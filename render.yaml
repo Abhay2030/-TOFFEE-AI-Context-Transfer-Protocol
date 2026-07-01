@@ -3,6 +3,7 @@ services:
   - type: web
     name: toffee-backend
     env: node
+    plan: free
     rootDir: packages/backend
     buildCommand: npm install && npm run build
     startCommand: npm run start
