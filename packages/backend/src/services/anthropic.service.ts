@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { env } from '../config/env';
+import { env } from '../config/env.js';
 
 // We initialize the client inside a getter or lazily so it doesn't crash if the key is missing at boot
 let anthropicClient: Anthropic | null = null;
