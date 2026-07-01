@@ -20,8 +20,12 @@ const firebaseConfig = {
 };
 
 // Prevent re-initialization in Next.js hot-reload
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+// Also prevent crashing during Next.js static build if env vars are missing
+let app;
+if (firebaseConfig.apiKey) {
+  app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+}
 
-export const auth = getAuth(app);
+export const auth = app ? getAuth(app) : null;
 export const googleProvider = new GoogleAuthProvider();
 export const githubProvider = new GithubAuthProvider();
