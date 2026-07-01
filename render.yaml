@@ -4,9 +4,8 @@ services:
     name: toffee-backend
     env: node
     plan: free
-    rootDir: packages/backend
-    buildCommand: npm install && npm run build
-    startCommand: npm run start
+    buildCommand: npm install && npm run build --workspace=@toffee/backend
+    startCommand: npm run start --workspace=@toffee/backend
     envVars:
       - key: NODE_ENV
         value: production
