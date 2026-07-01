@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Mail, Phone, MessageSquare, Building2, Globe, Shield, Sparkles, AlertTriangle, Bug, LifeBuoy, FileText, ChevronRight, Lock } from "lucide-react";
+import { ArrowRight, Mail, Phone, MessageSquare, Building2, Globe, Shield, Sparkles, AlertTriangle, Bug, LifeBuoy, FileText, ChevronRight, Lock, CheckCircle2 } from "lucide-react";
 
 const CONTACT_DEPARTMENTS = [
   {
