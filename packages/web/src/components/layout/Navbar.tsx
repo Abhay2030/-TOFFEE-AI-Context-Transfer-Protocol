@@ -6,6 +6,8 @@ import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import { MagneticButton } from "../ui/MagneticButton";
 import { motion, useScroll, useMotionValueEvent } from "framer-motion";
+import { onAuthStateChanged, User } from "firebase/auth";
+import { auth } from "@/utils/firebase/firebase";
 
 const NAV_LINKS = [
   { label: "Features", href: "#features" },
@@ -17,6 +19,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [hidden, setHidden] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const { scrollY } = useScroll();
 
   useMotionValueEvent(scrollY, "change", (latest) => {
@@ -32,6 +35,14 @@ export default function Navbar() {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    if (!auth) return;
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
   }, []);
 
   return (
@@ -75,20 +86,33 @@ export default function Navbar() {
 
           {/* Desktop CTAs */}
           <div className="hidden md:flex items-center gap-4">
-            <Link
-              href="/login"
-              className="text-sm font-medium text-navy-200 hover:text-white transition-colors"
-            >
-              Log in
-            </Link>
-            <MagneticButton>
-              <Link
-                href="/register"
-                className="btn-primary text-sm py-2 px-4"
-              >
-                Get Started
-              </Link>
-            </MagneticButton>
+            {user ? (
+              <MagneticButton>
+                <Link
+                  href="/dashboard"
+                  className="btn-primary text-sm py-2 px-4"
+                >
+                  Dashboard
+                </Link>
+              </MagneticButton>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="text-sm font-medium text-navy-200 hover:text-white transition-colors"
+                >
+                  Log in
+                </Link>
+                <MagneticButton>
+                  <Link
+                    href="/register"
+                    className="btn-primary text-sm py-2 px-4"
+                  >
+                    Get Started
+                  </Link>
+                </MagneticButton>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -117,12 +141,20 @@ export default function Navbar() {
               </a>
             ))}
             <div className="pt-3 border-t border-navy-800 flex flex-col gap-2">
-              <Link href="/login" className="text-sm text-navy-300 py-2">
-                Log in
-              </Link>
-              <Link href="/register" className="btn-primary text-sm py-2">
-                Get Started
-              </Link>
+              {user ? (
+                <Link href="/dashboard" className="btn-primary text-sm py-2">
+                  Dashboard
+                </Link>
+              ) : (
+                <>
+                  <Link href="/login" className="text-sm text-navy-300 py-2">
+                    Log in
+                  </Link>
+                  <Link href="/register" className="btn-primary text-sm py-2">
+                    Get Started
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

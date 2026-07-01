@@ -12,9 +12,9 @@ import {
   ChevronRight,
 } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { signOut } from "firebase/auth";
+import { signOut, onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/utils/firebase/firebase";
 
 const NAV_ITEMS = [
@@ -31,6 +31,19 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    if (!auth) return;
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (!currentUser) {
+        window.location.href = "/login";
+      } else {
+        setIsCheckingAuth(false);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   const handleLogout = async () => {
     await signOut(auth!);
@@ -38,6 +51,10 @@ export default function DashboardLayout({
     localStorage.removeItem("toffee_refresh_token");
     window.location.href = "/login";
   };
+
+  if (isCheckingAuth) {
+    return <div className="min-h-screen bg-navy-950 flex flex-col items-center justify-center text-white"><div className="w-8 h-8 border-4 border-toffee-500 border-t-transparent rounded-full animate-spin"></div></div>;
+  }
 
   return (
     <div className="min-h-screen bg-navy-950 flex">

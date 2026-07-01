@@ -7,8 +7,10 @@ import Image from "next/image";
 import {
   signInWithPopup,
   signInWithEmailAndPassword,
+  onAuthStateChanged,
 } from "firebase/auth";
 import { auth, googleProvider, githubProvider } from "@/utils/firebase/firebase";
+import { useEffect } from "react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -16,6 +18,16 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!auth) return;
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        window.location.href = "/dashboard";
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   const handleOAuth = async (provider: 'google' | 'github') => {
     try {
