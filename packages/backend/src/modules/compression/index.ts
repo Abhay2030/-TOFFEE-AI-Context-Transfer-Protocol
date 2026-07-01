@@ -6,7 +6,7 @@ import type { FastifyInstance } from 'fastify';
 import type { RawConversation, CompressionProfile } from '@toffee/shared';
 import { COMPRESSION_PROFILES } from '@toffee/shared';
 import { v4 as uuid } from 'uuid';
-import { compressConversationLLM } from '../../services/anthropic.service';
+import { compressConversationLLM } from '../../services/anthropic.service.js';
 
 export default async function compressionModule(fastify: FastifyInstance) {
   fastify.addHook('preHandler', async (request, reply) => {
