@@ -24,7 +24,7 @@ export default function RegisterPage() {
       setLoading(true);
       setError("");
       const authProvider = provider === 'google' ? googleProvider : githubProvider;
-      const result = await signInWithPopup(auth, authProvider);
+      const result = await signInWithPopup(auth!, authProvider);
       const idToken = await result.user.getIdToken();
       localStorage.setItem("toffee_access_token", idToken);
       window.location.href = "/dashboard";
@@ -46,7 +46,7 @@ export default function RegisterPage() {
     }
 
     try {
-      const result = await createUserWithEmailAndPassword(auth, email, password);
+      const result = await createUserWithEmailAndPassword(auth!, email, password);
 
       // Set display name on the Firebase user profile
       if (name) {

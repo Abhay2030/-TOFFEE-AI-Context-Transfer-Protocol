@@ -22,7 +22,7 @@ export default function LoginPage() {
       setLoading(true);
       setError("");
       const authProvider = provider === 'google' ? googleProvider : githubProvider;
-      const result = await signInWithPopup(auth, authProvider);
+      const result = await signInWithPopup(auth!, authProvider);
       const idToken = await result.user.getIdToken();
       localStorage.setItem("toffee_access_token", idToken);
       window.location.href = "/dashboard";
@@ -38,7 +38,7 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const result = await signInWithEmailAndPassword(auth, email, password);
+      const result = await signInWithEmailAndPassword(auth!, email, password);
       const idToken = await result.user.getIdToken();
       localStorage.setItem("toffee_access_token", idToken);
       window.location.href = "/dashboard";

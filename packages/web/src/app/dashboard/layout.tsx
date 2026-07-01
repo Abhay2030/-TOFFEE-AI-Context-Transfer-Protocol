@@ -33,7 +33,7 @@ export default function DashboardLayout({
   const [collapsed, setCollapsed] = useState(false);
 
   const handleLogout = async () => {
-    await signOut(auth);
+    await signOut(auth!);
     localStorage.removeItem("toffee_access_token");
     localStorage.removeItem("toffee_refresh_token");
     window.location.href = "/login";
