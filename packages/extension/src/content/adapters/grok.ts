@@ -1,0 +1,139 @@
+import type { RawConversation, ConversationTurn } from '@toffee/shared';
+import { BasePlatformAdapter, type InjectionOptions, type InjectionResult, type ModelInfo } from './types';
+
+class GrokAdapter extends BasePlatformAdapter {
+  readonly platformId = 'grok';
+  readonly hostPatterns = ['grok.com', 'x.com'];
+
+  // ── DOM Selectors (maintained for Grok UI) ────────────
+  private readonly SELECTORS = {
+    conversationContainer: 'div[data-testid="conversation"]', // Placeholder for Grok
+    messageGroup: 'div[data-testid="message"]',
+    userMessage: 'div[data-testid="user-message"]',
+    assistantMessage: 'div[data-testid="bot-message"]',
+    textarea: 'textarea[data-testid="prompt-textarea"]', // Grok's text area
+    sendButton: 'button[data-testid="send-button"]',
+    modelSelector: 'button[data-testid="model-selector"]',
+  };
+
+  async extractConversation(): Promise<RawConversation> {
+    console.log('[Toffee:Grok] Starting conversation extraction...');
+
+    // Scroll to load all messages
+    await this.scrollToLoadAll(this.SELECTORS.conversationContainer);
+
+    const messageElements = this.safeQuerySelectorAll(this.SELECTORS.messageGroup);
+    const turns: ConversationTurn[] = [];
+
+    for (const el of messageElements) {
+      // Basic heuristic for Grok
+      const isUser = el.querySelector(this.SELECTORS.userMessage) !== null || el.getAttribute('data-message-author') === 'user';
+      const role = isUser ? 'user' : 'assistant';
+      
+      const content = el.textContent?.trim() || '';
+
+      if (content) {
+        turns.push({
+          role,
+          content,
+          metadata: {
+            hasCode: el.querySelector('pre code') !== null,
+            hasTable: content.includes('|') && content.includes('---'),
+          },
+        });
+      }
+    }
+
+    console.log(`[Toffee:Grok] Extracted ${turns.length} turns`);
+
+    return {
+      platform: 'grok',
+      model: this.detectModel() || 'grok-3',
+      capturedAt: new Date().toISOString(),
+      turns,
+    };
+  }
+
+  async injectContext(formattedPrompt: string, opts: InjectionOptions): Promise<InjectionResult> {
+    if (opts.mode === 'clipboard') {
+      await navigator.clipboard.writeText(formattedPrompt);
+      return { success: true, tokensInjected: 0, method: 'clipboard' };
+    }
+
+    const success = await this.typeIntoTextarea(this.SELECTORS.textarea, formattedPrompt);
+
+    return {
+      success,
+      tokensInjected: success ? Math.ceil(formattedPrompt.length / 4) : 0,
+      method: 'textarea',
+      error: success ? undefined : 'Could not find Grok textarea',
+    };
+  }
+
+  detectModel(): string | null {
+    // Basic model detection for Grok
+    const modelEl = this.safeQuerySelector(this.SELECTORS.modelSelector);
+    if (modelEl?.textContent) {
+      const text = modelEl.textContent.toLowerCase();
+      if (text.includes('grok 3')) return 'grok-3';
+      if (text.includes('grok 2')) return 'grok-2';
+    }
+    return null;
+  }
+
+  getSupportedModels(): ModelInfo[] {
+    return [
+      { id: 'grok-3', name: 'Grok 3', maxContextWindow: 131_072 },
+      { id: 'grok-2', name: 'Grok 2', maxContextWindow: 32_768 }
+    ];
+  }
+
+  getMessageCount(): number {
+    return this.safeQuerySelectorAll(this.SELECTORS.messageGroup).length;
+  }
+}
+
+// ── Content Script Initialization ────────────────────────────
+
+const adapter = new GrokAdapter();
+
+if (adapter.detect()) {
+  console.log('[Toffee] Grok platform detected');
+
+  // Notify service worker
+  chrome.runtime.sendMessage({
+    type: 'PLATFORM_DETECTED',
+    payload: { platform: 'grok', model: adapter.detectModel() },
+  });
+
+  // Listen for messages from service worker
+  chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+    if (message.type === 'CAPTURE_REQUEST') {
+      adapter
+        .extractConversation()
+        .then((conversation) => {
+          chrome.runtime.sendMessage({
+            type: 'CAPTURE_RESULT',
+            payload: conversation,
+          });
+          sendResponse({ success: true, messageCount: conversation.turns.length });
+        })
+        .catch((error) => {
+          chrome.runtime.sendMessage({
+            type: 'CAPTURE_ERROR',
+            payload: { error: error.message },
+          });
+          sendResponse({ success: false, error: error.message });
+        });
+      return true;
+    }
+
+    if (message.type === 'INJECT_CONTEXT') {
+      adapter
+        .injectContext(message.payload.formattedPrompt, message.payload.options)
+        .then(sendResponse)
+        .catch((error) => sendResponse({ success: false, error: error.message }));
+      return true;
+    }
+  });
+}

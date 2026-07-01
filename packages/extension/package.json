@@ -1,0 +1,40 @@
+{
+  "name": "@toffee/extension",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "clean": "rimraf dist",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "@toffee/shared": "*",
+    "clsx": "^2.1.0",
+    "dexie": "^4.0.0",
+    "dompurify": "^3.2.0",
+    "firebase": "^12.15.0",
+    "framer-motion": "^12.0.0",
+    "lucide-react": "^0.500.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "zustand": "^5.0.0"
+  },
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^2.0.0-beta.30",
+    "@types/chrome": "^0.0.300",
+    "@types/dompurify": "^3.2.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^4.5.0",
+    "autoprefixer": "^10.4.0",
+    "postcss": "^8.5.0",
+    "rimraf": "^6.0.0",
+    "tailwindcss": "^3.4.0",
+    "terser": "^5.48.0",
+    "typescript": "^5.8.0",
+    "vite": "^6.3.0"
+  }
+}

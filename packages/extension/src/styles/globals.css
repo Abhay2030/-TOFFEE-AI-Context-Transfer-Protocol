@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Toffee Design System Global Styles ─────────────────── */
+
+:root {
+  --toffee-popup-width: 380px;
+  --toffee-popup-max-height: 600px;
+  color-scheme: light dark;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  width: var(--toffee-popup-width);
+  max-height: var(--toffee-popup-max-height);
+  overflow-y: auto;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Scrollbar ──────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5);
+}
+
+/* ── Glass Morphism Utility ─────────────────────────────── */
+
+@layer components {
+  .glass {
+    @apply bg-white/80 dark:bg-navy-900/80 backdrop-blur-lg border border-white/20 dark:border-navy-700/30;
+  }
+
+  .glass-card {
+    @apply glass rounded-2xl shadow-lg shadow-navy-900/5 dark:shadow-black/20;
+  }
+
+  .toffee-gradient {
+    @apply bg-gradient-to-br from-toffee-500 via-toffee-600 to-accent-teal;
+  }
+
+  .toffee-gradient-text {
+    @apply bg-gradient-to-r from-toffee-400 to-accent-teal bg-clip-text text-transparent;
+  }
+
+  .btn-primary {
+    @apply px-4 py-2 rounded-xl font-medium text-white toffee-gradient
+           hover:shadow-lg hover:shadow-toffee-500/25 active:scale-[0.98]
+           transition-all duration-150 ease-out;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 rounded-xl font-medium
+           bg-navy-100 dark:bg-navy-800 text-navy-700 dark:text-navy-200
+           hover:bg-navy-200 dark:hover:bg-navy-700 active:scale-[0.98]
+           transition-all duration-150 ease-out;
+  }
+
+  .btn-ghost {
+    @apply px-3 py-1.5 rounded-lg font-medium text-navy-500 dark:text-navy-400
+           hover:bg-navy-100 dark:hover:bg-navy-800 active:scale-[0.98]
+           transition-all duration-150 ease-out;
+  }
+
+  .input-field {
+    @apply w-full px-3 py-2 rounded-xl text-sm
+           bg-navy-50 dark:bg-navy-800 border border-navy-200 dark:border-navy-700
+           text-navy-900 dark:text-navy-100 placeholder:text-navy-400
+           focus:outline-none focus:ring-2 focus:ring-toffee-500/50 focus:border-toffee-500
+           transition-all duration-150;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-2xs font-medium;
+  }
+
+  .badge-platform {
+    @apply badge bg-toffee-100 dark:bg-toffee-900/30 text-toffee-700 dark:text-toffee-300;
+  }
+
+  .badge-profile {
+    @apply badge bg-accent-teal/10 text-accent-teal;
+  }
+
+  .shimmer-bg {
+    @apply bg-gradient-to-r from-navy-200 via-navy-100 to-navy-200 
+           dark:from-navy-800 dark:via-navy-700 dark:to-navy-800
+           bg-[length:200%_100%] animate-shimmer;
+  }
+}

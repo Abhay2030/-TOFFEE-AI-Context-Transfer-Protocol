@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: toffee
+      POSTGRES_PASSWORD: toffee_password
+      POSTGRES_DB: toffee_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - toffee_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U toffee -d toffee_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - toffee_redis_data:/data
+    command: redis-server --save 60 1 --loglevel warning
+
+volumes:
+  toffee_pg_data:
+  toffee_redis_data:

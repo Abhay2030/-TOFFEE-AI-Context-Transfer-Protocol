@@ -1,0 +1,47 @@
+services:
+  # Toffee Backend API
+  - type: web
+    name: toffee-backend
+    env: node
+    rootDir: packages/backend
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: toffee-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: toffee-redis
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        # Replace this with the actual Vercel URL once deployed
+        value: https://toffee-web.vercel.app
+      # Note: S3/R2 AWS credentials should be added manually in the Render dashboard
+      - key: AWS_REGION
+        value: auto
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_BUCKET_NAME
+        value: toffee-bundles
+
+databases:
+  - name: toffee-db
+    databaseName: toffee
+    user: toffee_user
+    plan: free
+
+  - type: redis
+    name: toffee-redis
+    plan: free
+    ipAllowList: []
