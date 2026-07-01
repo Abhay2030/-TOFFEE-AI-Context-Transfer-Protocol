@@ -4,7 +4,7 @@ services:
     name: toffee-backend
     env: node
     plan: free
-    buildCommand: npm install && npm run build --workspace=@toffee/backend
+    buildCommand: npm install --include=dev && npx turbo run build --filter=@toffee/backend
     startCommand: npm run start --workspace=@toffee/backend
     envVars:
       - key: NODE_ENV

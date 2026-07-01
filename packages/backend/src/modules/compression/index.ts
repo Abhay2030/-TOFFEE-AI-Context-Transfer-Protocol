@@ -28,7 +28,7 @@ export default async function compressionModule(fastify: FastifyInstance) {
 
     // ── Preprocessing & Real LLM Call ─────────────────────────────
     const transcriptText = conversation.turns
-      .map(t => `${t.role.toUpperCase()}: ${t.content}`)
+      .map((t: any) => `${t.role.toUpperCase()}: ${t.content}`)
       .join('\n\n');
 
     let summaryData;
