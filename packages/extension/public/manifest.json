@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Toffee — AI Context Transfer",
-  "description": "Capture, compress, and transfer AI conversation context between ChatGPT, Claude, Gemini, Copilot, Grok, and Perplexity. Never re-explain yourself to an AI again.",
+  "description": "Transfer AI context between ChatGPT, Claude, Gemini, Copilot, Grok & Perplexity. Never re-explain yourself again.",
   "version": "1.0.0",
   "icons": {
     "16": "icons/icon-16.png",
