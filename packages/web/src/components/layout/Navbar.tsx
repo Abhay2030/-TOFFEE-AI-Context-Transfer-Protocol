@@ -62,13 +62,10 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="relative w-8 h-8 rounded-lg overflow-hidden shadow-lg border border-navy-700/50">
-              <Image src="/logo.png" alt="Toffee Logo" fill className="object-cover" />
+          <Link href="/" className="flex items-center group">
+            <div className="relative w-40 h-14">
+              <Image src="/logo.png" alt="Toffee - Never Lose Context" fill className="object-contain" priority />
             </div>
-            <span className="text-lg font-bold text-white group-hover:text-toffee-400 transition-colors">
-              Toffee
-            </span>
           </Link>
 
           {/* Desktop Nav */}
