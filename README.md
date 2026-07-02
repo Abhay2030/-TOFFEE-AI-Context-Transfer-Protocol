@@ -7,12 +7,8 @@
 ### Capture • Compress • Secure • Transfer AI Context Anywhere
 
 <p align="center">
-<img<img width="598" height="490" alt="Toffee Logo 11" src="https://github.com/user-attachments/assets/a56a1469-4ed7-45aa-a109-303760e8e767" />
- />
-
-
->
-
+<img width="598" height="490" alt="Toffee Logo 11" src="https://github.com/user-attachments/assets/a56a1469-4ed7-45aa-a109-303760e8e767" />
+ 
 </p>
 
 <p align="center">
