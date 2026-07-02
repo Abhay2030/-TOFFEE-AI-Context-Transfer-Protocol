@@ -7,8 +7,10 @@
 ### Capture • Compress • Secure • Transfer AI Context Anywhere
 
 <p align="center">
+<img width="2000" height="2000" alt="Toffee Logo System on White Background" src="https://github.com/user-attachments/assets/1fa98f98-2f97-4a48-b77f-48c9225a10fa" />
 
-<img src="./assets/logo.png" width="180"/>
+<img ![Uploading Toffee Logo System on White Background.png…]()
+>
 
 </p>
 
