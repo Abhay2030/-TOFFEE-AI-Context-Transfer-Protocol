@@ -153,7 +153,7 @@ export default function TermsPage() {
               These Terms are governed by the laws of the State of California. Any disputes will be subject to binding arbitration, except where consumer rights dictate otherwise.
             </p>
             <p>
-              For legal inquiries, enterprise contracts, or questions about these terms, contact us at: <a href="mailto:legal@toffee.ai" className="text-toffee-400 font-bold hover:underline">legal@toffee.ai</a>.
+              For legal inquiries, enterprise contracts, or questions about these terms, contact us at: <a href="mailto:abhaydonde2007@gmail.com" className="text-toffee-400 font-bold hover:underline">abhaydonde2007@gmail.com</a>.
             </p>
           </div>
 

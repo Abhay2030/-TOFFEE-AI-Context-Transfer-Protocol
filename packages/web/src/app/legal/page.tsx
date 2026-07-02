@@ -78,7 +78,7 @@ export default function LegalPage() {
             <ul className="space-y-4 text-sm">
               <li className="flex flex-col"><span className="text-navy-500 font-semibold uppercase tracking-wider text-[10px]">Registered Name</span><span className="text-white">Toffee AI Inc.</span></li>
               <li className="flex flex-col"><span className="text-navy-500 font-semibold uppercase tracking-wider text-[10px]">Headquarters</span><span className="text-white">San Francisco, CA (Remote-First)</span></li>
-              <li className="flex flex-col"><span className="text-navy-500 font-semibold uppercase tracking-wider text-[10px]">Corporate Email</span><a href="mailto:legal@toffee.ai" className="text-toffee-400 hover:text-toffee-300">legal@toffee.ai</a></li>
+              <li className="flex flex-col"><span className="text-navy-500 font-semibold uppercase tracking-wider text-[10px]">Corporate Email</span><a href="mailto:abhaydonde2007@gmail.com" className="text-toffee-400 hover:text-toffee-300">abhaydonde2007@gmail.com</a></li>
               <li className="flex flex-col"><span className="text-navy-500 font-semibold uppercase tracking-wider text-[10px]">Founder</span><span className="text-white">Abhay</span></li>
             </ul>
           </div>
@@ -181,7 +181,7 @@ export default function LegalPage() {
             <p className="text-navy-300 mb-8">
               For dedicated legal inquiries, privacy requests, DMCA notices, or compliance documentation, please reach out to our legal department. Expected response time is 2-3 business days.
             </p>
-            <a href="mailto:legal@toffee.ai" className="btn-primary py-3 px-6 inline-flex items-center gap-2 w-full justify-center">
+            <a href="mailto:abhaydonde2007@gmail.com" className="btn-primary py-3 px-6 inline-flex items-center gap-2 w-full justify-center">
               Email Legal Department <ArrowRight className="w-4 h-4" />
             </a>
           </div>

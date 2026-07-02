@@ -8,7 +8,7 @@ const CONTACT_DEPARTMENTS = [
     purpose: "Help prospective customers understand pricing, features, and implementation.",
     idealFor: ["Product demonstrations", "Pricing questions", "Enterprise licensing", "Volume discounts"],
     cta: "Talk to Sales",
-    email: "sales@toffee.ai",
+    email: "abhaydonde2007@gmail.com",
     time: "< 2 hours",
     color: "toffee-500"
   },
@@ -18,7 +18,7 @@ const CONTACT_DEPARTMENTS = [
     purpose: "Dedicated support for technical issues.",
     idealFor: ["Installation", "Browser Extension", "Cloud Sync", "Performance"],
     cta: "Open Support Ticket",
-    email: "support@toffee.ai",
+    email: "abhaydonde2007@gmail.com",
     time: "< 4 hours",
     color: "accent-emerald"
   },
@@ -28,7 +28,7 @@ const CONTACT_DEPARTMENTS = [
     purpose: "Large organizations requiring enterprise solutions.",
     idealFor: ["Enterprise Deployment", "SSO Integration", "Security Review", "Custom Contracts"],
     cta: "Contact Enterprise Team",
-    email: "enterprise@toffee.ai",
+    email: "abhaydonde2007@gmail.com",
     time: "< 1 hour",
     color: "accent-violet"
   },
@@ -38,7 +38,7 @@ const CONTACT_DEPARTMENTS = [
     purpose: "Collaboration opportunities and integrations.",
     idealFor: ["AI Platform Integrations", "Browser Vendors", "Universities", "Technology Partners"],
     cta: "Propose Partnership",
-    email: "partners@toffee.ai",
+    email: "abhaydonde2007@gmail.com",
     time: "24-48 hours",
     color: "blue-500"
   },
@@ -48,7 +48,7 @@ const CONTACT_DEPARTMENTS = [
     purpose: "Support journalists, media organizations, and podcast hosts.",
     idealFor: ["Media inquiries", "Press kit download", "Speaking requests", "Interview requests"],
     cta: "Contact PR",
-    email: "press@toffee.ai",
+    email: "abhaydonde2007@gmail.com",
     time: "24 hours",
     color: "pink-500"
   },
@@ -58,7 +58,7 @@ const CONTACT_DEPARTMENTS = [
     purpose: "Responsible disclosure of security vulnerabilities.",
     idealFor: ["Security vulnerabilities", "Authentication flaws", "Privacy concerns"],
     cta: "Report Vulnerability",
-    email: "security@toffee.ai",
+    email: "abhaydonde2007@gmail.com",
     time: "Immediate",
     color: "red-500"
   }

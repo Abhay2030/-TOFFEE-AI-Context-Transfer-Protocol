@@ -200,7 +200,7 @@ export default function PrivacyPage() {
               Our architecture employs Zero Trust principles, rate limiting, continuous monitoring, and secure development lifecycles. 
             </p>
             <p>
-              For privacy-related requests, data protection inquiries, or to contact our DPO, please email: <a href="mailto:privacy@toffee.ai" className="text-toffee-400 font-bold hover:underline">privacy@toffee.ai</a>.
+              For privacy-related requests, data protection inquiries, or to contact our DPO, please email: <a href="mailto:abhaydonde2007@gmail.com" className="text-toffee-400 font-bold hover:underline">abhaydonde2007@gmail.com</a>.
             </p>
           </div>
 

@@ -155,7 +155,7 @@ export default function Home() {
               <p className="text-xl text-navy-300 mb-10">Join thousands of developers and professionals moving faster with Toffee.</p>
               <MagneticButton strength={25} className="mx-auto">
                 <Link href="/register" className="btn-primary py-4 px-10 text-xl rounded-2xl">
-                  Install for Chrome
+                  Install for Microsoft Edge
                 </Link>
               </MagneticButton>
             </ScrollReveal>
