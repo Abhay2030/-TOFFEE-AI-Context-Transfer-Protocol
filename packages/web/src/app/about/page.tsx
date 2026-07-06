@@ -220,6 +220,106 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* ── About the Creator ── */}
+      <section className="px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto py-24 border-t border-navy-800/50">
+        <div className="flex flex-col lg:flex-row gap-16 items-start">
+          
+          {/* Left Column - Profile & Stats */}
+          <div className="lg:w-1/3 w-full space-y-8">
+            <div>
+              <h2 className="text-3xl font-bold text-white mb-2">About the Creator</h2>
+              <div className="w-12 h-1 bg-toffee-500 rounded-full mb-6"></div>
+              <p className="text-2xl font-bold text-white">Abhay Sachin Donde</p>
+              <p className="text-toffee-400 font-medium text-lg">Founder & Builder of Toffee AI</p>
+              <p className="text-navy-400 mt-2 flex items-center gap-2 font-medium">
+                <Globe className="w-4 h-4" /> Nashik, Maharashtra, India
+              </p>
+            </div>
+            
+            <div className="flex flex-wrap gap-2">
+              {["TypeScript", "React", "Next.js", "Node.js", "PostgreSQL", "Firebase", "AI / ML", "Python", "Java", "C++"].map(skill => (
+                <span key={skill} className="px-3 py-1 bg-navy-800/50 border border-navy-700/50 rounded-lg text-xs font-medium text-navy-200">
+                  {skill}
+                </span>
+              ))}
+            </div>
+            
+            <div className="glass-card p-6 border-toffee-500/20">
+              <h4 className="text-white font-bold mb-4 flex items-center gap-2">🎓 Education</h4>
+              <div className="space-y-4 text-sm text-navy-300">
+                <div>
+                  <p className="text-white font-medium">Bachelor of Engineering — Computer Eng.</p>
+                  <p className="text-navy-400">Pravara College of Engineering · Ongoing</p>
+                </div>
+                <div className="pt-3 border-t border-navy-700/50">
+                  <p className="text-white font-medium">Diploma in Computer Technology</p>
+                  <p className="text-navy-400">K.K. Wagh Engineering College · Completed</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="glass-card p-6 border-accent-emerald/20">
+              <h4 className="text-white font-bold mb-4 flex items-center gap-2">💻 Experience</h4>
+              <div className="space-y-4 text-sm text-navy-300">
+                <div>
+                  <p className="text-white font-medium">Android Developer Intern</p>
+                  <p className="text-navy-400">Sumago Infotech</p>
+                  <p className="mt-2 text-xs">Built the "AEK Tunes" music application, gaining hands-on experience with native Android development patterns.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Right Column - Biography */}
+          <div className="lg:w-2/3 w-full prose prose-invert prose-lg text-navy-300 max-w-none">
+            <p className="text-2xl text-white font-medium leading-relaxed mb-8">
+              👋 Hello! I am a passionate developer specializing in bridging the gap between complex backend logic and intuitive, visually striking user experiences.
+            </p>
+            
+            <p>
+              My work lives at the intersection of engineering precision and creative vision. I firmly believe that studying the direction, pacing, and visual effects of great films gives me a unique advantage as a developer — it trains me to care deeply about the UI/UX, the flow of an application, and the ultimate story a product tells its users.
+            </p>
+            
+            <h3 className="text-white font-bold mt-10 mb-4 flex items-center gap-2">
+              <Zap className="w-6 h-6 text-toffee-400" /> Toffee — The Project You're Using Right Now
+            </h3>
+            <p>
+              Toffee is my vision for what a modern AI memory layer should feel like — fast, secure, beautiful, and genuinely useful. Built with a cutting-edge stack of Next.js, Turborepo, PostgreSQL, and WebGL, it seamlessly connects AI platforms. 
+            </p>
+            <p>
+              Every pixel of the UI was crafted from scratch — from the glowing glassmorphism cards to the interactive 3D node networks. Toffee represents my core belief that complex infrastructure tools don't have to look like boring developer tools.
+            </p>
+
+            <h3 className="text-white font-bold mt-10 mb-4 flex items-center gap-2">
+              <Brain className="w-6 h-6 text-accent-violet" /> ScholarBot & Other Projects
+            </h3>
+            <p>
+              Beyond Toffee, I've built <strong>ScholarBot</strong>, an elite multimodal AI tutoring platform engineered for university students using Python, Flask, and Gemini 2.5. 
+            </p>
+            <p>
+              My other notable projects include <strong>Ziphay</strong> (a high-performance browser-based compression and upscaling tool), <strong>Air Canvas</strong> (Computer Vision-based gesture recognition), and <strong>KrishiMitra</strong> (an AgriTech advisory system bridging the information gap for Indian farmers).
+            </p>
+
+            <h3 className="text-white font-bold mt-10 mb-4">🎬 CineAbstra — The Creative Edge</h3>
+            <p>
+              Beyond software engineering, I am the Founder and Creative Director of <strong>CineAbstra</strong> — an upcoming platform dedicated to filmmaking and creative education. I have a profound passion for cinema and visual storytelling, which continuously inspires my approach to digital product design.
+            </p>
+
+            <div className="mt-12 p-8 bg-navy-800/30 rounded-2xl border border-navy-700/50 hover:border-toffee-500/30 transition-colors">
+              <h4 className="text-white font-bold text-xl mb-3 flex items-center gap-2">
+                <Users className="w-6 h-6 text-toffee-400" /> Let's Connect
+              </h4>
+              <p className="text-base mb-6">
+                Whether I'm optimizing an AI API route, training a hand-gesture recognition model, or conceptualizing a new startup — I'm always eager to push boundaries. I'm actively looking for opportunities to collaborate on innovative projects that leverage AI and modern web technologies.
+              </p>
+              <a href="mailto:abhay@example.com" className="btn-primary py-3 px-8 text-sm">
+                Let's build something extraordinary
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── The Future & CTA ── */}
       <section className="px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto py-24 text-center border-t border-navy-800/50">
         <h2 className="text-3xl font-bold text-white mb-6">Why Toffee Matters</h2>

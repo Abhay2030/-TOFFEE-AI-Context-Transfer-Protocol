@@ -68,258 +68,210 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen bg-navy-950 pt-24 pb-16">
       
-      {/* ── Hero Section ── */}
-      <section className="relative px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pt-16 pb-24 text-center border-b border-navy-800/50">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-toffee-500/5 rounded-full blur-3xl -z-10 pointer-events-none" />
+      {/* ── Hero & Contact Form Section ── */}
+      <section className="relative px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pt-16 pb-24">
+        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-toffee-500/5 rounded-full blur-3xl -z-10 pointer-events-none" />
         
-        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.1] mb-8 text-white max-w-4xl mx-auto">
-          Let&apos;s Build the Future of <span className="toffee-gradient-text">AI Together</span>
-        </h1>
-        
-        <p className="text-xl text-navy-400 max-w-3xl mx-auto mb-12 leading-relaxed">
-          Whether you&apos;re a developer, enterprise customer, researcher, investor, journalist, or AI enthusiast, we&apos;re here to help. Reach out to the right team and we&apos;ll connect you with the people who can assist you best.
-        </p>
-
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <a href="#form" className="btn-primary py-4 px-8 text-lg inline-flex items-center gap-2">
-            Contact Our Team <ArrowRight className="w-5 h-5" />
-          </a>
-          <a href="#departments" className="btn-secondary py-4 px-8 text-lg inline-flex items-center gap-2">
-            Schedule a Demo
-          </a>
-        </div>
-
-        {/* World Map Mockup */}
-        <div className="mt-20 relative max-w-5xl mx-auto">
-          <div className="aspect-[21/9] rounded-2xl glass-card border-navy-800/50 overflow-hidden flex items-center justify-center bg-navy-900/30 relative">
-            <div className="absolute inset-0 bg-gradient-to-t from-navy-950 to-transparent z-10 opacity-80" />
-            <div className="absolute w-full h-full opacity-30" style={{ backgroundImage: 'radial-gradient(circle at center, rgba(168, 123, 68, 0.2) 0%, transparent 60%)' }} />
-            <div className="text-center z-20">
-              <Globe className="w-16 h-16 text-navy-600 mx-auto mb-4 animate-spin-slow" />
-              <p className="text-navy-500 font-mono text-sm tracking-widest uppercase">[ Interactive Global AI Network Visual ]</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Contact Center Departments ── */}
-      <section id="departments" className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-24">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-white mb-4">Intelligent Contact Hub</h2>
-          <p className="text-navy-400">Select the right department to ensure your request reaches the correct team instantly.</p>
-        </div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {CONTACT_DEPARTMENTS.map((dept, i) => (
-            <div key={i} className={`glass-card p-8 border-t-4 border-t-${dept.color} hover:-translate-y-1 transition-transform`}>
-              <div className="flex items-start justify-between mb-6">
-                <div className={`w-12 h-12 rounded-xl bg-${dept.color}/10 flex items-center justify-center`}>
-                  <dept.icon className={`w-6 h-6 text-${dept.color}`} />
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-navy-500 font-semibold uppercase tracking-wider">Avg Response</p>
-                  <p className="text-sm font-bold text-white">{dept.time}</p>
-                </div>
-              </div>
-              
-              <h3 className="text-xl font-bold text-white mb-2">{dept.title}</h3>
-              <p className="text-sm text-navy-400 mb-6 h-10">{dept.purpose}</p>
-              
-              <div className="mb-8">
-                <p className="text-xs text-navy-500 font-semibold uppercase tracking-wider mb-3">Ideal For:</p>
-                <ul className="space-y-2">
-                  {dept.idealFor.slice(0, 3).map((item, j) => (
-                    <li key={j} className="text-sm text-navy-300 flex items-center gap-2">
-                      <div className={`w-1.5 h-1.5 rounded-full bg-${dept.color}`} /> {item}
-                    </li>
-                  ))}
-                  {dept.idealFor.length > 3 && (
-                    <li className="text-sm text-navy-500 italic pl-3.5">+ more</li>
-                  )}
-                </ul>
-              </div>
-
-              <div className="mt-auto flex items-center justify-between pt-4 border-t border-navy-800/50">
-                <a href={`mailto:${dept.email}`} className="text-sm font-mono text-navy-400 hover:text-white transition-colors">
-                  {dept.email}
-                </a>
-                <button className={`text-xs font-bold text-${dept.color} flex items-center gap-1 hover:gap-2 transition-all`}>
-                  {dept.cta} <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── General Contact Form ── */}
-      <section id="form" className="px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto py-24 border-t border-navy-800/50">
-        <div className="glass-card p-8 md:p-12 border-toffee-500/20 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-toffee-500/5 rounded-full blur-3xl -z-10" />
+        <div className="grid lg:grid-cols-2 gap-16">
           
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold text-white mb-4">Send a Message</h2>
-            <p className="text-navy-400">Our AI-powered routing system will automatically assign your ticket to the correct department.</p>
+          {/* Left Column - Contact Info */}
+          <div className="space-y-12">
+            <div>
+              <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight leading-[1.1] mb-6 text-white">
+                Let&apos;s Build <br />
+                <span className="toffee-gradient-text">Something Great</span>
+              </h1>
+              <p className="text-xl text-navy-400 leading-relaxed">
+                Have a question, collaboration idea, bug report, or just want to say hello? I&apos;d love to hear from you.
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              <div className="flex gap-4 items-start">
+                <div className="w-12 h-12 rounded-xl bg-toffee-500/10 flex items-center justify-center shrink-0">
+                  <span className="text-2xl">👨‍💻</span>
+                </div>
+                <div>
+                  <h3 className="text-white font-bold text-lg mb-1">Creator</h3>
+                  <p className="text-navy-300 font-medium">Abhay Donde</p>
+                  <p className="text-sm text-navy-400">Software Engineer · AI Enthusiast</p>
+                </div>
+              </div>
+
+              <div className="flex gap-4 items-start">
+                <div className="w-12 h-12 rounded-xl bg-accent-violet/10 flex items-center justify-center shrink-0">
+                  <Mail className="w-6 h-6 text-accent-violet" />
+                </div>
+                <div>
+                  <h3 className="text-white font-bold text-lg mb-1">Email</h3>
+                  <a href="mailto:abhaydonde2007@gmail.com" className="text-navy-300 hover:text-toffee-400 transition-colors font-medium">
+                    abhaydonde2007@gmail.com
+                  </a>
+                  <p className="text-sm text-navy-400 mt-1">Response within 24–48 hours</p>
+                </div>
+              </div>
+
+              <div className="flex gap-4 items-start">
+                <div className="w-12 h-12 rounded-xl bg-accent-emerald/10 flex items-center justify-center shrink-0">
+                  <Globe className="w-6 h-6 text-accent-emerald" />
+                </div>
+                <div>
+                  <h3 className="text-white font-bold text-lg mb-1">Location</h3>
+                  <p className="text-navy-300 font-medium">Nashik, Maharashtra, India</p>
+                  <p className="text-sm text-navy-400">Open to remote collaboration worldwide</p>
+                </div>
+              </div>
+
+              <div className="flex gap-4 items-start">
+                <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
+                  <span className="text-2xl">🎓</span>
+                </div>
+                <div>
+                  <h3 className="text-white font-bold text-lg mb-1">Education</h3>
+                  <p className="text-navy-300 font-medium">BE Computer Engineering</p>
+                  <p className="text-sm text-navy-400">Pravara College of Engineering · Ongoing</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-8 border-t border-navy-800/50">
+              <h3 className="text-white font-bold mb-4 flex items-center gap-2">
+                <span className="text-xl">🤝</span> Open to Collaborate On
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {["AI Projects", "SaaS Products", "Open Source", "Startup Ideas", "Web Apps", "Android"].map(item => (
+                  <span key={item} className="px-4 py-2 bg-navy-900 border border-navy-700/50 rounded-lg text-sm font-medium text-navy-300">
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
 
-          <form className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
+          {/* Right Column - Contact Form */}
+          <div className="glass-card p-8 md:p-10 border-toffee-500/20 relative">
+            <h2 className="text-2xl font-bold text-white mb-8">Send a Message</h2>
+            <form className="space-y-6">
               <div>
-                <label className="block text-xs font-medium text-navy-300 mb-2">Full Name *</label>
-                <input type="text" className="w-full px-4 py-3 rounded-xl bg-navy-900 border border-navy-700 text-white focus:outline-none focus:border-toffee-500/50 focus:ring-1 focus:ring-toffee-500/50" />
+                <label className="block text-xs font-medium text-navy-300 mb-2">Your Name</label>
+                <input type="text" placeholder="e.g. Rahul Sharma" className="w-full px-4 py-3 rounded-xl bg-navy-900/50 border border-navy-700 text-white placeholder-navy-500 focus:outline-none focus:border-toffee-500/50 focus:ring-1 focus:ring-toffee-500/50" />
               </div>
+              
               <div>
-                <label className="block text-xs font-medium text-navy-300 mb-2">Email Address *</label>
-                <input type="email" className="w-full px-4 py-3 rounded-xl bg-navy-900 border border-navy-700 text-white focus:outline-none focus:border-toffee-500/50 focus:ring-1 focus:ring-toffee-500/50" />
+                <label className="block text-xs font-medium text-navy-300 mb-2">Email Address</label>
+                <input type="email" placeholder="you@example.com" className="w-full px-4 py-3 rounded-xl bg-navy-900/50 border border-navy-700 text-white placeholder-navy-500 focus:outline-none focus:border-toffee-500/50 focus:ring-1 focus:ring-toffee-500/50" />
               </div>
+              
               <div>
-                <label className="block text-xs font-medium text-navy-300 mb-2">Company / Organization</label>
-                <input type="text" className="w-full px-4 py-3 rounded-xl bg-navy-900 border border-navy-700 text-white focus:outline-none focus:border-toffee-500/50 focus:ring-1 focus:ring-toffee-500/50" />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-navy-300 mb-2">Inquiry Category *</label>
-                <select className="w-full px-4 py-3 rounded-xl bg-navy-900 border border-navy-700 text-white focus:outline-none focus:border-toffee-500/50 focus:ring-1 focus:ring-toffee-500/50 appearance-none">
-                  <option>General Inquiry</option>
-                  <option>Sales & Enterprise</option>
-                  <option>Technical Support</option>
-                  <option>Partnerships</option>
-                  <option>Press & Media</option>
+                <label className="block text-xs font-medium text-navy-300 mb-2">Topic</label>
+                <select className="w-full px-4 py-3 rounded-xl bg-navy-900/50 border border-navy-700 text-white focus:outline-none focus:border-toffee-500/50 focus:ring-1 focus:ring-toffee-500/50 appearance-none">
+                  <option>General Enquiry</option>
+                  <option>Bug Report</option>
+                  <option>Feature Request</option>
+                  <option>Collaboration / Business</option>
                 </select>
               </div>
-            </div>
 
-            <div>
-              <label className="block text-xs font-medium text-navy-300 mb-2">Subject *</label>
-              <input type="text" className="w-full px-4 py-3 rounded-xl bg-navy-900 border border-navy-700 text-white focus:outline-none focus:border-toffee-500/50 focus:ring-1 focus:ring-toffee-500/50" />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-navy-300 mb-2">Message *</label>
-              <textarea rows={5} className="w-full px-4 py-3 rounded-xl bg-navy-900 border border-navy-700 text-white focus:outline-none focus:border-toffee-500/50 focus:ring-1 focus:ring-toffee-500/50" />
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-4 border-t border-navy-800/50">
-              <label className="flex items-start gap-3 cursor-pointer group">
-                <div className="w-5 h-5 rounded border border-navy-600 bg-navy-900 flex items-center justify-center group-hover:border-toffee-500 transition-colors mt-0.5">
-                  <CheckCircle2 className="w-3 h-3 text-transparent group-hover:text-toffee-500 transition-colors" />
-                </div>
-                <span className="text-xs text-navy-400 max-w-sm">
-                  I agree to the Privacy Policy and consent to Toffee processing my data to handle this inquiry.
-                </span>
-              </label>
+              <div>
+                <label className="block text-xs font-medium text-navy-300 mb-2">Message</label>
+                <textarea rows={5} placeholder="Tell me what's on your mind..." className="w-full px-4 py-3 rounded-xl bg-navy-900/50 border border-navy-700 text-white placeholder-navy-500 focus:outline-none focus:border-toffee-500/50 focus:ring-1 focus:ring-toffee-500/50" />
+              </div>
               
-              <button type="button" className="btn-primary py-3 px-8 w-full sm:w-auto flex items-center justify-center gap-2">
-                Send Message <ArrowRight className="w-4 h-4" />
+              <button type="button" className="btn-primary py-4 px-8 w-full flex items-center justify-center gap-2 font-bold text-base">
+                <span className="text-xl">📨</span> Send Message
               </button>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       </section>
 
-      {/* ── Bug & Feature Requests ── */}
-      <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-20 border-t border-navy-800/50">
-        <div className="grid md:grid-cols-2 gap-8">
-          <div className="glass-card p-8 border-navy-800">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center">
-                <Bug className="w-6 h-6 text-red-500" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-white">Report a Bug</h3>
-                <p className="text-sm text-navy-400">Help us fix technical issues.</p>
+      {/* ── Guidelines ── */}
+      <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pb-24">
+        <div className="glass-card p-8 border-navy-800 flex flex-col md:flex-row gap-8 items-center">
+          <div className="w-16 h-16 rounded-2xl bg-navy-900 flex items-center justify-center shrink-0 border border-navy-700">
+            <span className="text-3xl">📬</span>
+          </div>
+          <div className="text-navy-300 text-sm leading-relaxed">
+            <p className="mb-2"><strong className="text-white">Bug reports:</strong> Please describe the file type, browser, and steps to reproduce.</p>
+            <p className="mb-2"><strong className="text-white">Feature requests:</strong> A short description of the problem you're solving is most helpful.</p>
+            <p><strong className="text-white">Collaboration/Business:</strong> Include a brief overview of the project or opportunity.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── About the Creator (Personalized for Toffee) ── */}
+      <section className="px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto py-24 border-t border-navy-800/50">
+        <div className="flex flex-col lg:flex-row gap-16 items-start">
+          
+          <div className="lg:w-1/3 w-full space-y-8">
+            <div>
+              <h2 className="text-3xl font-bold text-white mb-2">About the Creator</h2>
+              <div className="w-12 h-1 bg-toffee-500 rounded-full mb-6"></div>
+              <p className="text-2xl font-bold text-white">Abhay Sachin Donde</p>
+              <p className="text-toffee-400 font-medium text-lg">Founder & Builder of Toffee AI</p>
+            </div>
+            
+            <div className="flex flex-wrap gap-2">
+              {["TypeScript", "React", "Next.js", "Node.js", "PostgreSQL", "Firebase", "AI / ML", "Python", "Java", "C++", "Filmmaker & Story Writer"].map(skill => (
+                <span key={skill} className="px-3 py-1 bg-navy-800/50 border border-navy-700/50 rounded-lg text-xs font-medium text-navy-200">
+                  {skill}
+                </span>
+              ))}
+            </div>
+            
+            <div className="glass-card p-6 border-accent-emerald/20">
+              <h4 className="text-white font-bold mb-4 flex items-center gap-2">💻 Experience</h4>
+              <div className="space-y-4 text-sm text-navy-300">
+                <div>
+                  <p className="text-white font-medium">Android Developer Intern</p>
+                  <p className="text-navy-400">Sumago Infotech</p>
+                  <p className="mt-2 text-xs">Built the "AEK Tunes" music application, gaining hands-on experience with native Android development patterns.</p>
+                </div>
               </div>
             </div>
-            <p className="text-sm text-navy-300 mb-6">
-              Found an issue with the extension, browser compatibility, or context injection? Please provide your OS, browser version, and console logs.
+          </div>
+          
+          <div className="lg:w-2/3 w-full prose prose-invert prose-lg text-navy-300 max-w-none">
+            <p className="text-2xl text-white font-medium leading-relaxed mb-8">
+              👋 Hello! I am a passionate developer specializing in bridging the gap between complex backend logic and intuitive, visually striking user experiences.
             </p>
-            <button className="text-red-500 font-semibold text-sm flex items-center gap-2 hover:gap-3 transition-all">
-              Submit Bug Report <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-
-          <div className="glass-card p-8 border-navy-800">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-toffee-500/10 flex items-center justify-center">
-                <Sparkles className="w-6 h-6 text-toffee-500" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-white">Feature Requests</h3>
-                <p className="text-sm text-navy-400">Help shape Toffee's roadmap.</p>
-              </div>
-            </div>
-            <p className="text-sm text-navy-300 mb-6">
-              Missing a crucial AI platform adapter? Need advanced Cloud Sync settings? Let us know what we should build next.
+            
+            <p>
+              My work lives at the intersection of engineering precision and creative vision. I firmly believe that studying the direction, pacing, and visual effects of great films gives me a unique advantage as a developer — it trains me to care deeply about the UI/UX, the flow of an application, and the ultimate story a product tells its users.
             </p>
-            <button className="text-toffee-500 font-semibold text-sm flex items-center gap-2 hover:gap-3 transition-all">
-              Request a Feature <ArrowRight className="w-4 h-4" />
-            </button>
+            
+            <h3 className="text-white font-bold mt-10 mb-4 flex items-center gap-2">
+              <span className="text-2xl">⚡</span> Toffee — The Project You're Using Right Now
+            </h3>
+            <p>
+              Toffee is my vision for what a modern AI memory layer should feel like — fast, secure, beautiful, and genuinely useful. Built with a cutting-edge stack of Next.js, Turborepo, PostgreSQL, and WebGL, it seamlessly connects AI platforms. 
+            </p>
+            <p>
+              Every pixel of the UI was crafted from scratch — from the glowing glassmorphism cards to the interactive 3D node networks. Toffee represents my core belief that complex infrastructure tools don't have to look like boring developer tools.
+            </p>
+
+            <h3 className="text-white font-bold mt-10 mb-4 flex items-center gap-2">
+              <span className="text-2xl">🤖</span> ScholarBot & Other Projects
+            </h3>
+            <p>
+              Beyond Toffee, I've built <strong>ScholarBot</strong>, an elite multimodal AI tutoring platform engineered for university students using Python, Flask, and Gemini 2.5. 
+            </p>
+            <p>
+              My other notable projects include <strong>Ziphay</strong> (a high-performance browser-based compression and upscaling tool), <strong>Air Canvas</strong> (Computer Vision-based gesture recognition), and <strong>KrishiMitra</strong> (an AgriTech advisory system bridging the information gap for Indian farmers).
+            </p>
+
+            <h3 className="text-white font-bold mt-10 mb-4">🎬 CineAbstra — The Creative Edge</h3>
+            <p>
+              Beyond software engineering, I am the Founder and Creative Director of <strong>CineAbstra</strong> — an upcoming platform dedicated to filmmaking and creative education. I have a profound passion for cinema and visual storytelling, which continuously inspires my approach to digital product design.
+            </p>
           </div>
         </div>
       </section>
 
-      {/* ── Community Hub ── */}
-      <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-20 border-t border-navy-800/50">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-white mb-4">Join Our Community</h2>
-          <p className="text-navy-400">Connect with other AI professionals, developers, and the Toffee engineering team.</p>
-        </div>
-        
-        <div className="flex flex-wrap justify-center gap-4">
-          {["Discord Community", "GitHub Repository", "LinkedIn Page", "X (Twitter)", "Product Hunt", "YouTube"].map(platform => (
-            <span key={platform} className="px-6 py-3 rounded-xl bg-navy-900 border border-navy-700 text-sm font-medium text-white hover:border-toffee-500/50 hover:bg-navy-800 transition-colors cursor-pointer">
-              {platform}
-            </span>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Trust Indicators ── */}
-      <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-12 border-t border-navy-800/50">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          <div>
-            <LifeBuoy className="w-6 h-6 text-navy-500 mx-auto mb-3" />
-            <h4 className="text-white font-semibold mb-1">Global Support</h4>
-            <p className="text-xs text-navy-400">24/7 technical assistance</p>
-          </div>
-          <div>
-            <Lock className="w-6 h-6 text-navy-500 mx-auto mb-3" />
-            <h4 className="text-white font-semibold mb-1">Privacy by Design</h4>
-            <p className="text-xs text-navy-400">Your data belongs to you</p>
-          </div>
-          <div>
-            <Shield className="w-6 h-6 text-navy-500 mx-auto mb-3" />
-            <h4 className="text-white font-semibold mb-1">Security-First</h4>
-            <p className="text-xs text-navy-400">Responsible disclosure program</p>
-          </div>
-          <div>
-            <Building2 className="w-6 h-6 text-navy-500 mx-auto mb-3" />
-            <h4 className="text-white font-semibold mb-1">Enterprise-Ready</h4>
-            <p className="text-xs text-navy-400">Custom SLAs and deployments</p>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Final Call to Action ── */}
-      <section className="px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto py-24 text-center border-t border-navy-800/50">
-        <h2 className="text-4xl font-extrabold text-white mb-6">We&apos;re Here to Help You Build Better AI Workflows</h2>
-        <p className="text-lg text-navy-300 mb-10 max-w-2xl mx-auto">
-          Whether you&apos;re exploring Toffee for personal productivity, enterprise AI adoption, technical integration, research collaboration, or strategic partnership, our team is ready to support your journey.
-        </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <a href="#form" className="btn-primary py-4 px-8 text-lg">
-            Contact Us
-          </a>
-          <a href="#" className="btn-secondary py-4 px-8 text-lg">
-            Join Our Discord
-          </a>
-        </div>
-        
-        {/* Creator Note */}
-        <div className="mt-16 text-center">
-          <p className="text-xs font-medium text-toffee-500/50 tracking-widest uppercase">Designed & Developed by Abhay</p>
-        </div>
-      </section>
-
+      {/* Creator Note */}
+      <div className="mt-16 text-center pb-12">
+        <p className="text-xs font-medium text-toffee-500/50 tracking-widest uppercase">Designed & Developed by Abhay</p>
+      </div>
     </div>
   );
 }
