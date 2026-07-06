@@ -28,10 +28,10 @@ jobs:
         npm run lint -w @toffee/backend
         # add web/extension later when configured
         
+    - name: Build
+      run: npm run build
+        
     - name: Run Tests
       run: |
         npm run test -w @toffee/shared
         npm run test -w @toffee/backend
-        
-    - name: Build
-      run: npm run build
