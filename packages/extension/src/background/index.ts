@@ -2,7 +2,7 @@
 // MV3 Service Worker — Background Script
 // ============================================================
 
-import { requestPersistentStorage, db } from '../db/dexie';
+import { requestPersistentStorage, db } from '../db/database';
 import { v4 as uuid } from 'uuid';
 
 // ── Installation & Setup ─────────────────────────────────────

@@ -3,7 +3,7 @@
 // ============================================================
 
 import type { RawConversation, ToffeeBundle, Platform } from '@toffee/shared';
-import type { CapturedConversation, StoredBundle } from '../db/dexie';
+import type { CapturedConversation, StoredBundle } from '../db/database';
 import { auth } from '../lib/firebase';
 import { gzipString, uint8ArrayToBase64 } from './compression';
 import { generateHMAC } from './crypto';

@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Zap, ChevronDown, FileText, Gauge, Loader2 } from 'lucide-react';
-import { db, type StoredBundle } from '../../db/dexie';
+import { db, type StoredBundle } from '../../db/database';
 import { optimizeBundleForInjection } from '../../core/injection/tokenOptimizer';
 import { gunzipString, base64ToUint8Array } from '../../core/compression';
 

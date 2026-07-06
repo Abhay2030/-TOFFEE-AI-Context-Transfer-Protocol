@@ -61,3 +61,10 @@ export type {
   TokenUsageStats,
   ExtensionMessage,
 } from './types/index.js';
+
+// Utilities
+export {
+  deriveEncryptionKey,
+  encryptData,
+  decryptData
+} from './utils/encryption.js';

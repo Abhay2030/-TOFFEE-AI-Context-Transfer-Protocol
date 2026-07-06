@@ -1,7 +1,7 @@
 
 import { Scan, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { useCaptureStore } from '../stores/captureStore';
-import { db } from '../../db/dexie';
+import { db } from '../../db/database';
 import { generateToffeeBundle } from '../../core/bundleGenerator';
 
 export default function Capture() {

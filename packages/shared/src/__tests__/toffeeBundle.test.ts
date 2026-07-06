@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ToffeeBundleSchema, PlatformEnum, CaptureMethodEnum, CompressionProfileEnum } from '../schemas/toffeeBundle.js';
+import { ToffeeBundleSchema } from '../schemas/toffeeBundle.js';
 
 describe('ToffeeBundleSchema', () => {
   it('validates a correct bundle', () => {
