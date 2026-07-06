@@ -33,9 +33,12 @@ export async function generateToffeeBundle(
   };
 
   let bundle: ToffeeBundle;
+  let hmacSignature: string;
 
   if (navigator.onLine && accessToken) {
     // 1. Call Backend Compression Pipeline
+    //    The server generates a proper HMAC using a secret key.
+    //    We trust the server-returned bundle.hmac_sha256.
     const response = await fetch(`${API_URL}/compress`, {
       method: 'POST',
       headers: {
@@ -54,32 +57,39 @@ export async function generateToffeeBundle(
 
     const data = await response.json();
     bundle = data.bundle;
+    // Use the server-generated HMAC — signed with the per-user derived key
+    hmacSignature = bundle.hmac_sha256;
   } else {
     // 2. Offline / No Auth Fallback (Minimal local compression)
+    //    Generate a local HMAC using a key derived from a unique install ID + user UID.
     console.warn('[Toffee] Running offline minimal compression fallback');
     bundle = generateOfflineMinimalBundle(rawConversation);
+
+    // Derive an offline signing key from the extension install ID and user UID.
+    // This is not as secure as the server-side key, but prevents trivial forgery.
+    const installId = await getOrCreateInstallId();
+    const offlineKeyMaterial = `toffee-offline:${installId}:${user?.uid || 'anon'}`;
+    const bundleJsonForSigning = JSON.stringify(bundle);
+    hmacSignature = await generateHMAC(bundleJsonForSigning, offlineKeyMaterial);
+    bundle.hmac_sha256 = hmacSignature;
   }
 
   // 3. Serialize and Compress
-  const bundleJsonString = JSON.stringify(bundle);
-  const compressedBytes = await gzipString(bundleJsonString);
-  const bundleDataB64 = uint8ArrayToBase64(compressedBytes);
-
-  // 4. Sign HMAC
-  // For MVP, derive a key from a hardcoded extension secret + user ID (if available)
-  const userSecret = user?.uid || 'anonymous_secret_key';
-  const hmacSignature = await generateHMAC(bundleDataB64, userSecret);
-
-  // Set the HMAC inside the uncompressed bundle for schema compliance
-  // (In a real implementation, the backend or client would set this after generation)
-  bundle.hmac_sha256 = hmacSignature;
-  
-  // Re-compress if we modified the JSON (for strict integrity checks)
   const finalJsonString = JSON.stringify(bundle);
   const finalCompressedBytes = await gzipString(finalJsonString);
-  const finalBundleDataB64 = uint8ArrayToBase64(finalCompressedBytes);
+  let finalBundleDataB64 = uint8ArrayToBase64(finalCompressedBytes);
 
-  // 5. Return StoredBundle format for Dexie
+  // 3.5 Encrypt if user has configured an encryption password
+  const { toffee_encryption_password } = await chrome.storage.local.get('toffee_encryption_password');
+  if (toffee_encryption_password) {
+    console.log('[Toffee] Encrypting bundle data with AES-256-GCM');
+    const { deriveEncryptionKey, encryptData } = await import('@toffee/shared');
+    const key = await deriveEncryptionKey(toffee_encryption_password);
+    // Overwrite the base64 data with the encrypted string format (iv:ciphertext)
+    finalBundleDataB64 = await encryptData(finalBundleDataB64, key);
+  }
+
+  // 4. Return StoredBundle format for Dexie
   return {
     id: bundle.bundle_id,
     displayName: bundle.display_name || `${bundle.source_platform} Conversation`,
@@ -96,6 +106,20 @@ export async function generateToffeeBundle(
     createdAt: bundle.created_at,
     updatedAt: new Date().toISOString(),
   };
+}
+
+/**
+ * Get or create a persistent install ID for this extension instance.
+ * Used as part of the offline HMAC key derivation.
+ */
+async function getOrCreateInstallId(): Promise<string> {
+  const stored = await chrome.storage.local.get('toffee_install_id');
+  if (stored.toffee_install_id) {
+    return stored.toffee_install_id;
+  }
+  const id = crypto.randomUUID();
+  await chrome.storage.local.set({ toffee_install_id: id });
+  return id;
 }
 
 function generateOfflineMinimalBundle(conversation: RawConversation): ToffeeBundle {
@@ -119,13 +143,13 @@ function generateOfflineMinimalBundle(conversation: RawConversation): ToffeeBund
       suggested_continuation: '',
       knowledge_gaps: [],
     },
-    topics: [],
+    topics: ['offline-capture'],
     snippet_count: conversation.turns.length,
     token_count_original: originalTokens,
     token_count_bundle: bundleTokens,
     compression_ratio: bundleTokens / originalTokens,
     compression_profile: 'minimal',
     version: 1,
-    hmac_sha256: '', // Will be filled later
+    hmac_sha256: '0'.repeat(64), // temporary — replaced after signing
   };
 }

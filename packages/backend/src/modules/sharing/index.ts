@@ -6,6 +6,12 @@ import type { FastifyInstance } from 'fastify';
 import { v4 as uuid } from 'uuid';
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
+import {
+  UuidParamsSchema,
+  CreateShareBodySchema,
+  ShareTokenParamsSchema,
+  ShareAccessQuerySchema,
+} from '../../schemas/validation.js';
 
 export default async function sharingModule(fastify: FastifyInstance) {
   // ── POST /bundles/:id/share — Create share link ────────────
@@ -13,12 +19,18 @@ export default async function sharingModule(fastify: FastifyInstance) {
     preHandler: [async (request, reply) => { await (fastify as any).verifyFirebaseToken(request, reply); }],
   }, async (request, reply) => {
     const { uid } = request.firebaseUser;
-    const { id } = request.params as { id: string };
-    const { expiresInHours = 24, password, maxAccess = 100 } = request.body as {
-      expiresInHours?: number;
-      password?: string;
-      maxAccess?: number;
-    };
+
+    const paramsParsed = UuidParamsSchema.safeParse(request.params);
+    if (!paramsParsed.success) {
+      return reply.status(400).send({ error: 'Invalid bundle ID', details: paramsParsed.error.flatten().fieldErrors });
+    }
+    const { id } = paramsParsed.data;
+
+    const bodyParsed = CreateShareBodySchema.safeParse(request.body);
+    if (!bodyParsed.success) {
+      return reply.status(400).send({ error: 'Invalid request body', details: bodyParsed.error.flatten().fieldErrors });
+    }
+    const { expiresInHours, password, maxAccess } = bodyParsed.data;
 
     // Verify bundle ownership
     const bundle = await fastify.pg.query(
@@ -49,8 +61,17 @@ export default async function sharingModule(fastify: FastifyInstance) {
 
   // ── GET /share/:token — Access shared bundle ───────────────
   fastify.get('/share/:token', async (request, reply) => {
-    const { token } = request.params as { token: string };
-    const { password } = request.query as { password?: string };
+    const paramsParsed = ShareTokenParamsSchema.safeParse(request.params);
+    if (!paramsParsed.success) {
+      return reply.status(400).send({ error: 'Invalid share token', details: paramsParsed.error.flatten().fieldErrors });
+    }
+    const { token } = paramsParsed.data;
+
+    const queryParsed = ShareAccessQuerySchema.safeParse(request.query);
+    if (!queryParsed.success) {
+      return reply.status(400).send({ error: 'Invalid query parameters', details: queryParsed.error.flatten().fieldErrors });
+    }
+    const { password } = queryParsed.data;
 
     const result = await fastify.pg.query(
       `SELECT sl.*, tb.display_name, tb.source_platform, tb.compression_profile, tb.token_count_bundle, tb.s3_key

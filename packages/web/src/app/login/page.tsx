@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Mail, Lock, Eye, EyeOff, Github, Loader2 } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   signInWithPopup,
   signInWithEmailAndPassword,
@@ -13,6 +14,7 @@ import { auth, googleProvider, githubProvider } from "@/utils/firebase/firebase"
 import { useEffect } from "react";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -23,7 +25,7 @@ export default function LoginPage() {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
-        window.location.href = "/dashboard";
+        router.push("/dashboard");
       }
     });
     return () => unsubscribe();
@@ -36,8 +38,7 @@ export default function LoginPage() {
       const authProvider = provider === 'google' ? googleProvider : githubProvider;
       const result = await signInWithPopup(auth!, authProvider);
       const idToken = await result.user.getIdToken();
-      localStorage.setItem("toffee_access_token", idToken);
-      window.location.href = "/dashboard";
+      router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : `${provider} login failed`);
       setLoading(false);
@@ -52,8 +53,7 @@ export default function LoginPage() {
     try {
       const result = await signInWithEmailAndPassword(auth!, email, password);
       const idToken = await result.user.getIdToken();
-      localStorage.setItem("toffee_access_token", idToken);
-      window.location.href = "/dashboard";
+      router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {

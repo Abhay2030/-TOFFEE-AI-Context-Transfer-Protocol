@@ -1,17 +1,69 @@
 "use client";
 
-import { BarChart3, TrendingDown, Zap, DollarSign } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { BarChart3, TrendingDown, Zap, DollarSign, Loader2, AlertCircle } from "lucide-react";
+import { getUsageStats } from "@/lib/api";
+import type { UsageStats } from "@/lib/api";
 
-const STATS = [
-  { label: "Tokens Consumed", value: "0", icon: BarChart3, color: "text-toffee-400", bg: "bg-toffee-500/10" },
-  { label: "Tokens Saved", value: "0", icon: TrendingDown, color: "text-accent-emerald", bg: "bg-accent-emerald/10" },
-  { label: "Total Injections", value: "0", icon: Zap, color: "text-accent-violet", bg: "bg-accent-violet/10" },
-  { label: "Est. Cost Savings", value: "$0.00", icon: DollarSign, color: "text-accent-amber", bg: "bg-accent-amber/10" },
-];
-
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
+function formatNumber(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  return String(n);
+}
 
 export default function AnalyticsPage() {
+  const [stats, setStats] = useState<UsageStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const loadStats = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const data = await getUsageStats();
+      setStats(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load analytics");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadStats();
+  }, [loadStats]);
+
+  const STATS_CONFIG = [
+    {
+      label: "Tokens Consumed",
+      value: stats ? formatNumber(stats.totalTokensConsumed) : "—",
+      icon: BarChart3,
+      color: "text-toffee-400",
+      bg: "bg-toffee-500/10",
+    },
+    {
+      label: "Tokens Saved",
+      value: stats ? formatNumber(stats.totalTokensSaved) : "—",
+      icon: TrendingDown,
+      color: "text-accent-emerald",
+      bg: "bg-accent-emerald/10",
+    },
+    {
+      label: "Total Injections",
+      value: stats ? formatNumber(stats.injectionsPerformed) : "—",
+      icon: Zap,
+      color: "text-accent-violet",
+      bg: "bg-accent-violet/10",
+    },
+    {
+      label: "Est. Cost Savings",
+      value: stats ? `$${stats.estimatedCostSavingsUsd.toFixed(2)}` : "—",
+      icon: DollarSign,
+      color: "text-accent-amber",
+      bg: "bg-accent-amber/10",
+    },
+  ];
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -22,57 +74,63 @@ export default function AnalyticsPage() {
         </p>
       </div>
 
+      {/* Error Banner */}
+      {error && (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-accent-rose/10 border border-accent-rose/20 text-sm text-accent-rose">
+          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <span>{error}</span>
+          <button onClick={loadStats} className="ml-auto text-xs underline hover:no-underline">Retry</button>
+        </div>
+      )}
+
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {STATS.map((stat) => (
+        {STATS_CONFIG.map((stat) => (
           <div key={stat.label} className="glass-card p-5">
             <div className="flex items-center gap-3 mb-3">
               <div className={`w-10 h-10 rounded-xl ${stat.bg} flex items-center justify-center`}>
                 <stat.icon className={`w-5 h-5 ${stat.color}`} />
               </div>
               <p className="text-xs text-navy-400">{stat.label}</p>
+              {loading && <Loader2 className="w-3 h-3 text-navy-600 animate-spin ml-auto" />}
             </div>
             <p className="text-2xl font-bold text-white">{stat.value}</p>
           </div>
         ))}
       </div>
 
-      {/* Chart Placeholder */}
+      {/* Summary Card */}
       <div className="glass-card p-6">
         <h2 className="text-sm font-semibold text-navy-200 mb-6">
-          Monthly Token Usage
+          Usage Summary
         </h2>
-        <div className="h-64 flex items-end justify-between gap-3 px-4">
-          {MONTHS.map((month, i) => {
-            // Use deterministic height based on index for placeholder
-            const height = Math.max(8, 30 + (i * 15) % 70);
-            return (
-              <div key={month} className="flex-1 flex flex-col items-center gap-2">
-                <div className="w-full flex gap-1 items-end justify-center" style={{ height: "200px" }}>
-                  <div
-                    className="flex-1 max-w-8 rounded-t-lg bg-toffee-500/20 border border-toffee-500/10 transition-all hover:bg-toffee-500/30"
-                    style={{ height: `${height}%` }}
-                  />
-                  <div
-                    className="flex-1 max-w-8 rounded-t-lg bg-accent-emerald/20 border border-accent-emerald/10 transition-all hover:bg-accent-emerald/30"
-                    style={{ height: `${Math.max(8, height * 0.7)}%` }}
-                  />
-                </div>
-                <span className="text-xs text-navy-500">{month}</span>
-              </div>
-            );
-          })}
-        </div>
-        <div className="flex items-center justify-center gap-6 mt-4">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-sm bg-toffee-500/30" />
-            <span className="text-xs text-navy-400">Consumed</span>
+        {loading ? (
+          <div className="text-center py-8">
+            <Loader2 className="w-8 h-8 text-navy-600 animate-spin mx-auto mb-3" />
+            <p className="text-sm text-navy-500">Loading analytics...</p>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-sm bg-accent-emerald/30" />
-            <span className="text-xs text-navy-400">Saved</span>
+        ) : stats && (stats.bundlesCreated > 0 || stats.injectionsPerformed > 0) ? (
+          <div className="grid sm:grid-cols-3 gap-6">
+            <div className="text-center p-4 rounded-xl bg-navy-800/30">
+              <p className="text-3xl font-bold text-toffee-400">{stats.bundlesCreated}</p>
+              <p className="text-xs text-navy-400 mt-1">Bundles Created</p>
+            </div>
+            <div className="text-center p-4 rounded-xl bg-navy-800/30">
+              <p className="text-3xl font-bold text-accent-emerald">{formatNumber(stats.totalTokensSaved)}</p>
+              <p className="text-xs text-navy-400 mt-1">Total Tokens Saved</p>
+            </div>
+            <div className="text-center p-4 rounded-xl bg-navy-800/30">
+              <p className="text-3xl font-bold text-accent-amber">${stats.estimatedCostSavingsUsd.toFixed(4)}</p>
+              <p className="text-xs text-navy-400 mt-1">Estimated Savings</p>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-sm text-navy-500">
+              No data yet. Start using Toffee across AI platforms to see your analytics.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Platform Breakdown */}
@@ -82,7 +140,7 @@ export default function AnalyticsPage() {
         </h2>
         <div className="text-center py-8">
           <p className="text-sm text-navy-500">
-            No data yet. Start using Toffee across AI platforms to see your breakdown.
+            Platform-level analytics will be available in a future update.
           </p>
         </div>
       </div>

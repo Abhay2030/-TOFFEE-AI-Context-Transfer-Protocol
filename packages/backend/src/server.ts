@@ -42,6 +42,7 @@ const app = Fastify({
         ? { target: 'pino-pretty', options: { colorize: true } }
         : undefined,
   },
+  bodyLimit: 10485760, // 10MB limit
 });
 
 async function bootstrap() {
@@ -57,9 +58,28 @@ async function bootstrap() {
   });
 
   await app.register(cors, {
-    origin: env.NODE_ENV === 'production'
-      ? ['https://toffee.ai', 'chrome-extension://*']
-      : true,
+    origin: (origin, cb) => {
+      // In development, allow all
+      if (env.NODE_ENV !== 'production') {
+        return cb(null, true);
+      }
+      
+      // In production, allow web app and specific extension
+      const allowedOrigins = ['https://toffee.ai'];
+      
+      if (env.EXTENSION_ID) {
+        allowedOrigins.push(`chrome-extension://${env.EXTENSION_ID}`);
+      } else {
+        // Fallback for safety if no specific ID provided, but warn
+        app.log.warn('No EXTENSION_ID provided in env, allowing all chrome extensions in CORS.');
+        allowedOrigins.push('chrome-extension://*');
+      }
+
+      if (!origin || allowedOrigins.includes(origin) || (allowedOrigins.includes('chrome-extension://*') && origin.startsWith('chrome-extension://'))) {
+        return cb(null, true);
+      }
+      cb(new Error('Not allowed by CORS'), false);
+    },
     credentials: true,
   });
 

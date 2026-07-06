@@ -1,12 +1,84 @@
 "use client";
 
-import { useState } from "react";
-import { Search, Grid3X3, List, FileText, Share2, Trash2, Download } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import {
+  Search,
+  Grid3X3,
+  List,
+  FileText,
+  Share2,
+  Trash2,
+  Download,
+  Loader2,
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import Link from "next/link";
+import { getBundles, deleteBundle } from "@/lib/api";
+import type { BundleItem } from "@/lib/api";
+
+const PLATFORM_FILTERS = ["All", "chatgpt", "claude", "gemini", "copilot", "grok", "perplexity"];
+const PLATFORM_LABELS: Record<string, string> = {
+  All: "All", chatgpt: "ChatGPT", claude: "Claude", gemini: "Gemini",
+  copilot: "Copilot", grok: "Grok", perplexity: "Perplexity",
+};
 
 export default function BundlesPage() {
   const [view, setView] = useState<"grid" | "list">("grid");
   const [search, setSearch] = useState("");
+  const [platformFilter, setPlatformFilter] = useState("All");
+  const [bundles, setBundles] = useState<BundleItem[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const pageSize = 12;
+
+  const loadBundles = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const data = await getBundles({
+        page,
+        pageSize,
+        search: search || undefined,
+        tag: platformFilter !== "All" ? platformFilter : undefined,
+      });
+      setBundles(data.bundles);
+      setTotal(data.total);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load bundles");
+    } finally {
+      setLoading(false);
+    }
+  }, [page, search, platformFilter]);
+
+  useEffect(() => {
+    loadBundles();
+  }, [loadBundles]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [search, platformFilter]);
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Delete this bundle permanently?")) return;
+    try {
+      setDeleting(id);
+      await deleteBundle(id);
+      setBundles((prev) => prev.filter((b) => b.id !== id));
+      setTotal((prev) => prev - 1);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete bundle");
+    } finally {
+      setDeleting(null);
+    }
+  };
+
+  const totalPages = Math.ceil(total / pageSize);
 
   return (
     <div className="space-y-6">
@@ -15,10 +87,19 @@ export default function BundlesPage() {
         <div>
           <h1 className="text-2xl font-bold text-white">Bundle Library</h1>
           <p className="text-sm text-navy-400 mt-1">
-            Manage your captured AI conversation bundles
+            {total > 0 ? `${total} bundle${total !== 1 ? "s" : ""} in your library` : "Manage your captured AI conversation bundles"}
           </p>
         </div>
       </div>
+
+      {/* Error Banner */}
+      {error && (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-accent-rose/10 border border-accent-rose/20 text-sm text-accent-rose">
+          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <span>{error}</span>
+          <button onClick={loadBundles} className="ml-auto text-xs underline hover:no-underline">Retry</button>
+        </div>
+      )}
 
       {/* Search & Filters */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
@@ -54,81 +135,127 @@ export default function BundlesPage() {
 
       {/* Platform Filter Chips */}
       <div className="flex flex-wrap gap-2">
-        {["All", "ChatGPT", "Claude", "Gemini", "Copilot", "Grok", "Perplexity"].map(
-          (platform) => (
-            <button
-              key={platform}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                platform === "All"
-                  ? "bg-toffee-500/10 text-toffee-400 border border-toffee-500/20"
-                  : "bg-navy-800/30 text-navy-400 border border-navy-700/30 hover:border-navy-600 hover:text-navy-300"
-              }`}
-            >
-              {platform}
-            </button>
-          )
-        )}
+        {PLATFORM_FILTERS.map((platform) => (
+          <button
+            key={platform}
+            onClick={() => setPlatformFilter(platform)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              platformFilter === platform
+                ? "bg-toffee-500/10 text-toffee-400 border border-toffee-500/20"
+                : "bg-navy-800/30 text-navy-400 border border-navy-700/30 hover:border-navy-600 hover:text-navy-300"
+            }`}
+          >
+            {PLATFORM_LABELS[platform] || platform}
+          </button>
+        ))}
       </div>
 
-      {/* Empty State */}
-      <div className="text-center py-20">
-        <div className="w-20 h-20 mx-auto rounded-3xl bg-navy-800/30 flex items-center justify-center mb-6">
-          <FileText className="w-10 h-10 text-navy-700" />
+      {/* Loading State */}
+      {loading ? (
+        <div className="text-center py-20">
+          <Loader2 className="w-10 h-10 text-navy-600 animate-spin mx-auto mb-4" />
+          <p className="text-sm text-navy-500">Loading bundles...</p>
         </div>
-        <h3 className="text-lg font-semibold text-navy-300 mb-2">
-          No bundles found
-        </h3>
-        <p className="text-sm text-navy-500 max-w-sm mx-auto mb-6">
-          Your captured AI conversation bundles will appear here. Install the
-          Toffee browser extension to start capturing.
-        </p>
-        <div className="flex items-center justify-center gap-3">
-          <Link href="/install" className="btn-primary text-sm py-2.5 px-5 flex items-center gap-2">
-            <Download className="w-4 h-4" />
-            Install Extension
-          </Link>
-        </div>
-
-        {/* Demo Cards (to show how it will look) */}
-        <div className="mt-12 max-w-3xl mx-auto">
-          <p className="text-xs text-navy-600 mb-4 uppercase tracking-wider">Preview — How your bundles will look</p>
-          <div className={`grid ${view === "grid" ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1"} gap-3 opacity-50`}>
-            {[
-              { name: "React Architecture Discussion", platform: "ChatGPT", tokens: "2,847", ratio: "0.23" },
-              { name: "API Design Review", platform: "Claude", tokens: "1,205", ratio: "0.18" },
-            ].map((demo) => (
-              <div
-                key={demo.name}
-                className="glass-card p-4 text-left"
-              >
+      ) : bundles.length > 0 ? (
+        <>
+          {/* Bundle Cards */}
+          <div className={`grid ${view === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"} gap-3`}>
+            {bundles.map((bundle) => (
+              <div key={bundle.id} className="glass-card p-4 text-left hover:border-toffee-500/20 transition-all">
                 <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-lg bg-toffee-500/10 flex items-center justify-center">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-9 h-9 rounded-lg bg-toffee-500/10 flex items-center justify-center flex-shrink-0">
                       <FileText className="w-4 h-4 text-toffee-400" />
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-navy-200">{demo.name}</p>
-                      <p className="text-xs text-navy-500">{demo.platform} • {demo.tokens} tokens</p>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-navy-200 truncate">
+                        {bundle.display_name || `${bundle.source_platform} Conversation`}
+                      </p>
+                      <p className="text-xs text-navy-500">
+                        {bundle.source_platform} • {bundle.token_count_bundle.toLocaleString()} tokens
+                      </p>
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs px-2 py-0.5 rounded-md bg-accent-emerald/10 text-accent-emerald font-mono">
-                    {demo.ratio} ratio
+                    {bundle.compression_profile}
                   </span>
+                  {bundle.tags?.slice(0, 2).map((tag) => (
+                    <span key={tag} className="text-xs px-2 py-0.5 rounded-md bg-navy-800/50 text-navy-400">
+                      {tag}
+                    </span>
+                  ))}
                   <div className="flex-1" />
                   <button className="p-1.5 rounded-lg text-navy-500 hover:text-navy-300 hover:bg-navy-800/50 transition-all">
                     <Share2 className="w-3.5 h-3.5" />
                   </button>
-                  <button className="p-1.5 rounded-lg text-navy-500 hover:text-accent-rose hover:bg-accent-rose/5 transition-all">
-                    <Trash2 className="w-3.5 h-3.5" />
+                  <button
+                    onClick={() => handleDelete(bundle.id)}
+                    disabled={deleting === bundle.id}
+                    className="p-1.5 rounded-lg text-navy-500 hover:text-accent-rose hover:bg-accent-rose/5 transition-all disabled:opacity-50"
+                  >
+                    {deleting === bundle.id ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Trash2 className="w-3.5 h-3.5" />
+                    )}
                   </button>
                 </div>
+                <p className="text-xs text-navy-600 mt-2">
+                  {new Date(bundle.created_at).toLocaleDateString()}
+                </p>
               </div>
             ))}
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 pt-4">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="p-2 rounded-lg text-navy-400 hover:text-navy-200 hover:bg-navy-800/50 transition-all disabled:opacity-30"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <span className="text-sm text-navy-400">
+                Page {page} of {totalPages}
+              </span>
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="p-2 rounded-lg text-navy-400 hover:text-navy-200 hover:bg-navy-800/50 transition-all disabled:opacity-30"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+        </>
+      ) : (
+        /* Empty State */
+        <div className="text-center py-20">
+          <div className="w-20 h-20 mx-auto rounded-3xl bg-navy-800/30 flex items-center justify-center mb-6">
+            <FileText className="w-10 h-10 text-navy-700" />
+          </div>
+          <h3 className="text-lg font-semibold text-navy-300 mb-2">
+            No bundles found
+          </h3>
+          <p className="text-sm text-navy-500 max-w-sm mx-auto mb-6">
+            {search || platformFilter !== "All"
+              ? "No bundles match your current filters. Try adjusting your search."
+              : "Your captured AI conversation bundles will appear here. Install the Toffee browser extension to start capturing."}
+          </p>
+          {!search && platformFilter === "All" && (
+            <div className="flex items-center justify-center gap-3">
+              <Link href="/install" className="btn-primary text-sm py-2.5 px-5 flex items-center gap-2">
+                <Download className="w-4 h-4" />
+                Install Extension
+              </Link>
+            </div>
+          )}
         </div>
-      </div>
+      )}
     </div>
   );
 }

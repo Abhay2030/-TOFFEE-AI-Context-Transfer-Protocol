@@ -42,7 +42,7 @@ export const ToffeeSummarySchema = z.object({
  */
 export const EntitySchema = z.object({
   name: z.string().min(1),
-  type: z.enum(['person', 'project', 'tool', 'url', 'organization', 'concept', 'location']),
+  type: z.enum(['person', 'organization', 'concept', 'product', 'project', 'tool', 'url', 'location', 'other']),
   mentions: z.number().int().min(1),
   context: z.string().optional(),
   relationships: z

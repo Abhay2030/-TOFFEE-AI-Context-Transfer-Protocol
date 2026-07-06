@@ -17,7 +17,7 @@ export interface CompressionResult {
   topics: string[];
   entities: {
     name: string;
-    type: 'person' | 'organization' | 'concept' | 'product' | 'other';
+    type: 'person' | 'organization' | 'concept' | 'product' | 'project' | 'tool' | 'url' | 'location' | 'other';
     mentions: number;
   }[];
   intent: {
@@ -105,7 +105,7 @@ export async function compressConversationLLM(transcript: string): Promise<Compr
                 type: "object",
                 properties: {
                   name: { type: "string" },
-                  type: { type: "string", enum: ["person", "organization", "concept", "product", "other"] },
+                  type: { type: "string", enum: ["person", "organization", "concept", "product", "project", "tool", "url", "location", "other"] },
                   mentions: { type: "number" }
                 },
                 required: ["name", "type", "mentions"]

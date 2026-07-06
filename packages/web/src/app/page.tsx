@@ -3,7 +3,12 @@ import Link from "next/link";
 import { ArrowRight, Sparkles, Shield, Cpu, Lock, Network, Zap } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { WebGLScene } from "@/components/3d/Scene";
+import dynamic from "next/dynamic";
+
+const WebGLScene = dynamic(() => import("@/components/3d/Scene").then(mod => mod.WebGLScene), { 
+  ssr: false,
+  loading: () => <div className="absolute inset-0 bg-navy-950/20 backdrop-blur-sm" />
+});
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { MagneticButton } from "@/components/ui/MagneticButton";

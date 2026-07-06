@@ -17,6 +17,10 @@ const envSchema = z.object({
   FIREBASE_PROJECT_ID: z.string().min(1),
   FIREBASE_SERVICE_ACCOUNT_KEY: z.string().optional(),
 
+  // HMAC Bundle Signing
+  HMAC_SECRET: z.string().min(32, 'HMAC_SECRET must be at least 32 characters long for security'),
+  EXTENSION_ID: z.string().length(32, 'Chrome extension IDs are exactly 32 characters').optional(),
+
   // JWT (kept for backward compat — refresh token expiry config)
   JWT_EXPIRY: z.string().default('15m'),
   JWT_REFRESH_EXPIRY: z.string().default('7d'),

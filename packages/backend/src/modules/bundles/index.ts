@@ -7,6 +7,11 @@ import { v4 as uuid } from 'uuid';
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { env } from '../../config/env.js';
+import {
+  BundleListQuerySchema,
+  CreateBundleBodySchema,
+  UuidParamsSchema,
+} from '../../schemas/validation.js';
 
 const s3 = new S3Client({ region: env.AWS_REGION });
 
@@ -17,11 +22,14 @@ export default async function bundlesModule(fastify: FastifyInstance) {
   });
 
   // ── GET / — List bundles ───────────────────────────────────
-  fastify.get('/', async (request) => {
+  fastify.get('/', async (request, reply) => {
     const { uid } = request.firebaseUser;
-    const { page = 1, pageSize = 20, tag, search } = request.query as {
-      page?: number; pageSize?: number; tag?: string; search?: string;
-    };
+
+    const queryParsed = BundleListQuerySchema.safeParse(request.query);
+    if (!queryParsed.success) {
+      return reply.status(400).send({ error: 'Invalid query parameters', details: queryParsed.error.flatten().fieldErrors });
+    }
+    const { page, pageSize, tag, search } = queryParsed.data;
 
     let query = 'SELECT id, display_name, source_platform, source_model, compression_profile, token_count_original, token_count_bundle, tags, created_at, updated_at FROM toffee_bundles WHERE user_id = $1';
     const params: unknown[] = [uid];
@@ -61,46 +69,57 @@ export default async function bundlesModule(fastify: FastifyInstance) {
   // ── POST / — Create bundle ─────────────────────────────────
   fastify.post('/', async (request, reply) => {
     const { uid } = request.firebaseUser;
-    const body = request.body as {
-      display_name?: string;
-      source_platform: string;
-      source_model: string;
-      compression_profile: string;
-      token_count_original: number;
-      token_count_bundle: number;
-      compression_ratio: number;
-      tags?: string[];
-      bundle_data: string; // GZIP'd JSON
-    };
+
+    const bodyParsed = CreateBundleBodySchema.safeParse(request.body);
+    if (!bodyParsed.success) {
+      return reply.status(400).send({ error: 'Invalid request body', details: bodyParsed.error.flatten().fieldErrors });
+    }
+    const body = bodyParsed.data;
 
     const bundleId = uuid();
     const s3Key = `bundles/${uid}/${bundleId}.toffee`;
 
-    // Upload to S3
-    await s3.send(new PutObjectCommand({
-      Bucket: env.AWS_S3_BUCKET,
-      Key: s3Key,
-      Body: Buffer.from(body.bundle_data, 'base64'),
-      ContentType: 'application/x-toffee',
-      ServerSideEncryption: 'aws:kms',
-    }));
+    const client = await fastify.pg.connect();
+    try {
+      await client.query('BEGIN');
 
-    // Store metadata in PostgreSQL
-    await fastify.pg.query(
-      `INSERT INTO toffee_bundles (id, user_id, display_name, source_platform, source_model, compression_profile, token_count_original, token_count_bundle, compression_ratio, s3_key, tags)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
-      [bundleId, uid, body.display_name, body.source_platform, body.source_model, body.compression_profile, body.token_count_original, body.token_count_bundle, body.compression_ratio, s3Key, body.tags || []]
-    );
+      // Store metadata in PostgreSQL
+      await client.query(
+        `INSERT INTO toffee_bundles (id, user_id, display_name, source_platform, source_model, compression_profile, token_count_original, token_count_bundle, compression_ratio, s3_key, tags)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+        [bundleId, uid, body.display_name, body.source_platform, body.source_model, body.compression_profile, body.token_count_original, body.token_count_bundle, body.compression_ratio, s3Key, body.tags]
+      );
 
-    fastify.log.info(`Bundle created: ${bundleId} for user ${uid}`);
+      // Upload to S3
+      await s3.send(new PutObjectCommand({
+        Bucket: env.AWS_S3_BUCKET,
+        Key: s3Key,
+        Body: Buffer.from(body.bundle_data, 'base64'),
+        ContentType: 'application/x-toffee',
+        ServerSideEncryption: 'aws:kms',
+      }));
 
-    return reply.status(201).send({ id: bundleId, s3Key });
+      await client.query('COMMIT');
+      fastify.log.info(`Bundle created: ${bundleId} for user ${uid}`);
+      return reply.status(201).send({ id: bundleId, s3Key });
+    } catch (error) {
+      await client.query('ROLLBACK');
+      fastify.log.error(error);
+      return reply.status(500).send({ error: 'Failed to create bundle' });
+    } finally {
+      client.release();
+    }
   });
 
   // ── GET /:id — Get bundle ──────────────────────────────────
   fastify.get('/:id', async (request, reply) => {
     const { uid } = request.firebaseUser;
-    const { id } = request.params as { id: string };
+
+    const paramsParsed = UuidParamsSchema.safeParse(request.params);
+    if (!paramsParsed.success) {
+      return reply.status(400).send({ error: 'Invalid bundle ID', details: paramsParsed.error.flatten().fieldErrors });
+    }
+    const { id } = paramsParsed.data;
 
     const result = await fastify.pg.query(
       'SELECT * FROM toffee_bundles WHERE id = $1 AND user_id = $2',
@@ -125,7 +144,12 @@ export default async function bundlesModule(fastify: FastifyInstance) {
   // ── DELETE /:id — Delete bundle ────────────────────────────
   fastify.delete('/:id', async (request, reply) => {
     const { uid } = request.firebaseUser;
-    const { id } = request.params as { id: string };
+
+    const paramsParsed = UuidParamsSchema.safeParse(request.params);
+    if (!paramsParsed.success) {
+      return reply.status(400).send({ error: 'Invalid bundle ID', details: paramsParsed.error.flatten().fieldErrors });
+    }
+    const { id } = paramsParsed.data;
 
     const result = await fastify.pg.query(
       'SELECT s3_key FROM toffee_bundles WHERE id = $1 AND user_id = $2',

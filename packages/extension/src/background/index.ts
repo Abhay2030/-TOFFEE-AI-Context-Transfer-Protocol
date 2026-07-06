@@ -157,8 +157,13 @@ async function handleInjectRequest(payload: unknown) {
 }
 
 async function handleGetLibrary() {
-  // Will be implemented to read from IndexedDB
-  return { bundles: [], total: 0 };
+  try {
+    const bundles = await db.bundles.orderBy('createdAt').reverse().toArray();
+    return { bundles, total: bundles.length };
+  } catch (error: any) {
+    console.error('[Toffee] Failed to get library from Dexie:', error);
+    return { bundles: [], total: 0, error: error.message };
+  }
 }
 
 async function handleSyncStatus() {
@@ -177,8 +182,73 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 });
 
 async function processSyncQueue() {
-  // Will process pending sync operations from IndexedDB syncQueue table
   console.log('[Toffee] Processing sync queue...');
+  if (!navigator.onLine) {
+    console.log('[Toffee] Offline, skipping sync.');
+    return;
+  }
+
+  try {
+    // Basic sync logic: find un-processed conversations and process them
+    const unprocessed = await db.conversations.where('processed').equals('false').toArray();
+    if (unprocessed.length === 0) {
+      console.log('[Toffee] No pending conversations to sync.');
+      return;
+    }
+
+    const { auth } = await import('../lib/firebase');
+    const user = auth.currentUser;
+    if (!user) {
+      console.log('[Toffee] User not logged in, cannot sync to cloud.');
+      return;
+    }
+
+    const { generateToffeeBundle } = await import('../core/bundleGenerator');
+    for (const conv of unprocessed) {
+      try {
+        console.log(`[Toffee] Syncing conversation: ${conv.id}`);
+        const bundle = await generateToffeeBundle(conv, { profile: 'standard' });
+        await db.bundles.put(bundle);
+        
+        // Mark as processed
+        await db.conversations.update(conv.id, { processed: true });
+        
+        // POST to backend API (the compression API actually doesn't save to the DB, it just compresses)
+        // Wait, generateToffeeBundle calls `/compress` which does the LLM work and returns the payload.
+        // We need to then POST to `/bundles` to save it to S3.
+        const token = await user.getIdToken();
+        const res = await fetch('https://toffee-backend.onrender.com/v1/bundles', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            display_name: bundle.displayName,
+            source_platform: bundle.sourcePlatform,
+            source_model: bundle.sourceModel,
+            compression_profile: bundle.compressionProfile,
+            token_count_original: bundle.tokenCountOriginal,
+            token_count_bundle: bundle.tokenCountBundle,
+            compression_ratio: bundle.compressionRatio,
+            tags: bundle.tags,
+            bundle_data: bundle.bundleData,
+          })
+        });
+
+        if (!res.ok) {
+          console.error(`[Toffee] Failed to upload bundle ${conv.id}: ${res.statusText}`);
+        } else {
+          console.log(`[Toffee] Successfully uploaded bundle ${conv.id} to cloud.`);
+        }
+
+      } catch (err) {
+        console.error(`[Toffee] Error processing conversation ${conv.id}:`, err);
+      }
+    }
+  } catch (error) {
+    console.error('[Toffee] Sync queue error:', error);
+  }
 }
 
 console.log('[Toffee] Service worker initialized');

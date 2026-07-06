@@ -7,6 +7,8 @@ import type { RawConversation, CompressionProfile } from '@toffee/shared';
 import { COMPRESSION_PROFILES } from '@toffee/shared';
 import { v4 as uuid } from 'uuid';
 import { compressConversationLLM } from '../../services/anthropic.service.js';
+import { signBundle } from '../../services/hmac.service.js';
+import { CompressBodySchema } from '../../schemas/validation.js';
 
 export default async function compressionModule(fastify: FastifyInstance) {
   fastify.addHook('preHandler', async (request, reply) => {
@@ -15,11 +17,13 @@ export default async function compressionModule(fastify: FastifyInstance) {
 
   // ── POST /compress ─────────────────────────────────────────
   fastify.post('/compress', async (request, reply) => {
-    // const { uid } = request.firebaseUser;
-    const { conversation, profile = 'standard' } = request.body as {
-      conversation: RawConversation;
-      profile?: CompressionProfile;
-    };
+    const { uid } = request.firebaseUser;
+
+    const bodyParsed = CompressBodySchema.safeParse(request.body);
+    if (!bodyParsed.success) {
+      return reply.status(400).send({ error: 'Invalid request body', details: bodyParsed.error.flatten().fieldErrors });
+    }
+    const { conversation, profile } = bodyParsed.data;
 
     const startTime = Date.now();
     const profileConfig = COMPRESSION_PROFILES[profile];
@@ -53,7 +57,8 @@ export default async function compressionModule(fastify: FastifyInstance) {
     const originalTokens = estimateTokens(transcriptText);
     const bundleTokens = estimateTokens(JSON.stringify(summary));
 
-    const bundle = {
+    // Build bundle without HMAC first, then sign it
+    const bundlePayload = {
       schema_version: '1.0.0',
       bundle_id: bundleId,
       created_at: new Date().toISOString(),
@@ -68,8 +73,12 @@ export default async function compressionModule(fastify: FastifyInstance) {
       token_count_bundle: bundleTokens,
       compression_ratio: bundleTokens / originalTokens,
       compression_profile: profile,
-      hmac_sha256: 'placeholder-will-be-computed-client-side',
+      hmac_sha256: '', // placeholder for signing
     };
+
+    // Sign with server-side per-user derived key
+    const hmac = signBundle(JSON.stringify(bundlePayload), uid);
+    const bundle = { ...bundlePayload, hmac_sha256: hmac };
 
     const processingTimeMs = Date.now() - startTime;
 

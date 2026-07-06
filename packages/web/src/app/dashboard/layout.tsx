@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   FolderOpen,
@@ -30,6 +30,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
@@ -37,7 +38,7 @@ export default function DashboardLayout({
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (!currentUser) {
-        window.location.href = "/login";
+        router.push("/login");
       } else {
         setIsCheckingAuth(false);
       }
@@ -47,9 +48,7 @@ export default function DashboardLayout({
 
   const handleLogout = async () => {
     await signOut(auth!);
-    localStorage.removeItem("toffee_access_token");
-    localStorage.removeItem("toffee_refresh_token");
-    window.location.href = "/login";
+    router.push("/login");
   };
 
   if (isCheckingAuth) {
