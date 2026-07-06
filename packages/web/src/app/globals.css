@@ -38,6 +38,23 @@
   --color-accent-rose: #f43f5e;
 }
 
+@layer base {
+  :root.light {
+    /* Invert the navy scale for Light Mode */
+    --color-navy-950: #f8fafc; /* bg */
+    --color-navy-900: #f1f5f9; /* card bg */
+    --color-navy-800: #e2e8f0; /* borders */
+    --color-navy-700: #cbd5e1;
+    --color-navy-600: #94a3b8;
+    --color-navy-500: #64748b;
+    --color-navy-400: #475569; /* text-muted */
+    --color-navy-300: #334155;
+    --color-navy-200: #1e293b;
+    --color-navy-100: #0f172a; /* text-primary */
+    --color-navy-50: #020617;
+  }
+}
+
 /* ── Base Styles ── */
 html {
   scroll-behavior: smooth;
@@ -63,17 +80,17 @@ body {
 
 /* ── Glass Card ── */
 .glass-card {
-  background: rgba(30, 41, 59, 0.5);
+  background: color-mix(in srgb, var(--color-navy-900) 50%, transparent);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(148, 163, 184, 0.1);
+  border: 1px solid color-mix(in srgb, var(--color-navy-700) 20%, transparent);
   border-radius: 1rem;
 }
 
 .glass-card-light {
-  background: rgba(248, 250, 252, 0.7);
+  background: color-mix(in srgb, var(--color-navy-800) 70%, transparent);
   backdrop-filter: blur(16px);
-  border: 1px solid rgba(226, 232, 240, 0.5);
+  border: 1px solid color-mix(in srgb, var(--color-navy-600) 50%, transparent);
   border-radius: 1rem;
 }
 

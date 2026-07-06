@@ -8,6 +8,7 @@ import { MagneticButton } from "../ui/MagneticButton";
 import { motion, useScroll, useMotionValueEvent } from "framer-motion";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/utils/firebase/firebase";
+import { ThemeToggle } from "../ui/ThemeToggle";
 
 const NAV_LINKS = [
   { label: "Features", href: "#features" },
@@ -83,6 +84,7 @@ export default function Navbar() {
 
           {/* Desktop CTAs */}
           <div className="hidden md:flex items-center gap-4">
+            <ThemeToggle />
             {user ? (
               <MagneticButton>
                 <Link
@@ -138,6 +140,9 @@ export default function Navbar() {
               </a>
             ))}
             <div className="pt-3 border-t border-navy-800 flex flex-col gap-2">
+              <div className="flex justify-end pb-2">
+                <ThemeToggle />
+              </div>
               {user ? (
                 <Link href="/dashboard" className="btn-primary text-sm py-2">
                   Dashboard
