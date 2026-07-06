@@ -270,7 +270,7 @@ export default function ContactPage() {
 
       {/* Creator Note */}
       <div className="mt-16 text-center pb-12">
-        <p className="text-xs font-medium text-toffee-500/50 tracking-widest uppercase">Designed & Developed by Abhay</p>
+        <p className="text-xs font-medium text-toffee-500/50 tracking-widest uppercase">Designed & Developed by Abhay Sachin Donde</p>
       </div>
     </div>
   );

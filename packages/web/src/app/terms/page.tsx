@@ -167,7 +167,7 @@ export default function TermsPage() {
             Toffee exists to make AI knowledge portable, secure, and user-controlled. These Terms are designed to support that mission while providing a fair, transparent framework for everyone who uses the platform.
           </p>
           <div className="mt-8 text-center relative z-10">
-            <p className="text-xs font-medium text-navy-500 tracking-widest uppercase">Designed & Developed by Abhay</p>
+            <p className="text-xs font-medium text-navy-500 tracking-widest uppercase">Designed & Developed by Abhay Sachin Donde</p>
           </div>
         </div>
 

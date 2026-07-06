@@ -78,7 +78,7 @@ export default function Footer() {
         {/* Bottom */}
         <div className="mt-12 pt-8 border-t border-navy-800/50 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-navy-500">
-            © {new Date().getFullYear()} Toffee. All rights reserved. Designed & Developed by Abhay.
+            © {new Date().getFullYear()} Toffee. All rights reserved. Designed & Developed by Abhay Sachin Donde.
           </p>
           <p className="text-xs text-navy-600">
             Built with ⚡ for AI power users

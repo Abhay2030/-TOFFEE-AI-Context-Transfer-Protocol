@@ -124,7 +124,7 @@ export default function PricingPage() {
 
         {/* Creator Note */}
         <div className="mt-24 text-center">
-          <p className="text-xs font-medium text-navy-500 tracking-widest uppercase">Designed & Developed by Abhay</p>
+          <p className="text-xs font-medium text-navy-500 tracking-widest uppercase">Designed & Developed by Abhay Sachin Donde</p>
         </div>
 
       </div>

@@ -71,7 +71,7 @@ export default function FeaturesPage() {
           </p>
           <div className="flex items-center justify-center gap-3">
             <div className="h-px w-12 bg-navy-700" />
-            <p className="text-sm font-medium text-toffee-400 tracking-widest uppercase">Designed & Developed by Abhay</p>
+            <p className="text-sm font-medium text-toffee-400 tracking-widest uppercase">Designed & Developed by Abhay Sachin Donde</p>
             <div className="h-px w-12 bg-navy-700" />
           </div>
         </div>

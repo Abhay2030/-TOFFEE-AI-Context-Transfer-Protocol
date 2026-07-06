@@ -271,7 +271,7 @@ export default function CareersPage() {
         
         {/* Creator Note */}
         <div className="mt-16 text-center">
-          <p className="text-xs font-medium text-toffee-500/50 tracking-widest uppercase">Designed & Developed by Abhay</p>
+          <p className="text-xs font-medium text-toffee-500/50 tracking-widest uppercase">Designed & Developed by Abhay Sachin Donde</p>
         </div>
       </section>
 

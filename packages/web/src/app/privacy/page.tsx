@@ -214,7 +214,7 @@ export default function PrivacyPage() {
             Your AI knowledge belongs to you. Toffee is committed to protecting it through transparency, privacy-first engineering, and industry-leading security practices.
           </p>
           <div className="mt-8 text-center relative z-10">
-            <p className="text-xs font-medium text-navy-500 tracking-widest uppercase">Designed & Developed by Abhay</p>
+            <p className="text-xs font-medium text-navy-500 tracking-widest uppercase">Designed & Developed by Abhay Sachin Donde</p>
           </div>
         </div>
 

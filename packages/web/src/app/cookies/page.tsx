@@ -164,7 +164,7 @@ export default function CookiePolicyPage() {
             <a href="/privacy" className="btn-secondary py-3 px-6 text-sm">View Privacy Policy</a>
           </div>
           <div className="mt-8 text-center relative z-10">
-            <p className="text-xs font-medium text-navy-500 tracking-widest uppercase">Designed & Developed by Abhay</p>
+            <p className="text-xs font-medium text-navy-500 tracking-widest uppercase">Designed & Developed by Abhay Sachin Donde</p>
           </div>
         </div>
 
