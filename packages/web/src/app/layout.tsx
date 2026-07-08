@@ -30,6 +30,7 @@ export const metadata: Metadata = {
 };
 
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import DynamicBackground from "@/components/ui/DynamicBackground";
 
 export default function RootLayout({
   children,
@@ -38,8 +39,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans min-h-screen bg-navy-950 text-navy-100 antialiased`}>
+      <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans min-h-screen bg-navy-950 text-navy-100 antialiased relative overflow-x-hidden`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <DynamicBackground />
           <SmoothScroll>
             {children}
           </SmoothScroll>
