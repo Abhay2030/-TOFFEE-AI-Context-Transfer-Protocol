@@ -162,3 +162,25 @@ export async function submitContactForm(data: { name: string; email: string; top
     throw new Error(errorBody.error || `API Error: ${res.status}`);
   }
 }
+
+/**
+ * Get all contact messages (Admin only)
+ */
+export async function getContactMessages(): Promise<any[]> {
+  const token = await getAuthToken();
+  if (!token) throw new Error('Not authenticated');
+
+  const res = await fetch(`${API_URL}/v1/admin/contact/messages`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => ({}));
+    throw new Error(errorBody.error || `API Error: ${res.status}`);
+  }
+
+  const data = await res.json();
+  return data.messages;
+}

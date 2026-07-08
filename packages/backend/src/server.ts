@@ -20,6 +20,7 @@ import sharingModule from './modules/sharing/index.js';
 import analyticsModule from './modules/analytics/index.js';
 import eventsModule from './modules/events/index.js';
 import contactModule from './modules/contact/index.js';
+import adminModule from './modules/admin/index.js';
 // Plugin imports
 import postgresPlugin from './plugins/postgres.js';
 import redisPlugin from './plugins/redis.js';
@@ -171,6 +172,7 @@ async function bootstrap() {
   await app.register(analyticsModule, { prefix: '/v1/analytics' });
   await app.register(eventsModule, { prefix: '/v1/events' });
   await app.register(contactModule, { prefix: '/v1/contact' });
+  await app.register(adminModule, { prefix: '/v1/admin' });
 
   // ── Health Check ───────────────────────────────────────────
   app.get('/health', async () => ({
