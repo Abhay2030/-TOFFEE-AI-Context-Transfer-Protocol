@@ -40,6 +40,10 @@
 
 @layer base {
   :root.light {
+    /* Override hardcoded white/black for Light Mode */
+    --color-white: #020617;
+    --color-black: #ffffff;
+
     /* Invert the navy scale for Light Mode */
     --color-navy-950: #f8fafc; /* bg */
     --color-navy-900: #f1f5f9; /* card bg */
