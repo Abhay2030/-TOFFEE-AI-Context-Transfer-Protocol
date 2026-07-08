@@ -8,6 +8,13 @@ const eventsModule: FastifyPluginAsync = async (fastify: FastifyInstance) => {
   fastify.get('/stream', async (request, reply) => {
     const userId = request.firebaseUser.uid;
 
+    // Explicitly set CORS headers because we bypass Fastify's response lifecycle
+    const origin = request.headers.origin;
+    if (origin) {
+      reply.raw.setHeader('Access-Control-Allow-Origin', origin);
+      reply.raw.setHeader('Access-Control-Allow-Credentials', 'true');
+    }
+
     // Set headers for Server-Sent Events
     reply.raw.setHeader('Content-Type', 'text/event-stream');
     reply.raw.setHeader('Cache-Control', 'no-cache');
