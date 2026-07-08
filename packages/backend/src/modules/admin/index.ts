@@ -13,7 +13,7 @@ export default async function adminModule(fastify: FastifyInstance) {
   });
 
   // ── GET /contact/messages — List all contact messages ────────────────────
-  fastify.get('/contact/messages', async (request, reply) => {
+  fastify.get('/contact/messages', async (_request, reply) => {
     const client = await fastify.pg.connect();
     try {
       const result = await client.query(
