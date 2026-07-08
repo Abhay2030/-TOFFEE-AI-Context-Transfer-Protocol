@@ -69,7 +69,13 @@ async function bootstrap() {
       }
       
       // In production, allow web app and specific extension
-      const allowedOrigins = ['https://toffee.ai'];
+      const allowedOrigins = [
+        'https://toffee.ai',
+        'https://toffee-ai-context-transfer-protocol-red.vercel.app'
+      ];
+      
+      // Also allow any dynamic Vercel preview URLs
+      const isVercelPreview = origin && origin.endsWith('.vercel.app');
       
       if (env.EXTENSION_ID) {
         allowedOrigins.push(`chrome-extension://${env.EXTENSION_ID}`);
@@ -79,7 +85,7 @@ async function bootstrap() {
         allowedOrigins.push('chrome-extension://*');
       }
 
-      if (!origin || allowedOrigins.includes(origin) || (allowedOrigins.includes('chrome-extension://*') && origin.startsWith('chrome-extension://'))) {
+      if (!origin || allowedOrigins.includes(origin) || isVercelPreview || (allowedOrigins.includes('chrome-extension://*') && origin.startsWith('chrome-extension://'))) {
         return cb(null, true);
       }
       cb(new Error('Not allowed by CORS'), false);
