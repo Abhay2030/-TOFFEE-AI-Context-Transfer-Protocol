@@ -1,4 +1,8 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
+import { submitContactForm } from "@/lib/api";
 import { ArrowRight, Mail, Phone, MessageSquare, Building2, Globe, Shield, Sparkles, AlertTriangle, Bug, LifeBuoy, FileText, ChevronRight, Lock, CheckCircle2 } from "lucide-react";
 
 const CONTACT_DEPARTMENTS = [
@@ -65,6 +69,34 @@ const CONTACT_DEPARTMENTS = [
 ];
 
 export default function ContactPage() {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    topic: "General Enquiry",
+    message: ""
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitStatus("idle");
+    setErrorMessage("");
+
+    try {
+      await submitContactForm(formData);
+      setSubmitStatus("success");
+      setFormData({ name: "", email: "", topic: "General Enquiry", message: "" });
+    } catch (error: any) {
+      setSubmitStatus("error");
+      setErrorMessage(error.message || "Failed to send message. Please try again later.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-navy-950 pt-24 pb-16">
       
@@ -151,36 +183,96 @@ export default function ContactPage() {
           {/* Right Column - Contact Form */}
           <div className="glass-card p-8 md:p-10 border-toffee-500/20 relative">
             <h2 className="text-2xl font-bold text-white mb-8">Send a Message</h2>
-            <form className="space-y-6">
-              <div>
-                <label className="block text-xs font-medium text-navy-300 mb-2">Your Name</label>
-                <input type="text" placeholder="e.g. Rahul Sharma" className="w-full px-4 py-3 rounded-xl bg-navy-900/50 border border-navy-700 text-white placeholder-navy-500 focus:outline-none focus:border-toffee-500/50 focus:ring-1 focus:ring-toffee-500/50" />
+            
+            {submitStatus === "success" ? (
+              <div className="bg-accent-emerald/10 border border-accent-emerald/20 rounded-xl p-8 text-center">
+                <div className="w-16 h-16 bg-accent-emerald/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle2 className="w-8 h-8 text-accent-emerald" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">Message Sent!</h3>
+                <p className="text-navy-300">
+                  Thanks for reaching out. I've received your message and will get back to you as soon as possible.
+                </p>
+                <button 
+                  onClick={() => setSubmitStatus("idle")}
+                  className="mt-6 px-6 py-2 bg-navy-800 hover:bg-navy-700 text-white rounded-lg transition-colors font-medium text-sm"
+                >
+                  Send another message
+                </button>
               </div>
-              
-              <div>
-                <label className="block text-xs font-medium text-navy-300 mb-2">Email Address</label>
-                <input type="email" placeholder="you@example.com" className="w-full px-4 py-3 rounded-xl bg-navy-900/50 border border-navy-700 text-white placeholder-navy-500 focus:outline-none focus:border-toffee-500/50 focus:ring-1 focus:ring-toffee-500/50" />
-              </div>
-              
-              <div>
-                <label className="block text-xs font-medium text-navy-300 mb-2">Topic</label>
-                <select className="w-full px-4 py-3 rounded-xl bg-navy-900/50 border border-navy-700 text-white focus:outline-none focus:border-toffee-500/50 focus:ring-1 focus:ring-toffee-500/50 appearance-none">
-                  <option>General Enquiry</option>
-                  <option>Bug Report</option>
-                  <option>Feature Request</option>
-                  <option>Collaboration / Business</option>
-                </select>
-              </div>
+            ) : (
+              <form className="space-y-6" onSubmit={handleSubmit}>
+                {submitStatus === "error" && (
+                  <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-red-400 text-sm flex items-start gap-3">
+                    <AlertTriangle className="w-5 h-5 shrink-0" />
+                    <p>{errorMessage}</p>
+                  </div>
+                )}
+                <div>
+                  <label className="block text-xs font-medium text-navy-300 mb-2">Your Name</label>
+                  <input 
+                    type="text" 
+                    required
+                    value={formData.name}
+                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="e.g. Rahul Sharma" 
+                    className="w-full px-4 py-3 rounded-xl bg-navy-900/50 border border-navy-700 text-white placeholder-navy-500 focus:outline-none focus:border-toffee-500/50 focus:ring-1 focus:ring-toffee-500/50" 
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-xs font-medium text-navy-300 mb-2">Email Address</label>
+                  <input 
+                    type="email" 
+                    required
+                    value={formData.email}
+                    onChange={e => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="you@example.com" 
+                    className="w-full px-4 py-3 rounded-xl bg-navy-900/50 border border-navy-700 text-white placeholder-navy-500 focus:outline-none focus:border-toffee-500/50 focus:ring-1 focus:ring-toffee-500/50" 
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-xs font-medium text-navy-300 mb-2">Topic</label>
+                  <select 
+                    value={formData.topic}
+                    onChange={e => setFormData({ ...formData, topic: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl bg-navy-900/50 border border-navy-700 text-white focus:outline-none focus:border-toffee-500/50 focus:ring-1 focus:ring-toffee-500/50 appearance-none"
+                  >
+                    <option>General Enquiry</option>
+                    <option>Bug Report</option>
+                    <option>Feature Request</option>
+                    <option>Collaboration / Business</option>
+                  </select>
+                </div>
 
-              <div>
-                <label className="block text-xs font-medium text-navy-300 mb-2">Message</label>
-                <textarea rows={5} placeholder="Tell me what's on your mind..." className="w-full px-4 py-3 rounded-xl bg-navy-900/50 border border-navy-700 text-white placeholder-navy-500 focus:outline-none focus:border-toffee-500/50 focus:ring-1 focus:ring-toffee-500/50" />
-              </div>
-              
-              <button type="button" className="btn-primary py-4 px-8 w-full flex items-center justify-center gap-2 font-bold text-base">
-                <span className="text-xl">📨</span> Send Message
-              </button>
-            </form>
+                <div>
+                  <label className="block text-xs font-medium text-navy-300 mb-2">Message</label>
+                  <textarea 
+                    rows={5} 
+                    required
+                    value={formData.message}
+                    onChange={e => setFormData({ ...formData, message: e.target.value })}
+                    placeholder="Tell me what's on your mind..." 
+                    className="w-full px-4 py-3 rounded-xl bg-navy-900/50 border border-navy-700 text-white placeholder-navy-500 focus:outline-none focus:border-toffee-500/50 focus:ring-1 focus:ring-toffee-500/50" 
+                  />
+                </div>
+                
+                <button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="btn-primary py-4 px-8 w-full flex items-center justify-center gap-2 font-bold text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? (
+                    <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <span className="text-xl">📨</span> Send Message
+                    </>
+                  )}
+                </button>
+              </form>
+            )}
           </div>
         </div>
       </section>

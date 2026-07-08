@@ -80,3 +80,12 @@ export const ShareAccessQuerySchema = z.object({
 export const ShareTokenParamsSchema = z.object({
   token: z.string().length(64, 'Invalid share token format'),
 });
+
+// ── Contact ──────────────────────────────────────────────────
+
+export const ContactFormBodySchema = z.object({
+  name: z.string().min(1, 'Name is required').max(255),
+  email: z.string().email('Invalid email address').max(255),
+  topic: z.string().min(1, 'Topic is required').max(255),
+  message: z.string().min(1, 'Message is required').max(10000),
+});

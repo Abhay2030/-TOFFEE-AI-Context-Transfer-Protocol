@@ -12,7 +12,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
-import { getUsageStats, getBundles } from "@/lib/api";
+import { getUsageStats, getBundles, setupSSESync } from "@/lib/api";
 import type { UsageStats, BundleItem } from "@/lib/api";
 
 function formatNumber(n: number): string {
@@ -46,6 +46,27 @@ export default function DashboardPage() {
 
   useEffect(() => {
     loadData();
+
+    let eventSource: EventSource | null = null;
+    let mounted = true;
+
+    // Set up real-time sync for new bundles
+    setupSSESync((newBundleData) => {
+      if (mounted) {
+        console.log("Real-time sync: Received new bundle", newBundleData);
+        // Refresh data when a new bundle is received
+        loadData();
+      }
+    }).then(es => {
+      eventSource = es;
+    });
+
+    return () => {
+      mounted = false;
+      if (eventSource) {
+        eventSource.close();
+      }
+    };
   }, [loadData]);
 
   const STATS_CONFIG = [

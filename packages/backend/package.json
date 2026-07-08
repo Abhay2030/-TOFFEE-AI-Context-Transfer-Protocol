@@ -10,7 +10,7 @@
     "start": "node dist/server.js",
     "clean": "rimraf dist",
     "lint": "eslint src/",
-    "migrate": "node-pg-migrate",
+    "migrate": "node-pg-migrate --no-check-order",
     "test": "vitest"
   },
   "dependencies": {

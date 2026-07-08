@@ -12,6 +12,7 @@ import {
   CreateBundleBodySchema,
   UuidParamsSchema,
 } from '../../schemas/validation.js';
+import { sseService } from '../../services/sse.service.js';
 
 const s3 = new S3Client({ region: env.AWS_REGION });
 
@@ -101,6 +102,10 @@ export default async function bundlesModule(fastify: FastifyInstance) {
 
       await client.query('COMMIT');
       fastify.log.info(`Bundle created: ${bundleId} for user ${uid}`);
+
+      // Emit Server-Sent Event to connected dashboards
+      sseService.sendToUser(uid, 'new_bundle', { id: bundleId, display_name: body.display_name });
+
       return reply.status(201).send({ id: bundleId, s3Key });
     } catch (error) {
       await client.query('ROLLBACK');

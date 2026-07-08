@@ -9,7 +9,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://toffee-backend.onren
 /**
  * Get the current user's Firebase ID token for API authentication.
  */
-async function getAuthToken(): Promise<string | null> {
+export async function getAuthToken(): Promise<string | null> {
   if (!auth?.currentUser) return null;
   try {
     return await auth.currentUser.getIdToken();
@@ -115,4 +115,50 @@ export async function deleteBundle(id: string): Promise<void> {
 
 export async function getMe(): Promise<{ user: UserProfile }> {
   return apiFetch<{ user: UserProfile }>('/v1/auth/me');
+}
+
+/**
+ * Setup Server-Sent Events connection for real-time dashboard updates
+ */
+export async function setupSSESync(onNewBundle: (data: any) => void): Promise<EventSource | null> {
+  const token = await getAuthToken();
+  if (!token) return null;
+
+  const eventSource = new EventSource(`${API_URL}/v1/events/stream?token=${token}`);
+
+  eventSource.addEventListener('new_bundle', (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      onNewBundle(data);
+    } catch (e) {
+      console.error('Failed to parse SSE new_bundle event:', e);
+    }
+  });
+
+  return eventSource;
+}
+
+/**
+ * Submit contact form
+ */
+export async function submitContactForm(data: { name: string; email: string; topic: string; message: string }): Promise<void> {
+  const token = await getAuthToken();
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+  
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const res = await fetch(`${API_URL}/v1/contact`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(errorBody.error || `API Error: ${res.status}`);
+  }
 }

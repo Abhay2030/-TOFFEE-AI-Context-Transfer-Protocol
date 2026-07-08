@@ -18,7 +18,8 @@ import bundlesModule from './modules/bundles/index.js';
 import compressionModule from './modules/compression/index.js';
 import sharingModule from './modules/sharing/index.js';
 import analyticsModule from './modules/analytics/index.js';
-
+import eventsModule from './modules/events/index.js';
+import contactModule from './modules/contact/index.js';
 // Plugin imports
 import postgresPlugin from './plugins/postgres.js';
 import redisPlugin from './plugins/redis.js';
@@ -31,6 +32,9 @@ declare module 'fastify' {
       email?: string;
       name?: string;
     };
+  }
+  interface FastifyInstance {
+    verifyFirebaseToken: any;
   }
 }
 
@@ -96,12 +100,17 @@ async function bootstrap() {
 
   app.decorate('verifyFirebaseToken', async (request: import('fastify').FastifyRequest, reply: import('fastify').FastifyReply) => {
     const authHeader = request.headers.authorization;
+    let idToken = '';
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return reply.status(401).send({ error: 'Missing or invalid authorization header' });
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      idToken = authHeader.substring(7);
+    } else if (request.query && (request.query as any).token) {
+      idToken = (request.query as any).token;
     }
 
-    const idToken = authHeader.substring(7);
+    if (!idToken) {
+      return reply.status(401).send({ error: 'Missing or invalid authorization header or token query parameter' });
+    }
 
     try {
       const decoded = await firebaseAuth.verifyIdToken(idToken);
@@ -154,6 +163,8 @@ async function bootstrap() {
   await app.register(compressionModule, { prefix: '/v1' });
   await app.register(sharingModule, { prefix: '/v1' });
   await app.register(analyticsModule, { prefix: '/v1/analytics' });
+  await app.register(eventsModule, { prefix: '/v1/events' });
+  await app.register(contactModule, { prefix: '/v1/contact' });
 
   // ── Health Check ───────────────────────────────────────────
   app.get('/health', async () => ({
