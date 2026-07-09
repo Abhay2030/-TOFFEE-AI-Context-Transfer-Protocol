@@ -36,9 +36,9 @@ export default function Home() {
             </ScrollReveal>
 
             <div className="text-5xl sm:text-6xl md:text-8xl font-bold text-white tracking-tight leading-[1.1] mb-6 drop-shadow-2xl flex flex-col items-center justify-center">
-              <TextReveal text="Transfer Your" delay={0.3} />
+              <TextReveal text="Transfer Your" delay={0.3} className="justify-center" />
               <div className="text-transparent bg-clip-text bg-gradient-to-r from-toffee-400 to-accent-teal mt-2">
-                <TextReveal text="AI Memory Anywhere." delay={0.5} />
+                <TextReveal text="AI Memory Anywhere." delay={0.5} className="justify-center" />
               </div>
             </div>
 
