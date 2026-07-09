@@ -31,6 +31,7 @@ export const metadata: Metadata = {
 
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import DynamicBackground from "@/components/ui/DynamicBackground";
+import { PageTransition } from "@/components/ui/PageTransition";
 
 export default function RootLayout({
   children,
@@ -43,7 +44,9 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <DynamicBackground />
           <SmoothScroll>
-            {children}
+            <PageTransition>
+              {children}
+            </PageTransition>
           </SmoothScroll>
         </ThemeProvider>
       </body>

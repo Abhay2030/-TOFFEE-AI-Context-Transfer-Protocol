@@ -12,6 +12,7 @@ const WebGLScene = dynamic(() => import("@/components/3d/Scene").then(mod => mod
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { MagneticButton } from "@/components/ui/MagneticButton";
+import { TextReveal } from "@/components/ui/TextReveal";
 
 export default function Home() {
   return (
@@ -28,23 +29,21 @@ export default function Home() {
           
           <div className="relative z-10 max-w-4xl mx-auto text-center pointer-events-none">
             <ScrollReveal delay={0.2} direction="down">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-navy-800/50 border border-navy-700/50 backdrop-blur-md mb-8">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-navy-800/50 border border-navy-700/50 backdrop-blur-md mb-8 shadow-xl shadow-toffee-500/5">
                 <Sparkles className="w-4 h-4 text-accent-teal" />
                 <span className="text-sm font-medium text-navy-200">The Context Transfer Protocol</span>
               </div>
             </ScrollReveal>
 
-            <ScrollReveal delay={0.4}>
-              <h1 className="text-5xl sm:text-6xl md:text-8xl font-bold text-white tracking-tight leading-[1.1] mb-6 drop-shadow-2xl">
-                Transfer Your <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-toffee-400 to-accent-teal">
-                  AI Memory
-                </span> Anywhere.
-              </h1>
-            </ScrollReveal>
+            <div className="text-5xl sm:text-6xl md:text-8xl font-bold text-white tracking-tight leading-[1.1] mb-6 drop-shadow-2xl flex flex-col items-center justify-center">
+              <TextReveal text="Transfer Your" delay={0.3} />
+              <div className="text-transparent bg-clip-text bg-gradient-to-r from-toffee-400 to-accent-teal mt-2">
+                <TextReveal text="AI Memory Anywhere." delay={0.5} />
+              </div>
+            </div>
 
-            <ScrollReveal delay={0.6}>
-              <p className="text-lg md:text-2xl text-navy-300 max-w-2xl mx-auto mb-10 font-light">
+            <ScrollReveal delay={0.8}>
+              <p className="text-lg md:text-2xl text-navy-300 max-w-2xl mx-auto mb-10 font-light leading-relaxed">
                 Capture, compress, and sync conversations across ChatGPT, Claude, and Gemini with absolute privacy.
               </p>
             </ScrollReveal>
