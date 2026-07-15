@@ -19,7 +19,7 @@ export default function Inject() {
     });
   }, []);
   return (
-    <div className="pt-2 pb-6 space-y-6">
+    <div className="pt-2 pb-28 space-y-6">
       <div className="text-center space-y-3 py-6 relative">
         <div className="relative w-20 h-20 mx-auto rounded-full flex items-center justify-center bg-white/5 border border-white/10 shadow-inner z-10">
           <Zap className="w-8 h-8 text-[#F59E0B]" />

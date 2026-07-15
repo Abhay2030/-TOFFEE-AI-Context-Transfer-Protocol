@@ -3,7 +3,7 @@
 // Contract that every AI platform content script must implement
 // ============================================================
 
-import type { RawConversation } from '@toffee/shared';
+import type { RawConversation, ConversationTurn } from '@toffee/shared';
 
 export interface InjectionOptions {
   mode: 'auto' | 'manual' | 'clipboard';
@@ -155,20 +155,84 @@ export abstract class BasePlatformAdapter implements PlatformAdapter {
   }
 
   /**
-   * Type text into a textarea element (for injection).
+   * Graceful Degradation: Fallback extraction if primary DOM selectors fail.
+   * Scrapes all paragraphs and pre-formatted text in the container.
+   */
+  protected performFallbackExtraction(containerSelector: string): ConversationTurn[] {
+    console.warn(`[Toffee:${this.platformId}] Primary selectors failed. Attempting fallback extraction...`);
+    const turns: ConversationTurn[] = [];
+    const container = this.safeQuerySelector(containerSelector) || document.body;
+    
+    // Most AI chats use <p> for text and <pre> or <code> for code.
+    const contentNodes = container.querySelectorAll('p, div.whitespace-pre-wrap, div.prose, pre, code');
+    let combinedContent = '';
+    
+    // We use a Set to avoid duplicating text if selectors overlap (e.g. div.prose contains p)
+    const seenText = new Set<string>();
+
+    contentNodes.forEach(node => {
+      const text = node.textContent?.trim();
+      if (text && text.length > 5 && !seenText.has(text)) {
+        seenText.add(text);
+        combinedContent += text + '\n\n';
+      }
+    });
+
+    if (combinedContent.trim().length > 0) {
+      turns.push({
+        role: 'assistant',
+        content: combinedContent.trim(),
+        metadata: { hasCode: combinedContent.includes('function') || combinedContent.includes('const '), hasTable: false }
+      });
+    }
+
+    return turns;
+  }
+
+  /**
+   * Type text into a textarea element or contenteditable (for injection).
+   * Robust against React synthetic events, Vue, and ProseMirror/Slate editors.
    */
   protected async typeIntoTextarea(selector: string, text: string): Promise<boolean> {
-    const textarea = this.safeQuerySelector<HTMLTextAreaElement>(selector);
-    if (!textarea) return false;
+    const el = this.safeQuerySelector<HTMLElement>(selector);
+    if (!el) return false;
 
-    textarea.focus();
-    textarea.value = text;
+    el.focus();
 
-    // Dispatch input events to trigger framework reactivity
-    textarea.dispatchEvent(new Event('input', { bubbles: true }));
-    textarea.dispatchEvent(new Event('change', { bubbles: true }));
+    if (el instanceof HTMLTextAreaElement || el instanceof HTMLInputElement) {
+      // 1. Try bypassing React's overriding of the value setter
+      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set;
+      if (nativeInputValueSetter) {
+        nativeInputValueSetter.call(el, text);
+      } else {
+        el.value = text;
+      }
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+      return true;
+    } 
+    
+    // 2. It's a contenteditable (ChatGPT ProseMirror, Claude, Grok, Copilot)
+    if (el.getAttribute('contenteditable') === 'true' || el.isContentEditable) {
+      // Strategy A: document.execCommand (Simulates user typing/pasting perfectly in most browsers)
+      const execSuccess = document.execCommand('insertText', false, text);
+      if (execSuccess) return true;
 
-    return true;
+      // Strategy B: Simulate a native Paste Event (Perfect for ProseMirror/Slate)
+      const dataTransfer = new DataTransfer();
+      dataTransfer.setData('text/plain', text);
+      const pasteEvent = new ClipboardEvent('paste', {
+        clipboardData: dataTransfer,
+        bubbles: true,
+        cancelable: true
+      });
+      el.dispatchEvent(pasteEvent);
+      
+      // We assume paste event worked because it's standard for rich text editors
+      return true;
+    }
+
+    return false;
   }
 
   protected sleep(ms: number): Promise<void> {

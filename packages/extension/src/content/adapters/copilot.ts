@@ -70,7 +70,14 @@ class CopilotAdapter extends BasePlatformAdapter {
       const messageBlocks = el.shadowRoot?.querySelectorAll('cib-message') || [];
       return Array.from(messageBlocks).map(b => b.shadowRoot?.querySelector('.content')?.textContent?.trim() || '').join('\\n').trim() || null;
     }
-    
+    if (turns.length === 0) {
+      turns.push(...this.performFallbackExtraction(this.SELECTORS.conversationContainer));
+    }
+
+    if (turns.length === 0) {
+      throw new Error("No conversation found on this page. If the UI updated, please wait for a Toffee update or capture manually.");
+    }
+
     console.log(`[Toffee:Copilot] Extracted ${turns.length} turns via Shadow DOM traversal`);
 
     return {
@@ -112,11 +119,16 @@ class CopilotAdapter extends BasePlatformAdapter {
       success = true;
     }
 
+    if (!success) {
+      console.warn('[Toffee:Copilot] textarea injection failed, falling back to clipboard');
+      await navigator.clipboard.writeText(formattedPrompt);
+      return { success: true, tokensInjected: 0, method: 'clipboard' };
+    }
+
     return {
       success,
       tokensInjected: success ? Math.ceil(formattedPrompt.length / 4) : 0,
       method: 'textarea',
-      error: success ? undefined : 'Could not find Copilot textarea in Shadow DOM',
     };
   }
 

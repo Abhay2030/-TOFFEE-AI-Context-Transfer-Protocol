@@ -8,7 +8,7 @@ export default function Capture() {
   const { status, detectedPlatform, messageCount, progress } = useCaptureStore();
 
   return (
-    <div className="pt-2 pb-6 space-y-6">
+    <div className="pt-2 pb-28 space-y-6">
       <div className="text-center space-y-3 py-6 relative">
         {/* Animated Radar Background */}
         {(status === 'detecting' || status === 'capturing') && (

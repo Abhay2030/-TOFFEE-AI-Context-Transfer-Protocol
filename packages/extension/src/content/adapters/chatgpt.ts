@@ -53,28 +53,11 @@ class ChatGPTAdapter extends BasePlatformAdapter {
     }
     
     if (turns.length === 0) {
-      console.warn('[Toffee:ChatGPT] Primary selectors failed. Attempting fallback extraction...');
-      // Fallback: try to just grab all paragraphs in the main container
-      const container = this.safeQuerySelector(this.SELECTORS.conversationContainer);
-      if (container) {
-        const paragraphs = container.querySelectorAll('p, div.whitespace-pre-wrap');
-        let combinedContent = '';
-        paragraphs.forEach(p => {
-          if (p.textContent) combinedContent += p.textContent + '\n';
-        });
-        
-        if (combinedContent.trim().length > 0) {
-          turns.push({
-            role: 'assistant',
-            content: combinedContent.trim(),
-            metadata: { hasCode: false, hasTable: false }
-          });
-        }
-      }
+      turns.push(...this.performFallbackExtraction(this.SELECTORS.conversationContainer));
     }
 
     if (turns.length === 0) {
-      throw new Error("No conversation found on this page. If ChatGPT updated their UI, please wait for a Toffee update.");
+      throw new Error("No conversation found on this page. If the UI updated, please wait for a Toffee update or capture manually.");
     }
 
     console.log(`[Toffee:ChatGPT] Extracted ${turns.length} turns`);
@@ -93,41 +76,9 @@ class ChatGPTAdapter extends BasePlatformAdapter {
       return { success: true, tokensInjected: 0, method: 'clipboard' };
     }
 
-    // ChatGPT uses a React textarea or contenteditable.
-    // The base typeIntoTextarea uses standard .value = text, which React ignores.
-    // We need to trigger the native setter to bypass React's event pooling.
-    const textarea = this.safeQuerySelector<HTMLTextAreaElement | HTMLElement>(this.SELECTORS.textarea);
-    
-    if (!textarea) {
-      return { success: false, tokensInjected: 0, method: 'textarea', error: 'Could not find ChatGPT textarea' };
-    }
+    const success = await this.typeIntoTextarea(this.SELECTORS.textarea, formattedPrompt);
 
-    let success = false;
-    textarea.focus();
-
-    if (textarea instanceof HTMLTextAreaElement) {
-      // Bypass React's overriding of the value setter
-      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')?.set;
-      if (nativeInputValueSetter) {
-        nativeInputValueSetter.call(textarea, formattedPrompt);
-        textarea.dispatchEvent(new Event('input', { bubbles: true }));
-        success = true;
-      } else {
-        textarea.value = formattedPrompt;
-        textarea.dispatchEvent(new Event('input', { bubbles: true }));
-        success = true;
-      }
-    } else {
-      // It's a contenteditable (ChatGPT recently switched some UI to contenteditable)
-      success = document.execCommand('insertText', false, formattedPrompt);
-      if (!success) {
-        textarea.textContent = formattedPrompt;
-        textarea.dispatchEvent(new Event('input', { bubbles: true }));
-        success = true;
-      }
-    }
-    
-    // Clipboard fallback if everything failed
+    // Fallback if the robust injection failed for some reason
     if (!success) {
       console.warn('[Toffee:ChatGPT] textarea injection failed, falling back to clipboard');
       await navigator.clipboard.writeText(formattedPrompt);
@@ -138,7 +89,6 @@ class ChatGPTAdapter extends BasePlatformAdapter {
       success,
       tokensInjected: success ? Math.ceil(formattedPrompt.length / 4) : 0,
       method: 'textarea',
-      error: success ? undefined : 'Could not find ChatGPT textarea',
     };
   }
 

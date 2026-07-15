@@ -46,6 +46,14 @@ class ClaudeAdapter extends BasePlatformAdapter {
         });
       }
     }
+    
+    if (turns.length === 0) {
+      turns.push(...this.performFallbackExtraction(this.SELECTORS.conversationContainer));
+    }
+
+    if (turns.length === 0) {
+      throw new Error("No conversation found on this page. If the UI updated, please wait for a Toffee update or capture manually.");
+    }
 
     console.log(`[Toffee:Claude] Extracted ${turns.length} turns`);
 
@@ -63,27 +71,17 @@ class ClaudeAdapter extends BasePlatformAdapter {
       return { success: true, tokensInjected: 0, method: 'clipboard' };
     }
 
-    // Claude uses contenteditable div
-    const editor = this.safeQuerySelector<HTMLElement>(this.SELECTORS.textarea);
-    if (!editor) {
-      return { success: false, tokensInjected: 0, method: 'textarea', error: 'Editor not found' };
-    }
+    const success = await this.typeIntoTextarea(this.SELECTORS.textarea, formattedPrompt);
 
-    editor.focus();
-    
-    // Most robust way to inject into React/ProseMirror contenteditable editors
-    // is using execCommand to simulate real user pasting/typing
-    const successful = document.execCommand('insertText', false, formattedPrompt);
-    
-    // Fallback if execCommand is deprecated/disabled
-    if (!successful) {
-      editor.textContent = formattedPrompt;
-      editor.dispatchEvent(new Event('input', { bubbles: true }));
+    if (!success) {
+      console.warn('[Toffee:Claude] textarea injection failed, falling back to clipboard');
+      await navigator.clipboard.writeText(formattedPrompt);
+      return { success: true, tokensInjected: 0, method: 'clipboard' };
     }
 
     return {
-      success: true,
-      tokensInjected: Math.ceil(formattedPrompt.length / 4),
+      success,
+      tokensInjected: success ? Math.ceil(formattedPrompt.length / 4) : 0,
       method: 'textarea',
     };
   }

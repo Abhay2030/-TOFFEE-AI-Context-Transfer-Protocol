@@ -7,7 +7,7 @@ export default function Home() {
   const { bundles, searchQuery, setSearchQuery } = useLibraryStore();
 
   return (
-    <div className="pt-2 pb-6 space-y-5">
+    <div className="pt-2 pb-28 space-y-6">
       {/* Search */}
       <div className="relative group">
         <div className="absolute inset-0 bg-white/5 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />

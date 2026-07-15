@@ -53,6 +53,14 @@ class PerplexityAdapter extends BasePlatformAdapter {
       }
     }
 
+    if (turns.length === 0) {
+      turns.push(...this.performFallbackExtraction(this.SELECTORS.conversationContainer));
+    }
+
+    if (turns.length === 0) {
+      throw new Error("No conversation found on this page. If the UI updated, please wait for a Toffee update or capture manually.");
+    }
+
     console.log(`[Toffee:Perplexity] Extracted ${turns.length} turns`);
 
     return {
@@ -71,11 +79,16 @@ class PerplexityAdapter extends BasePlatformAdapter {
 
     const success = await this.typeIntoTextarea(this.SELECTORS.textarea, formattedPrompt);
 
+    if (!success) {
+      console.warn('[Toffee:Perplexity] textarea injection failed, falling back to clipboard');
+      await navigator.clipboard.writeText(formattedPrompt);
+      return { success: true, tokensInjected: 0, method: 'clipboard' };
+    }
+
     return {
       success,
       tokensInjected: success ? Math.ceil(formattedPrompt.length / 4) : 0,
       method: 'textarea',
-      error: success ? undefined : 'Could not find Perplexity textarea',
     };
   }
 
