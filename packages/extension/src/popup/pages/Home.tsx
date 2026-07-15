@@ -7,68 +7,85 @@ export default function Home() {
   const { bundles, searchQuery, setSearchQuery } = useLibraryStore();
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="pt-2 pb-6 space-y-5">
       {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-navy-400" />
-        <input
-          id="search-bundles"
-          type="text"
-          placeholder="Search bundles..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="input-field pl-9"
-        />
+      <div className="relative group">
+        <div className="absolute inset-0 bg-white/5 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="relative glass-pill flex items-center px-4 py-2 ring-1 ring-white/10 group-focus-within:ring-[#F59E0B]/50 transition-all">
+          <Search className="w-4 h-4 text-white/50 mr-2" />
+          <input
+            id="search-bundles"
+            type="text"
+            placeholder="Search your memories..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-transparent border-none outline-none text-sm text-white placeholder:text-white/30"
+          />
+        </div>
       </div>
 
       {/* Quick Actions */}
-      <div className="flex gap-2">
-        <button id="btn-new-capture" className="btn-primary flex-1 flex items-center justify-center gap-1.5 text-sm">
-          <Plus className="w-4 h-4" />
-          Capture
+      <div className="flex gap-3">
+        <button id="btn-new-capture" className="flex-1 relative group overflow-hidden rounded-2xl p-[1px]">
+          <div className="absolute inset-0 toffee-gradient opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="relative h-full flex items-center justify-center gap-2 px-4 py-3 bg-[#0A0A0A]/80 backdrop-blur-xl rounded-2xl group-hover:bg-[#0A0A0A]/60 transition-colors duration-300">
+            <Plus className="w-4 h-4 text-[#F59E0B]" />
+            <span className="text-sm font-semibold text-white">Capture</span>
+          </div>
         </button>
-        <button id="btn-import-bundle" className="btn-secondary flex-1 flex items-center justify-center gap-1.5 text-sm">
-          <FolderOpen className="w-4 h-4" />
-          Import
+        <button id="btn-import-bundle" className="flex-1 glass-card flex items-center justify-center gap-2 px-4 py-3 hover:bg-white/10 transition-colors duration-300">
+          <FolderOpen className="w-4 h-4 text-white/60" />
+          <span className="text-sm font-medium text-white/80">Import</span>
         </button>
       </div>
 
       {/* Bundle List */}
-      <div className="space-y-2">
-        <h2 className="text-xs font-semibold text-navy-500 dark:text-navy-400 uppercase tracking-wider">
-          Your Bundles ({bundles.length})
-        </h2>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xs font-semibold text-white/40 uppercase tracking-widest">
+            Memories ({bundles.length})
+          </h2>
+        </div>
 
         {bundles.length === 0 ? (
           <EmptyState />
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {bundles.map((bundle, i) => (
               <motion.div
                 key={bundle.id}
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-                className="glass-card p-3 cursor-pointer hover:border-toffee-300 dark:hover:border-toffee-700 transition-colors"
+                initial={{ opacity: 0, y: 10, filter: 'blur(4px)' }}
+                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                transition={{ delay: i * 0.05, type: 'spring', stiffness: 300, damping: 25 }}
+                className="group relative"
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-2.5 flex-1 min-w-0">
-                    <div className="mt-0.5 w-8 h-8 rounded-lg bg-toffee-100 dark:bg-toffee-900/30 flex items-center justify-center flex-shrink-0">
-                      <FileText className="w-4 h-4 text-toffee-600 dark:text-toffee-400" />
+                {/* Crystal Glow Effect behind card */}
+                <div className="absolute inset-0 toffee-gradient opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-500 rounded-2xl" />
+                
+                <div className="relative glass-card p-4 cursor-pointer hover:ring-[#F59E0B]/30 transition-all duration-300">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                      <div className="mt-0.5 w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0 shadow-inner">
+                        <FileText className="w-5 h-5 text-white/80" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-white truncate group-hover:text-[#F59E0B] transition-colors">
+                          {bundle.displayName || 'Untitled Memory'}
+                        </p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-[10px] font-semibold tracking-wide px-2 py-0.5 rounded-full bg-white/10 text-white/60">
+                            {bundle.sourcePlatform}
+                          </span>
+                          <span className="text-[10px] text-white/40">
+                            {bundle.tokenCountBundle.toLocaleString()} tokens
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-navy-900 dark:text-navy-100 truncate">
-                        {bundle.displayName || 'Untitled Bundle'}
-                      </p>
-                      <p className="text-2xs text-navy-400 mt-0.5">
-                        <span className="badge-platform mr-1">{bundle.sourcePlatform}</span>
-                        {bundle.tokenCountBundle.toLocaleString()} tokens
-                      </p>
-                    </div>
+                    <button className="p-2 rounded-full hover:bg-white/10 transition-colors">
+                      <ArrowRightLeft className="w-4 h-4 text-white/40 group-hover:text-white transition-colors" />
+                    </button>
                   </div>
-                  <button className="p-1.5 rounded-lg hover:bg-navy-100 dark:hover:bg-navy-800 transition-colors">
-                    <ArrowRightLeft className="w-3.5 h-3.5 text-navy-400" />
-                  </button>
                 </div>
               </motion.div>
             ))}
@@ -81,16 +98,21 @@ export default function Home() {
 
 function EmptyState() {
   return (
-    <div className="text-center py-8 space-y-3">
-      <div className="w-12 h-12 mx-auto rounded-2xl bg-navy-100 dark:bg-navy-800 flex items-center justify-center">
-        <FileText className="w-6 h-6 text-navy-400" />
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="text-center py-12 px-4 relative"
+    >
+      <div className="absolute inset-0 bg-[#F59E0B] blur-[100px] opacity-10 rounded-full animate-pulse" />
+      <div className="relative w-16 h-16 mx-auto rounded-2xl glass-card flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(245,158,11,0.2)]">
+        <FileText className="w-8 h-8 text-[#F59E0B]" />
       </div>
-      <div>
-        <p className="text-sm font-medium text-navy-600 dark:text-navy-300">No bundles yet</p>
-        <p className="text-2xs text-navy-400 mt-1">
-          Visit any AI platform and click &quot;Capture&quot; to create your first .toffee bundle
+      <div className="relative">
+        <p className="text-base font-semibold text-white">No memories yet</p>
+        <p className="text-xs text-white/50 mt-2 leading-relaxed max-w-[200px] mx-auto">
+          Visit any AI platform and click <strong className="text-[#F59E0B] font-medium">Capture</strong> to extract your first memory crystal.
         </p>
       </div>
-    </div>
+    </motion.div>
   );
 }

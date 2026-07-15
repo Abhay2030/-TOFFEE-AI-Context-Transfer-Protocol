@@ -204,20 +204,20 @@ async function processSyncQueue() {
     }
 
     const { generateToffeeBundle } = await import('../core/bundleGenerator');
-    for (const conv of unprocessed) {
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://toffee-backend.onrender.com/v1';
+    
+    // Process all pending conversions in parallel
+    const syncPromises = unprocessed.map(async (conv) => {
       try {
         console.log(`[Toffee] Syncing conversation: ${conv.id}`);
         const bundle = await generateToffeeBundle(conv, { profile: 'standard' });
         await db.bundles.put(bundle);
         
-        // Mark as processed
+        // Mark as processed locally
         await db.conversations.update(conv.id, { processed: true });
         
-        // POST to backend API (the compression API actually doesn't save to the DB, it just compresses)
-        // Wait, generateToffeeBundle calls `/compress` which does the LLM work and returns the payload.
-        // We need to then POST to `/bundles` to save it to S3.
         const token = await user.getIdToken();
-        const res = await fetch('https://toffee-backend.onrender.com/v1/bundles', {
+        const res = await fetch(`${apiUrl}/bundles`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -237,15 +237,21 @@ async function processSyncQueue() {
         });
 
         if (!res.ok) {
-          console.error(`[Toffee] Failed to upload bundle ${conv.id}: ${res.statusText}`);
-        } else {
-          console.log(`[Toffee] Successfully uploaded bundle ${conv.id} to cloud.`);
+          throw new Error(`Failed to upload bundle: ${res.statusText}`);
         }
-
+        
+        console.log(`[Toffee] Successfully uploaded bundle ${conv.id} to cloud.`);
+        return conv.id;
       } catch (err) {
         console.error(`[Toffee] Error processing conversation ${conv.id}:`, err);
+        throw err;
       }
-    }
+    });
+
+    const results = await Promise.allSettled(syncPromises);
+    const successCount = results.filter(r => r.status === 'fulfilled').length;
+    console.log(`[Toffee] Sync complete: ${successCount}/${unprocessed.length} successful.`);
+    
   } catch (error) {
     console.error('[Toffee] Sync queue error:', error);
   }

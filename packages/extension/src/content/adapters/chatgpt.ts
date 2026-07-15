@@ -12,16 +12,16 @@ class ChatGPTAdapter extends BasePlatformAdapter {
 
   // ── DOM Selectors (maintained for ChatGPT UI) ────────────
   private readonly SELECTORS = {
-    conversationContainer: 'main .flex.flex-col, main [role="presentation"]',
-    messageGroup: '[data-message-author-role], .text-message',
-    userMessage: '[data-message-author-role="user"], .text-base',
-    assistantMessage: '[data-message-author-role="assistant"], .markdown',
-    messageContent: '.markdown, .whitespace-pre-wrap',
-    codeBlock: 'pre code, .bg-black code',
-    textarea: '#prompt-textarea, [contenteditable="true"]',
+    conversationContainer: 'main, [role="presentation"]',
+    messageGroup: 'article, [data-message-author-role]',
+    userMessage: '[data-message-author-role="user"]',
+    assistantMessage: '[data-message-author-role="assistant"]',
+    messageContent: '.markdown, .whitespace-pre-wrap, [data-message-author-role="user"] > div',
+    codeBlock: 'pre code',
+    textarea: '#prompt-textarea',
     sendButton: '[data-testid="send-button"]',
-    modelSelector: '[class*="model"], .text-token-text-secondary',
-    conversationTitle: 'nav a.bg-token-sidebar-surface-secondary',
+    modelSelector: '[class*="model"]',
+    conversationTitle: 'title',
   };
 
   async extractConversation(): Promise<RawConversation> {
@@ -50,6 +50,31 @@ class ChatGPTAdapter extends BasePlatformAdapter {
           },
         });
       }
+    }
+    
+    if (turns.length === 0) {
+      console.warn('[Toffee:ChatGPT] Primary selectors failed. Attempting fallback extraction...');
+      // Fallback: try to just grab all paragraphs in the main container
+      const container = this.safeQuerySelector(this.SELECTORS.conversationContainer);
+      if (container) {
+        const paragraphs = container.querySelectorAll('p, div.whitespace-pre-wrap');
+        let combinedContent = '';
+        paragraphs.forEach(p => {
+          if (p.textContent) combinedContent += p.textContent + '\n';
+        });
+        
+        if (combinedContent.trim().length > 0) {
+          turns.push({
+            role: 'assistant',
+            content: combinedContent.trim(),
+            metadata: { hasCode: false, hasTable: false }
+          });
+        }
+      }
+    }
+
+    if (turns.length === 0) {
+      throw new Error("No conversation found on this page. If ChatGPT updated their UI, please wait for a Toffee update.");
     }
 
     console.log(`[Toffee:ChatGPT] Extracted ${turns.length} turns`);
@@ -100,6 +125,13 @@ class ChatGPTAdapter extends BasePlatformAdapter {
         textarea.dispatchEvent(new Event('input', { bubbles: true }));
         success = true;
       }
+    }
+    
+    // Clipboard fallback if everything failed
+    if (!success) {
+      console.warn('[Toffee:ChatGPT] textarea injection failed, falling back to clipboard');
+      await navigator.clipboard.writeText(formattedPrompt);
+      return { success: true, tokensInjected: 0, method: 'clipboard' };
     }
 
     return {

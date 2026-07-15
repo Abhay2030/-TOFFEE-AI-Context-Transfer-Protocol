@@ -23,6 +23,8 @@ body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Premium obsidian background */
+  @apply bg-[#0A0A0A] text-white;
 }
 
 /* ── Scrollbar ──────────────────────────────────────────── */
@@ -47,20 +49,26 @@ body {
 /* ── Glass Morphism Utility ─────────────────────────────── */
 
 @layer components {
+  /* Ultra-Premium Glassmorphism */
   .glass {
-    @apply bg-white/80 dark:bg-navy-900/80 backdrop-blur-lg border border-white/20 dark:border-navy-700/30;
+    @apply bg-white/5 dark:bg-black/20 backdrop-blur-xl ring-1 ring-white/10 dark:ring-white/5;
   }
 
   .glass-card {
-    @apply glass rounded-2xl shadow-lg shadow-navy-900/5 dark:shadow-black/20;
+    @apply glass rounded-2xl shadow-2xl shadow-black/50;
+  }
+  
+  .glass-pill {
+    @apply glass rounded-full shadow-2xl shadow-black/50;
   }
 
   .toffee-gradient {
-    @apply bg-gradient-to-br from-toffee-500 via-toffee-600 to-accent-teal;
+    /* Vibrant caramel orange to deep purple/magenta */
+    @apply bg-gradient-to-br from-[#F59E0B] via-[#E11D48] to-[#9333EA];
   }
 
   .toffee-gradient-text {
-    @apply bg-gradient-to-r from-toffee-400 to-accent-teal bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-[#F59E0B] via-[#E11D48] to-[#9333EA] bg-clip-text text-transparent;
   }
 
   .btn-primary {

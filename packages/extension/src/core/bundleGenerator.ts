@@ -9,7 +9,7 @@ import { gzipString, uint8ArrayToBase64 } from './compression';
 import { generateHMAC } from './crypto';
 
 // Replace with actual API URL
-const API_URL = 'https://toffee-backend.onrender.com/v1';
+const API_URL = import.meta.env.VITE_API_URL || 'https://toffee-backend.onrender.com/v1';
 
 export interface GenerateOptions {
   profile: 'minimal' | 'standard' | 'full';
