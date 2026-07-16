@@ -7,12 +7,12 @@ class GrokAdapter extends BasePlatformAdapter {
 
   // ── DOM Selectors (maintained for Grok UI) ────────────
   private readonly SELECTORS = {
-    conversationContainer: 'div[data-testid="conversation"]', // Placeholder for Grok
-    messageGroup: 'div[data-testid="message"]',
-    userMessage: 'div[data-testid="user-message"]',
-    assistantMessage: 'div[data-testid="bot-message"]',
-    textarea: 'textarea[data-testid="prompt-textarea"]', // Grok's text area
-    sendButton: 'button[data-testid="send-button"]',
+    conversationContainer: 'div[data-testid="conversation"], main, div[role="main"]',
+    messageGroup: 'div[data-testid="message"], div[dir="auto"].message, div.group',
+    userMessage: 'div[data-testid="user-message"], div[data-message-author="user"]',
+    assistantMessage: 'div[data-testid="bot-message"], div.prose',
+    textarea: 'textarea[data-testid="prompt-textarea"], textarea',
+    sendButton: 'button[data-testid="send-button"], button[aria-label="Grok"]',
     modelSelector: 'button[data-testid="model-selector"]',
   };
 

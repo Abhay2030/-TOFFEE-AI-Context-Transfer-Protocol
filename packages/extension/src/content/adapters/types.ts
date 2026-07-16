@@ -159,30 +159,46 @@ export abstract class BasePlatformAdapter implements PlatformAdapter {
    * Scrapes all paragraphs and pre-formatted text in the container.
    */
   protected performFallbackExtraction(containerSelector: string): ConversationTurn[] {
-    console.warn(`[Toffee:${this.platformId}] Primary selectors failed. Attempting fallback extraction...`);
+    console.warn(`[Toffee:${this.platformId}] Primary selectors failed. Attempting universal fallback extraction...`);
     const turns: ConversationTurn[] = [];
     const container = this.safeQuerySelector(containerSelector) || document.body;
     
-    // Most AI chats use <p> for text and <pre> or <code> for code.
-    const contentNodes = container.querySelectorAll('p, div.whitespace-pre-wrap, div.prose, pre, code');
-    let combinedContent = '';
+    // Aggressively scan for standard conversational text elements across all UI frameworks
+    const contentNodes = container.querySelectorAll(
+      'p, div.whitespace-pre-wrap, div.prose, div.markdown, div[dir="auto"], pre, code, .text-base, .message'
+    );
     
-    // We use a Set to avoid duplicating text if selectors overlap (e.g. div.prose contains p)
+    let combinedContent = '';
     const seenText = new Set<string>();
 
     contentNodes.forEach(node => {
+      // Exclude hidden elements or tiny UI labels
+      const style = window.getComputedStyle(node);
+      if (style.display === 'none' || style.visibility === 'hidden') return;
+
       const text = node.textContent?.trim();
-      if (text && text.length > 5 && !seenText.has(text)) {
+      // Only capture substantial text nodes to avoid grabbing UI buttons like "Copy", "Regenerate", etc.
+      if (text && text.length > 8 && !seenText.has(text)) {
         seenText.add(text);
-        combinedContent += text + '\n\n';
+        
+        // If it's a code block, preserve formatting
+        if (node.tagName.toLowerCase() === 'pre' || node.tagName.toLowerCase() === 'code') {
+          combinedContent += `\n\`\`\`\n${text}\n\`\`\`\n\n`;
+        } else {
+          combinedContent += text + '\n\n';
+        }
       }
     });
 
-    if (combinedContent.trim().length > 0) {
+    const finalContent = combinedContent.trim();
+    if (finalContent.length > 0) {
       turns.push({
-        role: 'assistant',
-        content: combinedContent.trim(),
-        metadata: { hasCode: combinedContent.includes('function') || combinedContent.includes('const '), hasTable: false }
+        role: 'assistant', // Default to assistant for safety
+        content: finalContent,
+        metadata: { 
+          hasCode: finalContent.includes('```') || finalContent.includes('function ') || finalContent.includes('const '), 
+          hasTable: finalContent.includes('|') && finalContent.includes('---') 
+        }
       });
     }
 

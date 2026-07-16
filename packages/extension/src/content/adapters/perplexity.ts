@@ -7,13 +7,13 @@ class PerplexityAdapter extends BasePlatformAdapter {
 
   // ── DOM Selectors (maintained for Perplexity UI) ────────────
   private readonly SELECTORS = {
-    conversationContainer: 'main', // the main scrollable area
-    messageGroup: '.group\\/turn', // Perplexity often groups turns using tailwind classes
-    userMessage: 'div:has(> svg[data-icon="user"])', // approximate based on avatar
-    assistantMessage: 'div.prose', // Perplexity's markdown container
-    textarea: 'textarea', // Main chat bar textarea
+    conversationContainer: 'main, div.overflow-y-auto, div[role="main"]',
+    messageGroup: '.group\\/turn, div.col-span-12, div:has(> .prose)',
+    userMessage: 'div:has(> svg[data-icon="user"]), div.font-display',
+    assistantMessage: 'div.prose, div.markdown',
+    textarea: 'textarea',
     sendButton: 'button[aria-label="Submit"]',
-    modelSelector: 'button:has(svg[data-icon="sparkles"])', // Pro toggle usually
+    modelSelector: 'button:has(svg[data-icon="sparkles"])',
   };
 
   async extractConversation(): Promise<RawConversation> {

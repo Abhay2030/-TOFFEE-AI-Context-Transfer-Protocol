@@ -43,33 +43,30 @@ export async function compressConversationLLM(transcript: string): Promise<Compr
   // can still be fully tested end-to-end.
   // ──────────────────────────────────────────────────────────
   if (!client) {
-    console.warn("⚠️ No ANTHROPIC_API_KEY found. Using local mock compression for testing.");
+    console.warn("⚠️ No ANTHROPIC_API_KEY found. Using dynamic pass-through mock compression for testing.");
     
     // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Create a dynamic mock based on the actual transcript
+    const cleanTranscript = transcript.trim();
+    const preview = cleanTranscript.substring(0, 80).replace(/\n/g, ' ') + '...';
 
     return {
-      topics: ["React UI Development", "AI Integration", "Extension Architecture"],
-      entities: [
-        { name: "Toffee", type: "product", mentions: 5 },
-        { name: "Firebase", type: "concept", mentions: 3 },
-        { name: "Anthropic", type: "organization", mentions: 2 }
-      ],
+      topics: ["Extracted Content", "Mock Pass-Through"],
+      entities: [],
       intent: {
-        primaryGoal: "Building a context-transfer browser extension for AI platforms.",
-        criticalContext: "The user is actively developing the Toffee platform using React and Tailwind.",
-        suggestedContinuation: "Continue helping the user refine the extension's UI and backend API connections.",
-        knowledgeGaps: ["How the user plans to distribute the extension"]
+        primaryGoal: `Discussing: ${preview}`,
+        criticalContext: `[RAW CONTEXT INJECTED VIA MOCK MODE]\n\n${cleanTranscript}`,
+        suggestedContinuation: "Resume the discussion based on the raw context provided above.",
+        knowledgeGaps: []
       },
       decisions: [
-        "Switched to a mock LLM implementation to bypass API key requirement for testing."
+        "Used dynamic pass-through mock mode to preserve the original conversation without an API key."
       ],
-      tasks: [
-        "Test the end-to-end bundle generation loop",
-        "Test the context injection on ChatGPT"
-      ],
+      tasks: [],
       preferences: {
-        summary: "Prefers concise, professional code solutions with glassmorphic UI aesthetics."
+        summary: "No preferences extracted (Mock Mode)"
       }
     };
   }

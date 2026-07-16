@@ -12,11 +12,11 @@ class ChatGPTAdapter extends BasePlatformAdapter {
 
   // ── DOM Selectors (maintained for ChatGPT UI) ────────────
   private readonly SELECTORS = {
-    conversationContainer: 'main, [role="presentation"]',
-    messageGroup: 'article, [data-message-author-role]',
+    conversationContainer: 'main, [role="presentation"], div.flex-1.overflow-hidden',
+    messageGroup: 'article, [data-message-author-role], div[data-testid^="conversation-turn"]',
     userMessage: '[data-message-author-role="user"]',
     assistantMessage: '[data-message-author-role="assistant"]',
-    messageContent: '.markdown, .whitespace-pre-wrap, [data-message-author-role="user"] > div',
+    messageContent: '.markdown, .whitespace-pre-wrap, .prose, [data-message-author-role="user"] > div, div.text-base',
     codeBlock: 'pre code',
     textarea: '#prompt-textarea',
     sendButton: '[data-testid="send-button"]',

@@ -7,12 +7,12 @@ class CopilotAdapter extends BasePlatformAdapter {
 
   // ── DOM Selectors (maintained for Copilot UI) ────────────
   private readonly SELECTORS = {
-    conversationContainer: 'cib-chat-main', // Usually inside shadow roots
-    messageGroup: 'cib-chat-turn', // Copilot turn element
-    userMessage: 'cib-message-group[source="user"]',
-    assistantMessage: 'cib-message-group[source="bot"]',
-    textarea: '#searchbox', // The main searchbox
-    sendButton: '.submit', // Send button
+    conversationContainer: 'cib-chat-main, main, cib-serp, #b_sydConvCont',
+    messageGroup: 'cib-chat-turn, div.turn, cib-message-group',
+    userMessage: 'cib-message-group[source="user"], div.user-message',
+    assistantMessage: 'cib-message-group[source="bot"], div.bot-message',
+    textarea: '#searchbox, textarea',
+    sendButton: '.submit, button[aria-label="Submit"]',
     modelSelector: '.cib-serp-main',
   };
 
