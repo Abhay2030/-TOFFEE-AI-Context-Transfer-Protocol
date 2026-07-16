@@ -87,7 +87,10 @@ export default function App() {
             initial={{ opacity: 0, scale: 0.98, filter: 'blur(4px)' }}
             animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
             exit={{ opacity: 0, scale: 0.98, filter: 'blur(4px)' }}
-            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            transition={{ 
+              type: 'spring', stiffness: 300, damping: 25,
+              filter: { type: 'tween', ease: 'easeOut', duration: 0.3 }
+            }}
             className="h-full"
           >
             {renderPage()}

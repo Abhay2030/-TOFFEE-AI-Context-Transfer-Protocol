@@ -50,7 +50,10 @@ export default function Login() {
       <motion.div
         initial={{ opacity: 0, scale: 0.95, filter: 'blur(10px)' }}
         animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        transition={{ 
+          type: 'spring', stiffness: 300, damping: 30,
+          filter: { type: 'tween', ease: 'easeOut', duration: 0.4 }
+        }}
         className="w-full max-w-sm glass-card p-8 border border-white/10 relative z-10"
       >
         <div className="flex flex-col items-center mb-8">

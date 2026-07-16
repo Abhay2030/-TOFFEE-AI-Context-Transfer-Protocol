@@ -87,32 +87,42 @@ async function handleMessage(
 // ── Content Script Injection Helper ──────────────────────────
 
 /**
- * Dynamically resolves the correct content script file for a given tab URL
- * by reading the runtime manifest's content_scripts entries.
- * This avoids hardcoding loader filenames that change every build.
+ * Dynamically resolves the raw compiled JS chunk for a given tab URL
+ * by reading the runtime manifest's web_accessible_resources entries.
+ * This ensures we inject the raw code instead of the Vite loader script,
+ * successfully bypassing strict CSP restrictions on dynamic imports.
  */
 function getContentScriptForUrl(tabUrl: string): string | null {
   try {
     const manifest = chrome.runtime.getManifest();
-    const contentScripts = manifest.content_scripts || [];
+    const resources = manifest.web_accessible_resources || [];
 
-    for (const entry of contentScripts) {
+    for (const entry of resources as any[]) {
+      if (typeof entry !== 'object' || !entry.matches) continue;
+      
       const matches = entry.matches || [];
       for (const pattern of matches) {
+        // Skip the generic catch-all used for icons
+        if (pattern === '<all_urls>') continue;
+
         // Convert manifest match pattern to a regex
-        // e.g. "https://chatgpt.com/*" → /^https:\/\/chatgpt\.com\/.*$/
         const regexStr = pattern
           .replace(/[.+?^${}()|[\]\\]/g, '\\$&')  // Escape special chars
           .replace(/\\\*/g, '.*');                    // Convert * to .*
         const regex = new RegExp(`^${regexStr}$`);
 
         if (regex.test(tabUrl)) {
-          return entry.js?.[0] || null;
+          // Find the actual platform script chunk (ignore types or CSS)
+          // The chunks are usually named chunks/chatgpt.ts-XYZ.js
+          const scriptChunk = (entry.resources || []).find((r: string) => r.startsWith('chunks/') && !r.includes('types'));
+          if (scriptChunk) {
+            return scriptChunk;
+          }
         }
       }
     }
   } catch (err) {
-    console.error('[Toffee] Failed to read manifest content_scripts:', err);
+    console.error('[Toffee] Failed to read manifest web_accessible_resources:', err);
   }
   return null;
 }
