@@ -31,6 +31,17 @@ export default function LoginPage() {
     return () => unsubscribe();
   }, []);
 
+  const getFirebaseErrorMessage = (err: unknown): string => {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes('auth/popup-blocked')) return 'Pop-up was blocked by your browser. Please allow pop-ups for this site and try again.';
+    if (msg.includes('auth/popup-closed-by-user')) return 'Sign-in was cancelled. Please try again.';
+    if (msg.includes('auth/unauthorized-domain')) return 'This domain is not authorized for sign-in. Please contact the administrator.';
+    if (msg.includes('auth/internal-error')) return 'Google sign-in is temporarily unavailable. Please try email/password login.';
+    if (msg.includes('auth/network-request-failed')) return 'Network error. Please check your internet connection.';
+    if (msg.includes('access_denied') || msg.includes('Access blocked')) return 'Access blocked by Google. The app owner needs to publish the OAuth consent screen. Please try email/password login.';
+    return msg;
+  };
+
   const handleOAuth = async (provider: 'google' | 'github') => {
     try {
       setLoading(true);
@@ -40,7 +51,7 @@ export default function LoginPage() {
       const idToken = await result.user.getIdToken();
       router.push("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : `${provider} login failed`);
+      setError(getFirebaseErrorMessage(err));
       setLoading(false);
     }
   };

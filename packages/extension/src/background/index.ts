@@ -4,6 +4,7 @@
 
 import { requestPersistentStorage, db } from '../db/database';
 import { v4 as uuid } from 'uuid';
+import { runFullSync, getSyncStatus, queueDeleteForSync } from './syncEngine';
 
 // ── Installation & Setup ─────────────────────────────────────
 
@@ -71,9 +72,75 @@ async function handleMessage(
     case 'SYNC_STATUS':
       return handleSyncStatus();
 
+    case 'TRIGGER_SYNC':
+      return handleTriggerSync();
+
+    case 'DELETE_BUNDLE':
+      return handleDeleteBundle(message.payload);
+
     default:
       console.warn(`[Toffee] Unknown message type: ${message.type}`);
       return { error: `Unknown message type: ${message.type}` };
+  }
+}
+
+// ── Content Script Injection Helper ──────────────────────────
+
+/**
+ * Dynamically resolves the correct content script file for a given tab URL
+ * by reading the runtime manifest's content_scripts entries.
+ * This avoids hardcoding loader filenames that change every build.
+ */
+function getContentScriptForUrl(tabUrl: string): string | null {
+  try {
+    const manifest = chrome.runtime.getManifest();
+    const contentScripts = manifest.content_scripts || [];
+
+    for (const entry of contentScripts) {
+      const matches = entry.matches || [];
+      for (const pattern of matches) {
+        // Convert manifest match pattern to a regex
+        // e.g. "https://chatgpt.com/*" → /^https:\/\/chatgpt\.com\/.*$/
+        const regexStr = pattern
+          .replace(/[.+?^${}()|[\]\\]/g, '\\$&')  // Escape special chars
+          .replace(/\\\*/g, '.*');                    // Convert * to .*
+        const regex = new RegExp(`^${regexStr}$`);
+
+        if (regex.test(tabUrl)) {
+          return entry.js?.[0] || null;
+        }
+      }
+    }
+  } catch (err) {
+    console.error('[Toffee] Failed to read manifest content_scripts:', err);
+  }
+  return null;
+}
+
+/**
+ * Try to programmatically inject the correct content script into a tab.
+ * This bypasses page-level CSP since chrome.scripting is a privileged API.
+ */
+async function ensureContentScript(tabId: number, tabUrl: string): Promise<boolean> {
+  try {
+    const scriptFile = getContentScriptForUrl(tabUrl);
+    if (!scriptFile) {
+      console.warn(`[Toffee] No content script mapping for URL: ${tabUrl}`);
+      return false;
+    }
+
+    await chrome.scripting.executeScript({
+      target: { tabId },
+      files: [scriptFile],
+    });
+
+    // Give the content script a moment to initialize and register listeners
+    await new Promise((r) => setTimeout(r, 500));
+    console.log(`[Toffee] Programmatically injected content script: ${scriptFile}`);
+    return true;
+  } catch (err) {
+    console.error('[Toffee] Programmatic injection failed:', err);
+    return false;
   }
 }
 
@@ -91,7 +158,23 @@ async function handleCaptureRequest() {
     });
     return response;
   } catch {
-    return { error: 'Content script not available on this page' };
+    // Declarative content script may not have loaded (CSP blocked dynamic import).
+    // Retry with programmatic injection.
+    console.log('[Toffee] First attempt failed, trying programmatic injection...');
+    const injected = await ensureContentScript(tab.id, tab.url || '');
+    if (!injected) {
+      return { error: 'Content script not available on this page. Try refreshing the page (F5).' };
+    }
+
+    try {
+      const response = await chrome.tabs.sendMessage(tab.id, {
+        type: 'CAPTURE_REQUEST',
+        payload: { selective: false },
+      });
+      return response;
+    } catch {
+      return { error: 'Content script not available on this page. Try refreshing the page (F5).' };
+    }
   }
 }
 
@@ -130,11 +213,10 @@ async function handlePlatformDetected(payload: any) {
     try {
       // Find the tab this came from, though in MV3 background script 
       // we might just set the badge text generally or for the specific tab
-      // For simplicity, we just log it and acknowledge. The popup will query active tabs.
-      chrome.action.setBadgeText({ text: 'AI' });
-      chrome.action.setBadgeBackgroundColor({ color: '#4CAF50' });
+      // Removed the ugly 'AI' text badge so it doesn't obscure the beautiful new logo
+      // Optionally we could set a more subtle indicator later.
     } catch (e) {
-      console.warn('Could not set badge', e);
+      console.warn('Could not update action state', e);
     }
   }
 
@@ -152,7 +234,22 @@ async function handleInjectRequest(payload: unknown) {
     });
     return response;
   } catch {
-    return { error: 'Content script not available on this page' };
+    // Retry with programmatic injection
+    console.log('[Toffee] Inject first attempt failed, trying programmatic injection...');
+    const injected = await ensureContentScript(tab.id, tab.url || '');
+    if (!injected) {
+      return { error: 'Content script not available on this page. Try refreshing the page (F5).' };
+    }
+
+    try {
+      const response = await chrome.tabs.sendMessage(tab.id, {
+        type: 'INJECT_CONTEXT',
+        payload,
+      });
+      return response;
+    } catch {
+      return { error: 'Content script not available on this page. Try refreshing the page (F5).' };
+    }
   }
 }
 
@@ -167,7 +264,29 @@ async function handleGetLibrary() {
 }
 
 async function handleSyncStatus() {
-  return { syncing: false, lastSyncAt: null };
+  return getSyncStatus();
+}
+
+async function handleTriggerSync() {
+  console.log('[Toffee] Manual sync triggered from popup');
+  const result = await runFullSync();
+  return { success: true, ...result };
+}
+
+async function handleDeleteBundle(payload: any) {
+  if (!payload?.bundleId) return { error: 'Missing bundleId' };
+
+  try {
+    // Queue the remote delete for next sync
+    await queueDeleteForSync(payload.bundleId);
+    // Delete locally
+    await db.bundles.delete(payload.bundleId);
+    console.log(`[Toffee] Bundle ${payload.bundleId} deleted locally and queued for remote delete.`);
+    return { success: true };
+  } catch (error: any) {
+    console.error('[Toffee] Delete bundle error:', error);
+    return { success: false, error: error.message };
+  }
 }
 
 // ── Alarm-based Background Sync ──────────────────────────────
@@ -176,85 +295,11 @@ chrome.alarms.create('toffee-sync', { periodInMinutes: 5 });
 
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === 'toffee-sync') {
-    // Process sync queue when online
-    processSyncQueue();
+    // Run the full bidirectional sync engine
+    runFullSync().catch((err) => {
+      console.error('[Toffee] Background sync alarm error:', err);
+    });
   }
 });
-
-async function processSyncQueue() {
-  console.log('[Toffee] Processing sync queue...');
-  if (!navigator.onLine) {
-    console.log('[Toffee] Offline, skipping sync.');
-    return;
-  }
-
-  try {
-    // Basic sync logic: find un-processed conversations and process them
-    const unprocessed = await db.conversations.where('processed').equals('false').toArray();
-    if (unprocessed.length === 0) {
-      console.log('[Toffee] No pending conversations to sync.');
-      return;
-    }
-
-    const { auth } = await import('../lib/firebase');
-    const user = auth.currentUser;
-    if (!user) {
-      console.log('[Toffee] User not logged in, cannot sync to cloud.');
-      return;
-    }
-
-    const { generateToffeeBundle } = await import('../core/bundleGenerator');
-    const apiUrl = import.meta.env.VITE_API_URL || 'https://toffee-backend.onrender.com/v1';
-    
-    // Process all pending conversions in parallel
-    const syncPromises = unprocessed.map(async (conv) => {
-      try {
-        console.log(`[Toffee] Syncing conversation: ${conv.id}`);
-        const bundle = await generateToffeeBundle(conv, { profile: 'standard' });
-        await db.bundles.put(bundle);
-        
-        // Mark as processed locally
-        await db.conversations.update(conv.id, { processed: true });
-        
-        const token = await user.getIdToken();
-        const res = await fetch(`${apiUrl}/bundles`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            display_name: bundle.displayName,
-            source_platform: bundle.sourcePlatform,
-            source_model: bundle.sourceModel,
-            compression_profile: bundle.compressionProfile,
-            token_count_original: bundle.tokenCountOriginal,
-            token_count_bundle: bundle.tokenCountBundle,
-            compression_ratio: bundle.compressionRatio,
-            tags: bundle.tags,
-            bundle_data: bundle.bundleData,
-          })
-        });
-
-        if (!res.ok) {
-          throw new Error(`Failed to upload bundle: ${res.statusText}`);
-        }
-        
-        console.log(`[Toffee] Successfully uploaded bundle ${conv.id} to cloud.`);
-        return conv.id;
-      } catch (err) {
-        console.error(`[Toffee] Error processing conversation ${conv.id}:`, err);
-        throw err;
-      }
-    });
-
-    const results = await Promise.allSettled(syncPromises);
-    const successCount = results.filter(r => r.status === 'fulfilled').length;
-    console.log(`[Toffee] Sync complete: ${successCount}/${unprocessed.length} successful.`);
-    
-  } catch (error) {
-    console.error('[Toffee] Sync queue error:', error);
-  }
-}
 
 console.log('[Toffee] Service worker initialized');

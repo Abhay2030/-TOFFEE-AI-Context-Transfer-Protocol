@@ -1,12 +1,20 @@
-import { type ReactNode } from 'react';
-import { User, Cloud, Shield, Moon, Globe, LogOut, ChevronRight } from 'lucide-react';
+import { type ReactNode, useEffect } from 'react';
+import { User, Cloud, Shield, Moon, Globe, LogOut, ChevronRight, RefreshCw, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { useSettingsStore } from '../stores/settingsStore';
 import { auth } from '../../lib/firebase';
 import { signOut } from 'firebase/auth';
 
 export default function SettingsPage() {
-  const { cloudSync, darkMode, language, toggleCloudSync, toggleDarkMode, setLanguage } = useSettingsStore();
+  const {
+    cloudSync, darkMode, language, syncStatus, lastSyncAt,
+    toggleCloudSync, toggleDarkMode, setLanguage,
+    loadFromStorage, triggerManualSync,
+  } = useSettingsStore();
   const user = auth.currentUser;
+
+  useEffect(() => {
+    loadFromStorage();
+  }, []);
 
   const handleSignOut = async () => {
     try {
@@ -72,9 +80,37 @@ export default function SettingsPage() {
             icon={<Cloud className="w-4 h-4 text-[#38BDF8]" />}
             iconBg="bg-[#38BDF8]/10"
             label="Cloud Sync"
-            description="Sync bundles across devices"
+            description={cloudSync
+              ? syncStatus === 'syncing'
+                ? 'Syncing...'
+                : lastSyncAt
+                  ? `Last synced ${new Date(lastSyncAt).toLocaleTimeString()}`
+                  : 'Enabled — waiting for first sync'
+              : 'Sync bundles across devices'
+            }
           >
-            <Toggle id="toggle-cloud-sync" enabled={cloudSync} onChange={toggleCloudSync} />
+            <div className="flex items-center gap-2">
+              {cloudSync && (
+                <button
+                  id="btn-sync-now"
+                  onClick={() => triggerManualSync()}
+                  disabled={syncStatus === 'syncing'}
+                  className="p-1.5 rounded-lg text-white/40 hover:text-[#38BDF8] hover:bg-[#38BDF8]/10 transition-all duration-300 disabled:opacity-40"
+                  title="Sync Now"
+                >
+                  {syncStatus === 'syncing' ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : syncStatus === 'success' ? (
+                    <CheckCircle className="w-3.5 h-3.5 text-[#10B981]" />
+                  ) : syncStatus === 'error' ? (
+                    <AlertCircle className="w-3.5 h-3.5 text-red-400" />
+                  ) : (
+                    <RefreshCw className="w-3.5 h-3.5" />
+                  )}
+                </button>
+              )}
+              <Toggle id="toggle-cloud-sync" enabled={cloudSync} onChange={toggleCloudSync} />
+            </div>
           </SettingRow>
           
           <SettingRow
