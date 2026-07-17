@@ -33,13 +33,18 @@ export default function LoginPage() {
 
   const getFirebaseErrorMessage = (err: unknown): string => {
     const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes('auth/invalid-credential') || msg.includes('auth/user-not-found') || msg.includes('auth/wrong-password')) {
+      return 'Invalid email or password. Please make sure you enter your actual registered credentials.';
+    }
+    if (msg.includes('auth/invalid-email')) return 'Please enter a valid email address.';
+    if (msg.includes('auth/too-many-requests')) return 'Too many failed login attempts. Please try again later.';
     if (msg.includes('auth/popup-blocked')) return 'Pop-up was blocked by your browser. Please allow pop-ups for this site and try again.';
     if (msg.includes('auth/popup-closed-by-user')) return 'Sign-in was cancelled. Please try again.';
     if (msg.includes('auth/unauthorized-domain')) return 'This domain is not authorized for sign-in. Please contact the administrator.';
     if (msg.includes('auth/internal-error')) return 'Google sign-in is temporarily unavailable. Please try email/password login.';
     if (msg.includes('auth/network-request-failed')) return 'Network error. Please check your internet connection.';
     if (msg.includes('access_denied') || msg.includes('Access blocked')) return 'Access blocked by Google. The app owner needs to publish the OAuth consent screen. Please try email/password login.';
-    return msg;
+    return 'Login failed. Please verify your credentials and try again.';
   };
 
   const handleOAuth = async (provider: 'google' | 'github') => {
@@ -66,7 +71,7 @@ export default function LoginPage() {
       const idToken = await result.user.getIdToken();
       router.push("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      setError(getFirebaseErrorMessage(err));
     } finally {
       setLoading(false);
     }
