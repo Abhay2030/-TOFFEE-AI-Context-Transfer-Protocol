@@ -38,6 +38,9 @@ export default function LoginPage() {
     }
     if (msg.includes('auth/invalid-email')) return 'Please enter a valid email address.';
     if (msg.includes('auth/too-many-requests')) return 'Too many failed login attempts. Please try again later.';
+    if (msg.includes('auth/account-exists-with-different-credential')) {
+      return 'An account already exists with this email using a different sign-in method (like Google or Email). Please use that method to sign in.';
+    }
     if (msg.includes('auth/popup-blocked')) return 'Pop-up was blocked by your browser. Please allow pop-ups for this site and try again.';
     if (msg.includes('auth/popup-closed-by-user')) return 'Sign-in was cancelled. Please try again.';
     if (msg.includes('auth/unauthorized-domain')) return 'This domain is not authorized for sign-in. Please contact the administrator.';

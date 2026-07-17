@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Shield, Scale, FileText, CheckCircle2, Lock, FileSignature, BookOpen, AlertTriangle, Building2, Globe, Sparkles, Code, Github } from "lucide-react";
+import { ArrowRight, Shield, Scale, FileText, CheckCircle2, Lock, FileSignature, BookOpen, AlertTriangle, Building2, Globe } from "lucide-react";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { GlassCard } from "@/components/ui/GlassCard";
 

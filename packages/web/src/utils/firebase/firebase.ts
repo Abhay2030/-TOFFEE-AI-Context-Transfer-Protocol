@@ -36,3 +36,4 @@ googleProvider.setCustomParameters({
 });
 
 export const githubProvider = new GithubAuthProvider();
+githubProvider.addScope('user:email');
