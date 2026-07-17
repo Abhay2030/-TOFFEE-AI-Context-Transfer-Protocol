@@ -50,7 +50,6 @@ export async function compressConversationLLM(transcript: string): Promise<Compr
 
     // Create a dynamic mock based on the actual transcript
     const cleanTranscript = transcript.trim();
-    const preview = cleanTranscript.substring(0, 80).replace(/\n/g, ' ') + '...';
 
     return {
       topics: [],
