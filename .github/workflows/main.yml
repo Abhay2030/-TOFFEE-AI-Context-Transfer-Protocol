@@ -32,6 +32,9 @@ jobs:
       run: npm run build
         
     - name: Run Tests
+      env:
+        FIREBASE_PROJECT_ID: "mock-project-id"
+        HMAC_SECRET: "mock-secret-at-least-32-chars-long-for-hmac!"
       run: |
         npm run test -w @toffee/shared
         npm run test -w @toffee/backend
