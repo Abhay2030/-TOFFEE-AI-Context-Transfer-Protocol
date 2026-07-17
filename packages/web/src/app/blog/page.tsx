@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Search as SearchIcon, Mail, TrendingUp, BookOpen, Clock, Tag, ChevronRight, CheckCircle2, Shield, Sparkles, Terminal, Layers } from "lucide-react";
+import { PageTransition } from "@/components/ui/PageTransition";
+import { GlassCard } from "@/components/ui/GlassCard";
 
 const CATEGORIES = [
   { name: "Product & Company", topics: ["Product Updates", "Release Notes", "Company News"] },
@@ -49,6 +51,7 @@ const FEATURED_ARTICLES = [
 
 export default function BlogPage() {
   return (
+    <PageTransition>
     <div className="min-h-screen bg-navy-950 pt-24 pb-16">
       
       {/* ── Hero Section ── */}
@@ -229,7 +232,7 @@ export default function BlogPage() {
 
       {/* ── Newsletter Signup ── */}
       <section id="newsletter" className="px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto py-24">
-        <div className="glass-card p-12 text-center relative overflow-hidden border-toffee-500/30">
+        <GlassCard className="p-12 text-center relative overflow-hidden border-toffee-500/30" disableTilt={false}>
           <div className="absolute inset-0 bg-gradient-to-br from-toffee-500/5 to-accent-violet/5 -z-10" />
           
           <div className="w-16 h-16 mx-auto rounded-2xl toffee-gradient flex items-center justify-center mb-6 shadow-lg shadow-toffee-500/20">
@@ -253,7 +256,7 @@ export default function BlogPage() {
             </button>
           </form>
           <p className="text-xs text-navy-500 mt-4">No spam. Unsubscribe at any time.</p>
-        </div>
+        </GlassCard>
         
         {/* Creator Note */}
         <div className="mt-16 text-center">
@@ -262,5 +265,6 @@ export default function BlogPage() {
       </section>
 
     </div>
+    </PageTransition>
   );
 }

@@ -1,5 +1,7 @@
 import { Check, X } from "lucide-react";
 import Link from "next/link";
+import { PageTransition } from "@/components/ui/PageTransition";
+import { GlassCard } from "@/components/ui/GlassCard";
 
 const TIERS = [
   {
@@ -55,8 +57,9 @@ const TIERS = [
 
 export default function PricingPage() {
   return (
-    <div className="min-h-screen bg-navy-950 pt-24 pb-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <PageTransition>
+      <div className="min-h-screen bg-navy-950 pt-24 pb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-6">
@@ -69,12 +72,12 @@ export default function PricingPage() {
 
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {TIERS.map((tier) => (
-            <div 
+            <GlassCard 
               key={tier.name}
               className={`relative rounded-3xl p-8 ${
                 tier.highlight 
-                  ? 'bg-gradient-to-b from-navy-900 to-navy-950 border border-toffee-500/50 shadow-2xl shadow-toffee-500/10' 
-                  : 'glass-card border-navy-800'
+                  ? 'bg-gradient-to-b from-navy-900 to-navy-950 border-toffee-500/50 shadow-toffee-500/10' 
+                  : 'border-navy-800'
               }`}
             >
               {tier.highlight && (
@@ -118,7 +121,7 @@ export default function PricingPage() {
                   </li>
                 ))}
               </ul>
-            </div>
+            </GlassCard>
           ))}
         </div>
 
@@ -129,5 +132,6 @@ export default function PricingPage() {
 
       </div>
     </div>
+    </PageTransition>
   );
 }

@@ -1,7 +1,10 @@
 import { Shield, Eye, Settings, CheckCircle2, Globe, FileText, Settings2, Smartphone, Key, Lock } from "lucide-react";
+import { PageTransition } from "@/components/ui/PageTransition";
+import { GlassCard } from "@/components/ui/GlassCard";
 
 export default function CookiePolicyPage() {
   return (
+    <PageTransition>
     <div className="min-h-screen bg-navy-950 pt-24 pb-16">
       
       {/* ── Hero Section ── */}
@@ -153,7 +156,7 @@ export default function CookiePolicyPage() {
         </div>
 
         {/* ── Final Statement ── */}
-        <div className="mt-24 p-10 glass-card border-accent-emerald/30 text-center relative overflow-hidden">
+        <GlassCard className="mt-24 p-10 border-accent-emerald/30 text-center relative overflow-hidden">
           <div className="absolute inset-0 bg-accent-emerald/5" />
           <h3 className="text-2xl font-bold text-white mb-4 relative z-10">Privacy Starts with Transparency</h3>
           <p className="text-lg text-navy-300 max-w-2xl mx-auto relative z-10">
@@ -166,9 +169,10 @@ export default function CookiePolicyPage() {
           <div className="mt-8 text-center relative z-10">
             <p className="text-xs font-medium text-navy-500 tracking-widest uppercase">Designed & Developed by Abhay Sachin Donde</p>
           </div>
-        </div>
+        </GlassCard>
 
       </section>
     </div>
+    </PageTransition>
   );
 }

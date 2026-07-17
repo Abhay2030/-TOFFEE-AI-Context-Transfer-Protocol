@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { ArrowRight, Shield, Scale, FileText, CheckCircle2, Lock, FileSignature, BookOpen, AlertTriangle, Building2, Globe } from "lucide-react";
+import { ArrowRight, Shield, Scale, FileText, CheckCircle2, Lock, FileSignature, BookOpen, AlertTriangle, Building2, Globe, Sparkles, Code, Github } from "lucide-react";
+import { PageTransition } from "@/components/ui/PageTransition";
+import { GlassCard } from "@/components/ui/GlassCard";
 
 const SECTIONS = [
   { id: "copyright", icon: FileText, title: "Copyright Policy", desc: "Information on ownership of the Toffee platform, website content, and source code." },
@@ -15,6 +17,7 @@ const SECTIONS = [
 
 export default function LegalPage() {
   return (
+    <PageTransition>
     <div className="min-h-screen bg-navy-950 pt-24 pb-16">
       
       {/* ── Hero Section ── */}
@@ -176,7 +179,7 @@ export default function LegalPage() {
       {/* ── Contact & Legal Resources ── */}
       <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-20 border-t border-navy-800/50">
         <div className="grid md:grid-cols-2 gap-12">
-          <div className="glass-card p-10 border-toffee-500/20">
+          <GlassCard className="p-10 border-toffee-500/20" disableTilt={false}>
             <h3 className="text-2xl font-bold text-white mb-6">Contact the Legal Team</h3>
             <p className="text-navy-300 mb-8">
               For dedicated legal inquiries, privacy requests, DMCA notices, or compliance documentation, please reach out to our legal department. Expected response time is 2-3 business days.
@@ -184,9 +187,9 @@ export default function LegalPage() {
             <a href="mailto:abhaydonde2007@gmail.com" className="btn-primary py-3 px-6 inline-flex items-center gap-2 w-full justify-center">
               Email Legal Department <ArrowRight className="w-4 h-4" />
             </a>
-          </div>
+          </GlassCard>
 
-          <div className="glass-card p-10 border-navy-800">
+          <GlassCard className="p-10 border-navy-800" disableTilt={false}>
             <h3 className="text-2xl font-bold text-white mb-6">Legal Resource Center</h3>
             <ul className="space-y-3">
               {["Privacy Policy", "Terms of Service", "Data Processing Agreement", "Security Whitepaper", "Brand Guidelines", "API Terms"].map(doc => (
@@ -198,7 +201,7 @@ export default function LegalPage() {
                 </li>
               ))}
             </ul>
-          </div>
+          </GlassCard>
         </div>
       </section>
 
@@ -230,6 +233,7 @@ export default function LegalPage() {
       </section>
 
     </div>
+    </PageTransition>
   );
 }
 

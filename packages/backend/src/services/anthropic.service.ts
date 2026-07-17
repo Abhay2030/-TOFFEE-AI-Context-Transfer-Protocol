@@ -53,20 +53,18 @@ export async function compressConversationLLM(transcript: string): Promise<Compr
     const preview = cleanTranscript.substring(0, 80).replace(/\n/g, ' ') + '...';
 
     return {
-      topics: ["Extracted Content", "Mock Pass-Through"],
+      topics: [],
       entities: [],
       intent: {
-        primaryGoal: `Discussing: ${preview}`,
-        criticalContext: `[RAW CONTEXT INJECTED VIA MOCK MODE]\n\n${cleanTranscript}`,
-        suggestedContinuation: "Resume the discussion based on the raw context provided above.",
+        primaryGoal: "Resume conversation context.",
+        criticalContext: cleanTranscript,
+        suggestedContinuation: "",
         knowledgeGaps: []
       },
-      decisions: [
-        "Used dynamic pass-through mock mode to preserve the original conversation without an API key."
-      ],
+      decisions: [],
       tasks: [],
       preferences: {
-        summary: "No preferences extracted (Mock Mode)"
+        summary: ""
       }
     };
   }

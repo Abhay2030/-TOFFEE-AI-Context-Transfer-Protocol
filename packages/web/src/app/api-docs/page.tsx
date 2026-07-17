@@ -1,7 +1,9 @@
 import { Terminal, Code, Cpu, Layers } from "lucide-react";
+import { PageTransition } from "@/components/ui/PageTransition";
 
 export default function ApiDocsPage() {
   return (
+    <PageTransition>
     <div className="min-h-screen bg-navy-950 pt-24 pb-16 flex justify-center">
       <div className="max-w-5xl w-full px-4 sm:px-6 lg:px-8">
         
@@ -90,5 +92,6 @@ export default function ApiDocsPage() {
 
       </div>
     </div>
+    </PageTransition>
   );
 }
