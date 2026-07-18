@@ -115,8 +115,11 @@ class GeminiAdapter extends BasePlatformAdapter {
 
 const adapter = new GeminiAdapter();
 
-if (adapter.detect()) {
+if (!(window as any).__toffee_gemini_initialized && adapter.detect()) {
+  (window as any).__toffee_gemini_initialized = true;
   console.log('[Toffee] Gemini platform detected');
+
+  adapter.registerPingHandler();
 
   // Notify service worker
   chrome.runtime.sendMessage({
@@ -155,3 +158,4 @@ if (adapter.detect()) {
     }
   });
 }
+

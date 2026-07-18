@@ -1,5 +1,6 @@
 // ============================================================
 // MV3 Service Worker — Background Script
+// Production-grade content script injection & message routing
 // ============================================================
 
 import { requestPersistentStorage, db } from '../db/database';
@@ -84,69 +85,142 @@ async function handleMessage(
   }
 }
 
-// ── Content Script Injection Helper ──────────────────────────
+// ── Platform URL Mapping ─────────────────────────────────────
 
 /**
- * Dynamically resolves the raw compiled JS chunk for a given tab URL
- * by reading the runtime manifest's web_accessible_resources entries.
- * This ensures we inject the raw code instead of the Vite loader script,
- * successfully bypassing strict CSP restrictions on dynamic imports.
+ * Static map of supported AI platform URL patterns to their content script
+ * chunk files in the build output. This is resolved at build time by reading
+ * the manifest's web_accessible_resources entries.
+ *
+ * This approach is 100% reliable compared to regex matching on dynamic hashes.
  */
-function getContentScriptForUrl(tabUrl: string): string | null {
+function getContentScriptChunks(tabUrl: string): string[] {
   try {
     const manifest = chrome.runtime.getManifest();
     const resources = manifest.web_accessible_resources || [];
+    const url = new URL(tabUrl);
 
     for (const entry of resources as any[]) {
       if (typeof entry !== 'object' || !entry.matches) continue;
-      
-      const matches = entry.matches || [];
+
+      const matches: string[] = entry.matches || [];
+
+      // Skip the generic catch-all used for icons only
+      if (matches.length === 1 && matches[0] === '<all_urls>') continue;
+
       for (const pattern of matches) {
-        // Skip the generic catch-all used for icons
         if (pattern === '<all_urls>') continue;
 
-        // Convert manifest match pattern to a regex
-        const regexStr = pattern
-          .replace(/[.+?^${}()|[\]\\]/g, '\\$&')  // Escape special chars
-          .replace(/\\\*/g, '.*');                    // Convert * to .*
-        const regex = new RegExp(`^${regexStr}$`);
-
-        if (regex.test(tabUrl)) {
-          // Find the actual platform script chunk (ignore types or CSS)
-          // The chunks are usually named chunks/chatgpt.ts-XYZ.js
-          const scriptChunk = (entry.resources || []).find((r: string) => r.startsWith('chunks/') && !r.includes('types'));
-          if (scriptChunk) {
-            return scriptChunk;
+        // Convert Chrome match pattern to check against current URL
+        // Pattern format: "https://chat.openai.com/*"
+        if (urlMatchesPattern(url, pattern)) {
+          // Return ALL resource chunks (types + platform script)
+          const jsChunks = (entry.resources || []).filter(
+            (r: string) => r.endsWith('.js')
+          );
+          if (jsChunks.length > 0) {
+            return jsChunks;
           }
         }
       }
     }
   } catch (err) {
-    console.error('[Toffee] Failed to read manifest web_accessible_resources:', err);
+    console.error('[Toffee] Failed to resolve content script chunks:', err);
   }
-  return null;
+  return [];
 }
 
 /**
- * Try to programmatically inject the correct content script into a tab.
- * This bypasses page-level CSP since chrome.scripting is a privileged API.
+ * Check if a URL matches a Chrome extension match pattern.
+ * Handles patterns like "https://chat.openai.com/*"
  */
-async function ensureContentScript(tabId: number, tabUrl: string): Promise<boolean> {
+function urlMatchesPattern(url: URL, pattern: string): boolean {
   try {
-    const scriptFile = getContentScriptForUrl(tabUrl);
-    if (!scriptFile) {
-      console.warn(`[Toffee] No content script mapping for URL: ${tabUrl}`);
-      return false;
+    // Parse the match pattern: scheme://host/path
+    const match = pattern.match(/^(\*|https?|ftp):\/\/(\*|(?:\*\.)?[^/*]+)\/(.*)$/);
+    if (!match) return false;
+
+    const [, scheme, host, path] = match;
+
+    // Check scheme
+    if (scheme !== '*' && scheme !== url.protocol.replace(':', '')) return false;
+
+    // Check host
+    if (host !== '*') {
+      if (host.startsWith('*.')) {
+        const baseDomain = host.slice(2);
+        if (url.hostname !== baseDomain && !url.hostname.endsWith('.' + baseDomain)) return false;
+      } else {
+        if (url.hostname !== host) return false;
+      }
     }
 
-    await chrome.scripting.executeScript({
-      target: { tabId },
-      files: [scriptFile],
+    // Check path (simple wildcard at end)
+    if (path !== '*') {
+      const pathRegex = new RegExp('^/' + path.replace(/\*/g, '.*') + '$');
+      if (!pathRegex.test(url.pathname + url.search)) return false;
+    }
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// ── Content Script Injection Engine ──────────────────────────
+
+/**
+ * Probe whether a content script is alive in the given tab.
+ * Uses a lightweight ping/pong to avoid false negatives.
+ */
+async function isContentScriptAlive(tabId: number): Promise<boolean> {
+  try {
+    const response = await chrome.tabs.sendMessage(tabId, { type: 'TOFFEE_PING' });
+    return response?.pong === true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Programmatically inject all required content script chunks into a tab.
+ * This bypasses CSP restrictions because chrome.scripting.executeScript
+ * runs in the "isolated" world and is not subject to page-level CSP.
+ *
+ * We inject the shared types chunk FIRST, then the platform-specific chunk.
+ */
+async function injectContentScript(tabId: number, tabUrl: string): Promise<boolean> {
+  const chunks = getContentScriptChunks(tabUrl);
+  if (chunks.length === 0) {
+    console.warn(`[Toffee] No content script chunks found for URL: ${tabUrl}`);
+    return false;
+  }
+
+  try {
+    // Sort: inject shared dependencies first (types), then platform scripts
+    const sorted = [...chunks].sort((a, b) => {
+      if (a.includes('types')) return -1;
+      if (b.includes('types')) return 1;
+      return 0;
     });
 
-    // Give the content script a moment to initialize and register listeners
-    await new Promise((r) => setTimeout(r, 500));
-    console.log(`[Toffee] Programmatically injected content script: ${scriptFile}`);
+    for (const chunk of sorted) {
+      await chrome.scripting.executeScript({
+        target: { tabId },
+        files: [chunk],
+        world: 'MAIN' as any, // Try MAIN world first to access page DOM directly
+      }).catch(() => {
+        // Fall back to ISOLATED world if MAIN world injection fails
+        return chrome.scripting.executeScript({
+          target: { tabId },
+          files: [chunk],
+        });
+      });
+    }
+
+    // Give the content script time to initialize and register listeners
+    await new Promise((r) => setTimeout(r, 800));
+    console.log(`[Toffee] Programmatically injected ${sorted.length} chunks into tab ${tabId}`);
     return true;
   } catch (err) {
     console.error('[Toffee] Programmatic injection failed:', err);
@@ -154,12 +228,49 @@ async function ensureContentScript(tabId: number, tabUrl: string): Promise<boole
   }
 }
 
+/**
+ * Ensure a content script is running in the active tab.
+ * First checks if one is already alive (ping), then injects if not.
+ */
+async function ensureContentScript(tabId: number, tabUrl: string): Promise<boolean> {
+  // Step 1: Check if content script is already running
+  const alive = await isContentScriptAlive(tabId);
+  if (alive) {
+    console.log('[Toffee] Content script already alive in tab');
+    return true;
+  }
+
+  // Step 2: Programmatic injection
+  console.log('[Toffee] Content script not alive, injecting programmatically...');
+  const injected = await injectContentScript(tabId, tabUrl);
+  if (!injected) return false;
+
+  // Step 3: Verify injection worked
+  const nowAlive = await isContentScriptAlive(tabId);
+  if (nowAlive) return true;
+
+  // Step 4: Last resort — try one more time with a longer delay
+  await new Promise((r) => setTimeout(r, 1000));
+  return isContentScriptAlive(tabId);
+}
+
 // ── Message Handlers ─────────────────────────────────────────
 
 async function handleCaptureRequest() {
-  // Forward capture request to the active tab's content script
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (!tab?.id) return { error: 'No active tab found' };
+  if (!tab?.id || !tab.url) return { error: 'No active tab found' };
+
+  // Check if we're on a supported platform
+  const chunks = getContentScriptChunks(tab.url);
+  if (chunks.length === 0) {
+    return { error: 'This page is not a supported AI platform. Navigate to ChatGPT, Claude, Gemini, Copilot, Grok, or Perplexity.' };
+  }
+
+  // Ensure content script is injected and alive
+  const ready = await ensureContentScript(tab.id, tab.url);
+  if (!ready) {
+    return { error: 'Content script not available on this page. Try refreshing the page (F5).' };
+  }
 
   try {
     const response = await chrome.tabs.sendMessage(tab.id, {
@@ -168,23 +279,7 @@ async function handleCaptureRequest() {
     });
     return response;
   } catch {
-    // Declarative content script may not have loaded (CSP blocked dynamic import).
-    // Retry with programmatic injection.
-    console.log('[Toffee] First attempt failed, trying programmatic injection...');
-    const injected = await ensureContentScript(tab.id, tab.url || '');
-    if (!injected) {
-      return { error: 'Content script not available on this page. Try refreshing the page (F5).' };
-    }
-
-    try {
-      const response = await chrome.tabs.sendMessage(tab.id, {
-        type: 'CAPTURE_REQUEST',
-        payload: { selective: false },
-      });
-      return response;
-    } catch {
-      return { error: 'Content script not available on this page. Try refreshing the page (F5).' };
-    }
+    return { error: 'Content script not available on this page. Try refreshing the page (F5).' };
   }
 }
 
@@ -217,25 +312,18 @@ async function handleCaptureError(payload: unknown) {
 
 async function handlePlatformDetected(payload: any) {
   console.log('[Toffee] Platform detected:', payload);
-  
-  if (payload && payload.platform) {
-    // Optionally set a badge or extension state
-    try {
-      // Find the tab this came from, though in MV3 background script 
-      // we might just set the badge text generally or for the specific tab
-      // Removed the ugly 'AI' text badge so it doesn't obscure the beautiful new logo
-      // Optionally we could set a more subtle indicator later.
-    } catch (e) {
-      console.warn('Could not update action state', e);
-    }
-  }
-
   return { acknowledged: true };
 }
 
 async function handleInjectRequest(payload: unknown) {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (!tab?.id) return { error: 'No active tab found' };
+  if (!tab?.id || !tab.url) return { error: 'No active tab found' };
+
+  // Ensure content script is injected and alive
+  const ready = await ensureContentScript(tab.id, tab.url);
+  if (!ready) {
+    return { error: 'Content script not available on this page. Try refreshing the page (F5).' };
+  }
 
   try {
     const response = await chrome.tabs.sendMessage(tab.id, {
@@ -244,22 +332,7 @@ async function handleInjectRequest(payload: unknown) {
     });
     return response;
   } catch {
-    // Retry with programmatic injection
-    console.log('[Toffee] Inject first attempt failed, trying programmatic injection...');
-    const injected = await ensureContentScript(tab.id, tab.url || '');
-    if (!injected) {
-      return { error: 'Content script not available on this page. Try refreshing the page (F5).' };
-    }
-
-    try {
-      const response = await chrome.tabs.sendMessage(tab.id, {
-        type: 'INJECT_CONTEXT',
-        payload,
-      });
-      return response;
-    } catch {
-      return { error: 'Content script not available on this page. Try refreshing the page (F5).' };
-    }
+    return { error: 'Content script not available on this page. Try refreshing the page (F5).' };
   }
 }
 

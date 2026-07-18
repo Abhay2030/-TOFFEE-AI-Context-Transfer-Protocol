@@ -117,8 +117,11 @@ class PerplexityAdapter extends BasePlatformAdapter {
 
 const adapter = new PerplexityAdapter();
 
-if (adapter.detect()) {
+if (!(window as any).__toffee_perplexity_initialized && adapter.detect()) {
+  (window as any).__toffee_perplexity_initialized = true;
   console.log('[Toffee] Perplexity platform detected');
+
+  adapter.registerPingHandler();
 
   // Notify service worker
   chrome.runtime.sendMessage({
@@ -157,3 +160,4 @@ if (adapter.detect()) {
     }
   });
 }
+

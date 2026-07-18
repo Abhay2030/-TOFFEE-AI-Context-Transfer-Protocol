@@ -116,8 +116,11 @@ class ClaudeAdapter extends BasePlatformAdapter {
 
 const adapter = new ClaudeAdapter();
 
-if (adapter.detect()) {
+if (!(window as any).__toffee_claude_initialized && adapter.detect()) {
+  (window as any).__toffee_claude_initialized = true;
   console.log('[Toffee] Claude platform detected');
+
+  adapter.registerPingHandler();
 
   chrome.runtime.sendMessage({
     type: 'PLATFORM_DETECTED',
@@ -148,3 +151,4 @@ if (adapter.detect()) {
     }
   });
 }
+

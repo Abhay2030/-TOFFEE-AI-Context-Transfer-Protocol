@@ -121,8 +121,13 @@ class ChatGPTAdapter extends BasePlatformAdapter {
 
 const adapter = new ChatGPTAdapter();
 
-if (adapter.detect()) {
+// Guard against duplicate initialization (declarative + programmatic injection)
+if (!(window as any).__toffee_chatgpt_initialized && adapter.detect()) {
+  (window as any).__toffee_chatgpt_initialized = true;
   console.log('[Toffee] ChatGPT platform detected');
+
+  // Register ping handler for health checks
+  adapter.registerPingHandler();
 
   // Notify service worker
   chrome.runtime.sendMessage({
@@ -161,3 +166,4 @@ if (adapter.detect()) {
     }
   });
 }
+

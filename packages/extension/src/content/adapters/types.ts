@@ -274,4 +274,22 @@ export abstract class BasePlatformAdapter implements PlatformAdapter {
   protected sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
+
+  /**
+   * Register a PING handler so the background service worker can verify
+   * this content script is alive and responsive. Must be called once
+   * during content script initialization.
+   */
+  registerPingHandler(): void {
+    // Guard against duplicate registrations (e.g. if script is injected twice)
+    if ((window as any).__toffee_ping_registered) return;
+    (window as any).__toffee_ping_registered = true;
+
+    chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+      if (message.type === 'TOFFEE_PING') {
+        sendResponse({ pong: true, platform: this.platformId });
+        return true;
+      }
+    });
+  }
 }

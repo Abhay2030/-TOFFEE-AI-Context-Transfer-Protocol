@@ -152,8 +152,11 @@ class CopilotAdapter extends BasePlatformAdapter {
 
 const adapter = new CopilotAdapter();
 
-if (adapter.detect()) {
+if (!(window as any).__toffee_copilot_initialized && adapter.detect()) {
+  (window as any).__toffee_copilot_initialized = true;
   console.log('[Toffee] Copilot platform detected');
+
+  adapter.registerPingHandler();
 
   // Notify service worker
   chrome.runtime.sendMessage({
@@ -192,3 +195,4 @@ if (adapter.detect()) {
     }
   });
 }
+

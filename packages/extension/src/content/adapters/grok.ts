@@ -110,8 +110,11 @@ class GrokAdapter extends BasePlatformAdapter {
 
 const adapter = new GrokAdapter();
 
-if (adapter.detect()) {
+if (!(window as any).__toffee_grok_initialized && adapter.detect()) {
+  (window as any).__toffee_grok_initialized = true;
   console.log('[Toffee] Grok platform detected');
+
+  adapter.registerPingHandler();
 
   // Notify service worker
   chrome.runtime.sendMessage({
@@ -150,3 +153,4 @@ if (adapter.detect()) {
     }
   });
 }
+
