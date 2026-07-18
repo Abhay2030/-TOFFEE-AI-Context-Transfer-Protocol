@@ -72,28 +72,28 @@ export default function DashboardPage() {
   const STATS_CONFIG = [
     {
       label: "Total Bundles",
-      value: stats ? formatNumber(stats.bundlesCreated) : "—",
+      value: stats ? formatNumber(stats.overview.bundlesCreated) : "—",
       icon: FolderOpen,
       color: "text-toffee-400",
       bg: "bg-toffee-500/10",
     },
     {
       label: "Tokens Saved",
-      value: stats ? formatNumber(stats.totalTokensSaved) : "—",
+      value: stats ? formatNumber(stats.overview.totalTokensSaved) : "—",
       icon: TrendingDown,
       color: "text-accent-emerald",
       bg: "bg-accent-emerald/10",
     },
     {
       label: "Injections",
-      value: stats ? formatNumber(stats.injectionsPerformed) : "—",
+      value: stats ? formatNumber(stats.overview.injectionsPerformed) : "—",
       icon: Zap,
       color: "text-accent-violet",
       bg: "bg-accent-violet/10",
     },
     {
       label: "Cost Saved",
-      value: stats ? `$${stats.estimatedCostSavingsUsd.toFixed(2)}` : "—",
+      value: stats ? `$${stats.overview.estimatedCostSavingsUsd.toFixed(2)}` : "—",
       icon: BarChart3,
       color: "text-accent-amber",
       bg: "bg-accent-amber/10",
