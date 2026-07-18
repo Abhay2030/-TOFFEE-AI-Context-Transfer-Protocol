@@ -117,7 +117,7 @@ export default async function bundlesModule(fastify: FastifyInstance) {
   });
 
   // ── GET /tags — Get unique tags ─────────────────────────────
-  fastify.get('/tags', async (request, reply) => {
+  fastify.get('/tags', async (request) => {
     const { uid } = request.firebaseUser;
     
     const result = await fastify.pg.query(
