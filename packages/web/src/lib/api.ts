@@ -52,11 +52,23 @@ async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> 
 // ── Types ────────────────────────────────────────────────────
 
 export interface UsageStats {
-  totalTokensConsumed: number;
-  totalTokensSaved: number;
-  estimatedCostSavingsUsd: number;
-  bundlesCreated: number;
-  injectionsPerformed: number;
+  overview: {
+    totalTokensConsumed: number;
+    totalTokensSaved: number;
+    estimatedCostSavingsUsd: number;
+    bundlesCreated: number;
+    injectionsPerformed: number;
+  };
+  timeseries: {
+    date: string;
+    tokensSaved: number;
+    tokensConsumed: number;
+  }[];
+  platforms: {
+    name: string;
+    bundles: number;
+    tokens: number;
+  }[];
 }
 
 export interface BundleItem {
