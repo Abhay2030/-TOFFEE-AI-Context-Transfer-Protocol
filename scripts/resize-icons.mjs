@@ -12,7 +12,7 @@ import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const SIZES = [16, 32, 48, 128];
+const SIZES = [16, 32, 48, 128, 192, 512];
 
 const sourcePath = process.argv[2];
 if (!sourcePath) {
@@ -20,15 +20,21 @@ if (!sourcePath) {
   process.exit(1);
 }
 
-const outputDir = resolve(__dirname, '..', 'packages', 'extension', 'public', 'icons');
+const extensionDir = resolve(__dirname, '..', 'packages', 'extension', 'public', 'icons');
+const webDir = resolve(__dirname, '..', 'packages', 'web', 'public', 'icons');
+
+import fs from 'fs';
+if (!fs.existsSync(extensionDir)) fs.mkdirSync(extensionDir, { recursive: true });
+if (!fs.existsSync(webDir)) fs.mkdirSync(webDir, { recursive: true });
 
 for (const size of SIZES) {
-  const outputPath = resolve(outputDir, `icon-${size}.png`);
+  const isWebSize = size === 192 || size === 512;
+  const outputPath = resolve(isWebSize ? webDir : extensionDir, `icon-${size}.png`);
   await sharp(sourcePath)
     .resize(size, size, { fit: 'cover', kernel: sharp.kernel.lanczos3 })
     .png({ quality: 100 })
     .toFile(outputPath);
-  console.log(`✅ icon-${size}.png (${size}x${size})`);
+  console.log(`✅ icon-${size}.png (${size}x${size}) -> ${isWebSize ? 'web' : 'extension'}`);
 }
 
 console.log('\\n🎉 All icons generated successfully!');

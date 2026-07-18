@@ -8,6 +8,12 @@ const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jet
 
 export const metadata: Metadata = {
   title: "Toffee — AI Context Transfer Protocol",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Toffee",
+  },
   description:
     "Capture, compress, and transfer AI conversation context between ChatGPT, Claude, Gemini, Copilot, Grok, and Perplexity. Never re-explain yourself to an AI again.",
   keywords: [
@@ -32,6 +38,7 @@ export const metadata: Metadata = {
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import DynamicBackground from "@/components/ui/DynamicBackground";
 import { PageTransition } from "@/components/ui/PageTransition";
+import ServiceWorkerRegister from "@/components/pwa/ServiceWorkerRegister";
 
 export default function RootLayout({
   children,
@@ -42,6 +49,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans min-h-screen bg-navy-950 text-navy-100 antialiased relative overflow-x-hidden`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <ServiceWorkerRegister />
           <DynamicBackground />
           <SmoothScroll>
             <PageTransition>

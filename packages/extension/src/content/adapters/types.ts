@@ -80,22 +80,41 @@ export abstract class BasePlatformAdapter implements PlatformAdapter {
   abstract getMessageCount(): number;
 
   /**
-   * Safely query a DOM element with error handling.
+   * Safely query a DOM element with error handling, recursively piercing open shadow roots.
    */
-  protected safeQuerySelector<T extends Element>(selector: string): T | null {
+  protected safeQuerySelector<T extends Element>(selector: string, root: Document | Element | ShadowRoot = document): T | null {
     try {
-      return document.querySelector<T>(selector);
+      const el = root.querySelector<T>(selector);
+      if (el) return el;
+
+      const allElements = root.querySelectorAll('*');
+      for (const child of Array.from(allElements)) {
+        if (child.shadowRoot) {
+          const shadowEl = this.safeQuerySelector<T>(selector, child.shadowRoot);
+          if (shadowEl) return shadowEl;
+        }
+      }
+      return null;
     } catch {
       return null;
     }
   }
 
   /**
-   * Safely query all matching DOM elements.
+   * Safely query all matching DOM elements, recursively piercing open shadow roots.
    */
-  protected safeQuerySelectorAll<T extends Element>(selector: string): T[] {
+  protected safeQuerySelectorAll<T extends Element>(selector: string, root: Document | Element | ShadowRoot = document): T[] {
     try {
-      return Array.from(document.querySelectorAll<T>(selector));
+      const results: T[] = [];
+      results.push(...Array.from(root.querySelectorAll<T>(selector)));
+
+      const allElements = root.querySelectorAll('*');
+      for (const child of Array.from(allElements)) {
+        if (child.shadowRoot) {
+          results.push(...this.safeQuerySelectorAll<T>(selector, child.shadowRoot));
+        }
+      }
+      return results;
     } catch {
       return [];
     }
@@ -163,9 +182,10 @@ export abstract class BasePlatformAdapter implements PlatformAdapter {
     const turns: ConversationTurn[] = [];
     const container = this.safeQuerySelector(containerSelector) || document.body;
     
-    // Aggressively scan for standard conversational text elements across all UI frameworks
-    const contentNodes = container.querySelectorAll(
-      'p, div.whitespace-pre-wrap, div.prose, div.markdown, div[dir="auto"], pre, code, .text-base, .message'
+    // Aggressively scan for standard conversational text elements, piercing shadow DOMs natively
+    const contentNodes = this.safeQuerySelectorAll(
+      'p, div.whitespace-pre-wrap, div.prose, div.markdown, div[dir="auto"], pre, code, .text-base, .message, user-message, model-response',
+      container
     );
     
     let combinedContent = '';

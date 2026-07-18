@@ -7,10 +7,10 @@ class GeminiAdapter extends BasePlatformAdapter {
 
   // ── DOM Selectors (maintained for Gemini UI) ────────────
   private readonly SELECTORS = {
-    conversationContainer: 'chat-app', // Approximate container
-    messageGroup: 'message-content', // Individual message container
-    userMessage: '.user-query', // User query class or similar
-    assistantMessage: '.model-response', // Model response class
+    conversationContainer: 'chat-app, main', // Approximate container
+    messageGroup: 'user-message, model-response, message-content', // Individual message container found via deep query
+    userMessage: 'user-query, .user-query', // User query class or tag
+    assistantMessage: 'model-response, .model-response', // Model response class or tag
     codeBlock: 'pre code',
     textarea: 'rich-textarea p, .ql-editor p', // Rich text editor in Gemini
     sendButton: '.send-button, button[aria-label="Send message"]',
@@ -27,8 +27,10 @@ class GeminiAdapter extends BasePlatformAdapter {
     const turns: ConversationTurn[] = [];
 
     for (const el of messageElements) {
-      // Very basic heuristic for Gemini: usually user messages have a different styling/class
-      const isUser = el.classList.contains('user-query') || el.closest('.user-message-container');
+      // Deep DOM heuristic for Gemini: web component tag names or inner classes
+      const isUser = el.tagName.toLowerCase() === 'user-message' || 
+                     el.classList.contains('user-query') || 
+                     el.closest('user-message, .user-message-container') !== null;
       const role = isUser ? 'user' : 'assistant';
       
       const content = el.textContent?.trim() || '';
