@@ -125,6 +125,18 @@ export async function deleteBundle(id: string): Promise<void> {
   return apiFetch<void>(`/v1/bundles/${id}`, { method: 'DELETE' });
 }
 
+export async function getTags(): Promise<string[]> {
+  const res = await apiFetch<{ tags: string[] }>('/v1/bundles/tags');
+  return res.tags;
+}
+
+export async function updateBundleTags(id: string, tags: string[]): Promise<void> {
+  return apiFetch<void>(`/v1/bundles/${id}/tags`, {
+    method: 'PATCH',
+    body: JSON.stringify({ tags }),
+  });
+}
+
 export async function getMe(): Promise<{ user: UserProfile }> {
   return apiFetch<{ user: UserProfile }>('/v1/auth/me');
 }

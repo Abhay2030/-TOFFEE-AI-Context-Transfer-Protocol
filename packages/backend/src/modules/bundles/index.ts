@@ -116,6 +116,18 @@ export default async function bundlesModule(fastify: FastifyInstance) {
     }
   });
 
+  // ── GET /tags — Get unique tags ─────────────────────────────
+  fastify.get('/tags', async (request, reply) => {
+    const { uid } = request.firebaseUser;
+    
+    const result = await fastify.pg.query(
+      'SELECT DISTINCT unnest(tags) as tag FROM toffee_bundles WHERE user_id = $1 ORDER BY tag ASC',
+      [uid]
+    );
+
+    return { tags: result.rows.map(row => row.tag) };
+  });
+
   // ── GET /:id — Get bundle ──────────────────────────────────
   fastify.get('/:id', async (request, reply) => {
     const { uid } = request.firebaseUser;
@@ -144,6 +156,33 @@ export default async function bundlesModule(fastify: FastifyInstance) {
     );
 
     return { ...bundle, downloadUrl };
+  });
+
+  // ── PATCH /:id/tags — Update bundle tags ───────────────────
+  fastify.patch('/:id/tags', async (request, reply) => {
+    const { uid } = request.firebaseUser;
+
+    const paramsParsed = UuidParamsSchema.safeParse(request.params);
+    if (!paramsParsed.success) {
+      return reply.status(400).send({ error: 'Invalid bundle ID', details: paramsParsed.error.flatten().fieldErrors });
+    }
+    const { id } = paramsParsed.data;
+
+    const { tags } = request.body as { tags: string[] };
+    if (!Array.isArray(tags)) {
+      return reply.status(400).send({ error: 'Tags must be an array of strings' });
+    }
+
+    const result = await fastify.pg.query(
+      'UPDATE toffee_bundles SET tags = $1, updated_at = NOW() WHERE id = $2 AND user_id = $3 RETURNING id',
+      [tags, id, uid]
+    );
+
+    if (result.rows.length === 0) {
+      return reply.status(404).send({ error: 'Bundle not found' });
+    }
+
+    return { success: true };
   });
 
   // ── DELETE /:id — Delete bundle ────────────────────────────

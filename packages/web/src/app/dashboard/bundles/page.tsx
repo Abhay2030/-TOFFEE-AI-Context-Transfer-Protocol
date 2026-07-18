@@ -15,7 +15,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
-import { getBundles, deleteBundle } from "@/lib/api";
+import { getBundles, deleteBundle, getTags, updateBundleTags } from "@/lib/api";
 import type { BundleItem } from "@/lib/api";
 
 const PLATFORM_FILTERS = ["All", "chatgpt", "claude", "gemini", "copilot", "grok", "perplexity"];
@@ -34,6 +34,9 @@ export default function BundlesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [customTags, setCustomTags] = useState<string[]>([]);
+  const [editingTagsFor, setEditingTagsFor] = useState<string | null>(null);
+  const [newTagInput, setNewTagInput] = useState("");
   const pageSize = 12;
 
   const loadBundles = useCallback(async () => {
@@ -59,6 +62,20 @@ export default function BundlesPage() {
     loadBundles();
   }, [loadBundles]);
 
+  const loadTags = useCallback(async () => {
+    try {
+      const tags = await getTags();
+      // Filter out basic platform tags
+      setCustomTags(tags.filter(t => !PLATFORM_FILTERS.includes(t.toLowerCase())));
+    } catch (err) {
+      console.error("Failed to load tags", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadTags();
+  }, [loadTags]);
+
   // Reset page when filters change
   useEffect(() => {
     setPage(1);
@@ -75,6 +92,39 @@ export default function BundlesPage() {
       setError(err instanceof Error ? err.message : "Failed to delete bundle");
     } finally {
       setDeleting(null);
+    }
+  };
+
+  const handleAddTag = async (bundle: BundleItem) => {
+    if (!newTagInput.trim()) return;
+    const tag = newTagInput.trim().toLowerCase();
+    if (bundle.tags?.includes(tag)) return;
+
+    const newTags = [...(bundle.tags || []), tag];
+    try {
+      // Optimistic update
+      setBundles(prev => prev.map(b => b.id === bundle.id ? { ...b, tags: newTags } : b));
+      setNewTagInput("");
+      setEditingTagsFor(null);
+      if (!customTags.includes(tag)) {
+        setCustomTags(prev => [...prev, tag]);
+      }
+      await updateBundleTags(bundle.id, newTags);
+    } catch (err) {
+      console.error("Failed to update tags");
+      loadBundles();
+    }
+  };
+
+  const handleRemoveTag = async (bundle: BundleItem, tagToRemove: string) => {
+    const newTags = bundle.tags?.filter(t => t !== tagToRemove) || [];
+    try {
+      // Optimistic update
+      setBundles(prev => prev.map(b => b.id === bundle.id ? { ...b, tags: newTags } : b));
+      await updateBundleTags(bundle.id, newTags);
+    } catch (err) {
+      console.error("Failed to update tags");
+      loadBundles();
     }
   };
 
@@ -134,20 +184,42 @@ export default function BundlesPage() {
       </div>
 
       {/* Platform Filter Chips */}
-      <div className="flex flex-wrap gap-2">
-        {PLATFORM_FILTERS.map((platform) => (
-          <button
-            key={platform}
-            onClick={() => setPlatformFilter(platform)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-              platformFilter === platform
-                ? "bg-toffee-500/10 text-toffee-400 border border-toffee-500/20"
-                : "bg-navy-800/30 text-navy-400 border border-navy-700/30 hover:border-navy-600 hover:text-navy-300"
-            }`}
-          >
-            {PLATFORM_LABELS[platform] || platform}
-          </button>
-        ))}
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-wrap gap-2">
+          {PLATFORM_FILTERS.map((platform) => (
+            <button
+              key={platform}
+              onClick={() => setPlatformFilter(platform)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                platformFilter === platform
+                  ? "bg-toffee-500/10 text-toffee-400 border border-toffee-500/20"
+                  : "bg-navy-800/30 text-navy-400 border border-navy-700/30 hover:border-navy-600 hover:text-navy-300"
+              }`}
+            >
+              {PLATFORM_LABELS[platform] || platform}
+            </button>
+          ))}
+        </div>
+
+        {/* Smart Folders / Tags */}
+        {customTags.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-navy-800/50">
+            <span className="text-xs text-navy-500 font-medium mr-1 uppercase tracking-wider">Smart Folders:</span>
+            {customTags.map((tag) => (
+              <button
+                key={tag}
+                onClick={() => setPlatformFilter(tag)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  platformFilter === tag
+                    ? "bg-accent-violet/10 text-accent-violet border border-accent-violet/20"
+                    : "bg-navy-800/30 text-navy-400 border border-navy-700/30 hover:border-navy-600 hover:text-navy-300"
+                }`}
+              >
+                # {tag}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Loading State */}
@@ -177,16 +249,34 @@ export default function BundlesPage() {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-xs px-2 py-0.5 rounded-md bg-accent-emerald/10 text-accent-emerald font-mono">
                     {bundle.compression_profile}
                   </span>
-                  {bundle.tags?.slice(0, 2).map((tag) => (
-                    <span key={tag} className="text-xs px-2 py-0.5 rounded-md bg-navy-800/50 text-navy-400">
-                      {tag}
+                  {bundle.tags?.filter(t => !PLATFORM_FILTERS.includes(t.toLowerCase())).map((tag) => (
+                    <span key={tag} className="text-xs px-2 py-0.5 rounded-md bg-navy-800/50 text-navy-400 flex items-center gap-1 group">
+                      #{tag}
+                      <button onClick={() => handleRemoveTag(bundle, tag)} className="hidden group-hover:block text-accent-rose hover:text-red-400">×</button>
                     </span>
                   ))}
-                  <div className="flex-1" />
+                  {editingTagsFor === bundle.id ? (
+                    <form onSubmit={(e) => { e.preventDefault(); handleAddTag(bundle); }} className="flex items-center gap-1">
+                      <input 
+                        type="text" 
+                        value={newTagInput} 
+                        onChange={e => setNewTagInput(e.target.value)} 
+                        placeholder="new tag..." 
+                        autoFocus
+                        onBlur={() => { setEditingTagsFor(null); handleAddTag(bundle); }}
+                        className="text-xs px-2 py-0.5 rounded-md bg-navy-900 border border-navy-700 text-white w-24 outline-none"
+                      />
+                    </form>
+                  ) : (
+                    <button onClick={() => { setEditingTagsFor(bundle.id); setNewTagInput(""); }} className="text-xs px-2 py-0.5 rounded-md border border-dashed border-navy-600 text-navy-500 hover:text-navy-300">
+                      + Tag
+                    </button>
+                  )}
+                  <div className="flex-1 min-w-[20px]" />
                   <button className="p-1.5 rounded-lg text-navy-500 hover:text-navy-300 hover:bg-navy-800/50 transition-all">
                     <Share2 className="w-3.5 h-3.5" />
                   </button>
