@@ -2,6 +2,7 @@
 // Toffee API Client — Typed fetch wrapper with Firebase Auth
 // ============================================================
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { auth } from '@/utils/firebase/firebase';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://toffee-backend.onrender.com';

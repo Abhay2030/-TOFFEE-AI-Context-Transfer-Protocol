@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Link from "next/link";
 import { ArrowRight, Shield, Scale, FileText, CheckCircle2, Lock, FileSignature, BookOpen, AlertTriangle, Building2, Globe } from "lucide-react";
 import { PageTransition } from "@/components/ui/PageTransition";

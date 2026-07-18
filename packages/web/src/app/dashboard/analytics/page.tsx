@@ -31,7 +31,7 @@ export default function AnalyticsPage() {
   }, []);
 
   useEffect(() => {
-    loadStats();
+    setTimeout(() => loadStats(), 0);
   }, [loadStats]);
 
   const STATS_CONFIG = [

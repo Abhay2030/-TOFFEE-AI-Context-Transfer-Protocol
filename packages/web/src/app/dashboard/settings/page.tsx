@@ -7,6 +7,7 @@ import { auth } from "@/utils/firebase/firebase";
 import { updateProfile, signOut, User as FirebaseUser } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
@@ -87,7 +88,7 @@ export default function SettingsPage() {
         <div className="flex items-center gap-5 mb-8">
           <div className="relative w-16 h-16 rounded-2xl overflow-hidden bg-gradient-to-br from-toffee-500 to-accent-violet flex items-center justify-center ring-4 ring-navy-900 shadow-xl">
             {user?.photoURL ? (
-              <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+              <Image src={user.photoURL} alt="Profile" fill className="object-cover" referrerPolicy="no-referrer" />
             ) : (
               <User className="w-8 h-8 text-white" />
             )}

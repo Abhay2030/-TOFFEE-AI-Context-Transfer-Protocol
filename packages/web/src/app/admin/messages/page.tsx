@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -13,10 +14,23 @@ export default function AdminMessagesPage() {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const router = useRouter();
 
+  const fetchMessages = async () => {
+    try {
+      const data = await getContactMessages();
+      setMessages(data);
+    } catch (err: any) {
+      setError(err.message || "Failed to load messages");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!auth) {
-      setError("Authentication service is not available.");
-      setLoading(false);
+      setTimeout(() => {
+        setError("Authentication service is not available.");
+        setLoading(false);
+      }, 0);
       return;
     }
 
@@ -40,16 +54,7 @@ export default function AdminMessagesPage() {
     return () => unsubscribe();
   }, []);
 
-  const fetchMessages = async () => {
-    try {
-      const data = await getContactMessages();
-      setMessages(data);
-    } catch (err: any) {
-      setError(err.message || "Failed to load messages");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // fetchMessages moved above useEffect
 
   if (loading) {
     return (

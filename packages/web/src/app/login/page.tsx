@@ -29,7 +29,7 @@ export default function LoginPage() {
       }
     });
     return () => unsubscribe();
-  }, []);
+  }, [router]);
 
   const getFirebaseErrorMessage = (err: unknown): string => {
     const msg = err instanceof Error ? err.message : String(err);

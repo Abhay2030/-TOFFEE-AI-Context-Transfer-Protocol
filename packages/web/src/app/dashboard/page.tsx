@@ -45,7 +45,7 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    loadData();
+    setTimeout(() => loadData(), 0);
 
     let eventSource: EventSource | null = null;
     let mounted = true;

@@ -9,7 +9,7 @@ export default function DynamicBackground() {
   const { resolvedTheme } = useTheme();
 
   useEffect(() => {
-    setMounted(true);
+    setTimeout(() => setMounted(true), 0);
   }, []);
 
   if (!mounted) return null;

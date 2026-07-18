@@ -44,7 +44,7 @@ export default function DashboardLayout({
       }
     });
     return () => unsubscribe();
-  }, []);
+  }, [router]);
 
   const handleLogout = async () => {
     await signOut(auth!);

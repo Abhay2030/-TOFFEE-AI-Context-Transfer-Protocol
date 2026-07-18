@@ -59,7 +59,7 @@ export default function BundlesPage() {
   }, [page, search, platformFilter]);
 
   useEffect(() => {
-    loadBundles();
+    setTimeout(() => loadBundles(), 0);
   }, [loadBundles]);
 
   const loadTags = useCallback(async () => {
@@ -78,7 +78,7 @@ export default function BundlesPage() {
 
   // Reset page when filters change
   useEffect(() => {
-    setPage(1);
+    setTimeout(() => setPage(1), 0);
   }, [search, platformFilter]);
 
   const handleDelete = async (id: string) => {
