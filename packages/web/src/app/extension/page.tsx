@@ -1,9 +1,12 @@
 import { Chrome, Download, Shield, Sparkles, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { PageTransition } from "@/components/ui/PageTransition";
+import { GlassCard } from "@/components/ui/GlassCard";
 
 export default function ExtensionPage() {
   return (
+    <PageTransition>
     <div className="min-h-screen bg-navy-950 pt-24 pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
@@ -35,7 +38,7 @@ export default function ExtensionPage() {
             <div className="absolute inset-0 bg-toffee-500/20 rounded-full blur-3xl -z-10 animate-pulse-soft" />
             
             {/* Mockup */}
-            <div className="glass-card border-toffee-500/30 p-2 rounded-3xl shadow-2xl overflow-hidden aspect-[4/5] bg-navy-900/80 flex flex-col items-center justify-center relative group">
+            <GlassCard className="border-toffee-500/30 p-2 rounded-3xl shadow-2xl overflow-hidden aspect-[4/5] bg-navy-900/80 flex flex-col items-center justify-center relative group">
               <div className="w-64 h-96 bg-navy-950 border border-navy-800 rounded-2xl shadow-inner relative overflow-hidden flex flex-col">
                 {/* Popup Header */}
                 <div className="h-12 border-b border-navy-800 flex items-center justify-between px-4">
@@ -58,23 +61,23 @@ export default function ExtensionPage() {
                    <button className="w-full py-2 rounded-lg bg-toffee-500 text-white text-xs font-semibold mt-4">Generate Bundle</button>
                 </div>
               </div>
-            </div>
+            </GlassCard>
           </div>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 mb-20">
-          <div className="glass-card p-6 border-l-2 border-l-toffee-500">
+          <GlassCard className="p-6 border-l-2 border-l-toffee-500">
             <h3 className="text-white font-bold mb-2">Manifest V3</h3>
             <p className="text-sm text-navy-400">Built on the latest, most secure extension architecture for minimal memory footprint.</p>
-          </div>
-          <div className="glass-card p-6 border-l-2 border-l-accent-violet">
+          </GlassCard>
+          <GlassCard className="p-6 border-l-2 border-l-accent-violet">
             <h3 className="text-white font-bold mb-2">Dexie Local DB</h3>
             <p className="text-sm text-navy-400">Uses your browser&apos;s native IndexedDB to store hundreds of `.toffee` bundles totally offline.</p>
-          </div>
-          <div className="glass-card p-6 border-l-2 border-l-accent-emerald">
+          </GlassCard>
+          <GlassCard className="p-6 border-l-2 border-l-accent-emerald">
             <h3 className="text-white font-bold mb-2">No Tracking</h3>
             <p className="text-sm text-navy-400">We don&apos;t use Google Analytics in the extension. Your context stays strictly on your machine.</p>
-          </div>
+          </GlassCard>
         </div>
 
         {/* Creator Note */}
@@ -86,5 +89,6 @@ export default function ExtensionPage() {
 
       </div>
     </div>
+    </PageTransition>
   );
 }

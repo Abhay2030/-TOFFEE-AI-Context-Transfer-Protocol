@@ -1,8 +1,10 @@
-import Link from "next/link";
 import { ArrowRight, Download, Brain, Globe, Shield, Sparkles, Workflow, Lock, Users, Zap } from "lucide-react";
+import { PageTransition } from "@/components/ui/PageTransition";
+import { GlassCard } from "@/components/ui/GlassCard";
 
 export default function AboutPage() {
   return (
+    <PageTransition>
     <div className="min-h-screen bg-navy-950 pt-24 pb-16">
       
       {/* ── Hero Section ── */}
@@ -18,11 +20,11 @@ export default function AboutPage() {
           AI models are becoming smarter, but your knowledge remains trapped inside individual conversations and platforms. Toffee unlocks that knowledge, making your AI memory portable, secure, and instantly reusable across every major AI ecosystem.
         </p>
 
-        <div className="inline-block glass-card px-6 py-4 mb-12 border-toffee-500/30 shadow-lg shadow-toffee-500/10">
+        <GlassCard className="inline-block px-6 py-4 mb-12 border-toffee-500/30 shadow-lg shadow-toffee-500/10">
           <p className="text-lg font-medium text-navy-200">
             We&apos;re building the infrastructure that allows AI conversations to move as freely as information moves across the internet.
           </p>
-        </div>
+        </GlassCard>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link href="/install" className="btn-primary py-4 px-8 text-lg inline-flex items-center gap-2">
@@ -63,7 +65,7 @@ export default function AboutPage() {
       {/* ── Why We Exist & Our Mission ── */}
       <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-20">
         <div className="grid md:grid-cols-2 gap-12">
-          <div className="glass-card p-10 border-accent-violet/20 hover:border-accent-violet/40 transition-colors">
+          <GlassCard className="p-10 border-accent-violet/20 hover:border-accent-violet/40 transition-colors">
             <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
               <Globe className="w-6 h-6 text-accent-violet" /> Why We Exist
             </h2>
@@ -77,9 +79,9 @@ export default function AboutPage() {
               <p>Each model has unique strengths, but none can access the context built inside another platform. This creates unnecessary repetition, increased costs, slower workflows, and lost productivity.</p>
               <p className="font-medium text-accent-violet">Toffee bridges these disconnected ecosystems with a secure, intelligent context layer.</p>
             </div>
-          </div>
+          </GlassCard>
 
-          <div className="glass-card p-10 border-accent-emerald/20 hover:border-accent-emerald/40 transition-colors">
+          <GlassCard className="p-10 border-accent-emerald/20 hover:border-accent-emerald/40 transition-colors">
             <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
               <Brain className="w-6 h-6 text-accent-emerald" /> Our Mission
             </h2>
@@ -97,7 +99,7 @@ export default function AboutPage() {
               </ul>
               <p className="font-medium text-accent-emerald pt-4">Just as cloud storage changed how we manage files, Toffee aims to change how we manage AI knowledge.</p>
             </div>
-          </div>
+          </GlassCard>
         </div>
       </section>
 
@@ -190,10 +192,10 @@ export default function AboutPage() {
                 { title: "Transparency", desc: "Users should always know what is captured, processed, and shared." },
                 { title: "Innovation", desc: "We build foundational infrastructure for the AI-native future." }
               ].map(principle => (
-                <div key={principle.title} className="glass-card p-4 border-l-4 border-l-toffee-500">
+                <GlassCard key={principle.title} className="p-4 border-l-4 border-l-toffee-500">
                   <h4 className="text-white font-bold">{principle.title}</h4>
                   <p className="text-sm text-navy-400">{principle.desc}</p>
-                </div>
+                </GlassCard>
               ))}
             </div>
           </div>
@@ -210,12 +212,12 @@ export default function AboutPage() {
             { icon: BookOpen, title: "Students", desc: "Continue learning across assistants." },
             { icon: PenTool, title: "Creators", desc: "Maintain consistent creative direction." },
             { icon: Building2, title: "Enterprises", desc: "Secure collaborative workflows." }
-          ].map(persona => (
-            <div key={persona.title} className="glass-card p-6 flex flex-col items-center justify-center hover:-translate-y-1 transition-transform">
+              ].map(persona => (
+            <GlassCard key={persona.title} className="p-6 flex flex-col items-center justify-center hover:-translate-y-1 transition-transform">
               <persona.icon className="w-8 h-8 text-toffee-400 mb-4" />
               <h4 className="text-white font-bold mb-2">{persona.title}</h4>
               <p className="text-xs text-navy-400 leading-relaxed">{persona.desc}</p>
-            </div>
+            </GlassCard>
           ))}
         </div>
       </section>
@@ -243,8 +245,7 @@ export default function AboutPage() {
                 </span>
               ))}
             </div>
-            
-            <div className="glass-card p-6 border-toffee-500/20">
+            <GlassCard className="p-6 border-toffee-500/20">
               <h4 className="text-white font-bold mb-4 flex items-center gap-2">🎓 Education</h4>
               <div className="space-y-4 text-sm text-navy-300">
                 <div>
@@ -256,9 +257,9 @@ export default function AboutPage() {
                   <p className="text-navy-400">K.K. Wagh Engineering College · Completed</p>
                 </div>
               </div>
-            </div>
+            </GlassCard>
 
-            <div className="glass-card p-6 border-accent-emerald/20">
+            <GlassCard className="p-6 border-accent-emerald/20">
               <h4 className="text-white font-bold mb-4 flex items-center gap-2">💻 Experience</h4>
               <div className="space-y-4 text-sm text-navy-300">
                 <div>
@@ -267,7 +268,7 @@ export default function AboutPage() {
                   <p className="mt-2 text-xs">Built the "AEK Tunes" music application, gaining hands-on experience with native Android development patterns.</p>
                 </div>
               </div>
-            </div>
+            </GlassCard>
           </div>
           
           {/* Right Column - Biography */}
@@ -329,7 +330,7 @@ export default function AboutPage() {
           <p>We believe the next generation of AI will not be defined solely by larger models—but by how effectively knowledge moves between them.</p>
         </div>
 
-        <div className="glass-card p-12 border-toffee-500/30 relative overflow-hidden">
+        <GlassCard className="p-12 border-toffee-500/30 relative overflow-hidden">
           <div className="absolute inset-0 bg-toffee-500/5" />
           <h3 className="text-4xl font-extrabold text-white mb-6 relative z-10">Build Without Starting Over</h3>
           <p className="text-lg text-navy-300 mb-8 max-w-2xl mx-auto relative z-10">
@@ -339,7 +340,7 @@ export default function AboutPage() {
             <Download className="w-5 h-5" /> Install Toffee
           </Link>
           <p className="mt-6 text-sm text-navy-400 font-medium relative z-10 uppercase tracking-widest">Own your AI memory. Continue every conversation. Anywhere.</p>
-        </div>
+        </GlassCard>
         
         {/* Creator Note */}
         <div className="mt-16 text-center">
@@ -348,6 +349,7 @@ export default function AboutPage() {
       </section>
 
     </div>
+    </PageTransition>
   );
 }
 

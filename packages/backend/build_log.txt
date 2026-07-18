@@ -1,0 +1,12 @@
+
+> @toffee/backend@1.0.0 build
+> tsc
+
+src/services/anthropic.service.ts(53,11): error TS6133: 'preview' is declared but its value is never read.
+npm error Lifecycle script `build` failed with error:
+npm error code 2
+npm error path D:\My Projects\Toffee Chat Transfer\packages\backend
+npm error workspace @toffee/backend@1.0.0
+npm error location D:\My Projects\Toffee Chat Transfer\packages\backend
+npm error command failed
+npm error command C:\WINDOWS\system32\cmd.exe /d /s /c tsc

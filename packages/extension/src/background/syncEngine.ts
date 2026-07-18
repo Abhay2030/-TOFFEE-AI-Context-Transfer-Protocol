@@ -125,32 +125,42 @@ async function pushLocalBundles(token: string, errors: string[]): Promise<number
 
     console.log(`[Toffee Sync] Pushing ${localOnly.length} local bundles to cloud...`);
 
-    for (const bundle of localOnly) {
-      try {
-        const res = await apiRequest('/bundles', token, {
-          method: 'POST',
-          body: JSON.stringify({
-            display_name: bundle.displayName,
-            source_platform: bundle.sourcePlatform,
-            source_model: bundle.sourceModel,
-            compression_profile: bundle.compressionProfile,
-            token_count_original: bundle.tokenCountOriginal,
-            token_count_bundle: bundle.tokenCountBundle,
-            compression_ratio: bundle.compressionRatio,
-            tags: bundle.tags,
-            bundle_data: bundle.bundleData,
-          }),
-        });
+    const chunkSize = 5;
+    for (let i = 0; i < localOnly.length; i += chunkSize) {
+      const chunk = localOnly.slice(i, i + chunkSize);
+      const results = await Promise.allSettled(
+        chunk.map(async (bundle) => {
+          const res = await apiRequest('/bundles', token, {
+            method: 'POST',
+            body: JSON.stringify({
+              display_name: bundle.displayName,
+              source_platform: bundle.sourcePlatform,
+              source_model: bundle.sourceModel,
+              compression_profile: bundle.compressionProfile,
+              token_count_original: bundle.tokenCountOriginal,
+              token_count_bundle: bundle.tokenCountBundle,
+              compression_ratio: bundle.compressionRatio,
+              tags: bundle.tags,
+              bundle_data: bundle.bundleData,
+            }),
+          });
 
-        if (res.ok) {
+          if (res.ok) {
+            console.log(`[Toffee Sync] Pushed bundle ${bundle.id}`);
+            return true;
+          } else {
+            const errText = await res.text();
+            throw new Error(`Push ${bundle.id}: ${res.status} ${errText}`);
+          }
+        })
+      );
+
+      for (const res of results) {
+        if (res.status === 'fulfilled' && res.value) {
           pushed++;
-          console.log(`[Toffee Sync] Pushed bundle ${bundle.id}`);
-        } else {
-          const errText = await res.text();
-          errors.push(`Push ${bundle.id}: ${res.status} ${errText}`);
+        } else if (res.status === 'rejected') {
+          errors.push(res.reason.message);
         }
-      } catch (err: any) {
-        errors.push(`Push ${bundle.id}: ${err.message}`);
       }
     }
   } catch (err: any) {
@@ -189,56 +199,65 @@ async function pullRemoteBundles(token: string, errors: string[]): Promise<numbe
 
     console.log(`[Toffee Sync] Pulling ${remoteOnly.length} remote bundles to local...`);
 
-    for (const remoteMeta of remoteOnly) {
-      try {
-        // Fetch full bundle details (includes downloadUrl for S3 data)
-        const detailRes = await apiRequest(`/bundles/${remoteMeta.id}`, token);
-        if (!detailRes.ok) {
-          errors.push(`Pull detail ${remoteMeta.id}: ${detailRes.status}`);
-          continue;
-        }
-
-        const detail = await detailRes.json();
-
-        // Download the actual bundle data from S3 pre-signed URL
-        let bundleData = '';
-        if (detail.downloadUrl) {
-          try {
-            const s3Res = await fetch(detail.downloadUrl);
-            if (s3Res.ok) {
-              // The S3 object is stored as base64 — read it as text
-              bundleData = await s3Res.text();
-            }
-          } catch (s3Err: any) {
-            console.warn(`[Toffee Sync] S3 download failed for ${remoteMeta.id}:`, s3Err);
+    const chunkSize = 5;
+    for (let i = 0; i < remoteOnly.length; i += chunkSize) {
+      const chunk = remoteOnly.slice(i, i + chunkSize);
+      const results = await Promise.allSettled(
+        chunk.map(async (remoteMeta) => {
+          // Fetch full bundle details (includes downloadUrl for S3 data)
+          const detailRes = await apiRequest(`/bundles/${remoteMeta.id}`, token);
+          if (!detailRes.ok) {
+            throw new Error(`Pull detail ${remoteMeta.id}: ${detailRes.status}`);
           }
+
+          const detail = await detailRes.json();
+
+          // Download the actual bundle data from S3 pre-signed URL
+          let bundleData = '';
+          if (detail.downloadUrl) {
+            try {
+              const s3Res = await fetch(detail.downloadUrl);
+              if (s3Res.ok) {
+                // The S3 object is stored as base64 — read it as text
+                bundleData = await s3Res.text();
+              }
+            } catch (s3Err: any) {
+              console.warn(`[Toffee Sync] S3 download failed for ${remoteMeta.id}:`, s3Err);
+            }
+          }
+
+          // Store in local Dexie
+          const storedBundle: StoredBundle = {
+            id: detail.id,
+            displayName: detail.display_name || `${detail.source_platform} Conversation`,
+            sourcePlatform: detail.source_platform,
+            sourceModel: detail.source_model || 'unknown',
+            compressionProfile: detail.compression_profile || 'standard',
+            tokenCountOriginal: detail.token_count_original || 0,
+            tokenCountBundle: detail.token_count_bundle || 0,
+            compressionRatio: detail.token_count_original > 0
+              ? detail.token_count_bundle / detail.token_count_original
+              : 0,
+            tags: detail.tags || [],
+            bundleData: bundleData,
+            hmacSignature: '',
+            version: 1,
+            createdAt: detail.created_at || new Date().toISOString(),
+            updatedAt: detail.updated_at || new Date().toISOString(),
+          };
+
+          await db.bundles.put(storedBundle);
+          console.log(`[Toffee Sync] Pulled bundle ${detail.id}`);
+          return true;
+        })
+      );
+
+      for (const res of results) {
+        if (res.status === 'fulfilled' && res.value) {
+          pulled++;
+        } else if (res.status === 'rejected') {
+          errors.push(res.reason.message);
         }
-
-        // Store in local Dexie
-        const storedBundle: StoredBundle = {
-          id: detail.id,
-          displayName: detail.display_name || `${detail.source_platform} Conversation`,
-          sourcePlatform: detail.source_platform,
-          sourceModel: detail.source_model || 'unknown',
-          compressionProfile: detail.compression_profile || 'standard',
-          tokenCountOriginal: detail.token_count_original || 0,
-          tokenCountBundle: detail.token_count_bundle || 0,
-          compressionRatio: detail.token_count_original > 0
-            ? detail.token_count_bundle / detail.token_count_original
-            : 0,
-          tags: detail.tags || [],
-          bundleData: bundleData,
-          hmacSignature: '',
-          version: 1,
-          createdAt: detail.created_at || new Date().toISOString(),
-          updatedAt: detail.updated_at || new Date().toISOString(),
-        };
-
-        await db.bundles.put(storedBundle);
-        pulled++;
-        console.log(`[Toffee Sync] Pulled bundle ${detail.id}`);
-      } catch (err: any) {
-        errors.push(`Pull ${remoteMeta.id}: ${err.message}`);
       }
     }
   } catch (err: any) {
@@ -263,31 +282,41 @@ async function processDeleteQueue(token: string, errors: string[]): Promise<numb
 
     console.log(`[Toffee Sync] Processing ${deleteItems.length} delete operations...`);
 
-    for (const item of deleteItems) {
-      try {
-        const res = await apiRequest(`/bundles/${item.resourceId}`, token, {
-          method: 'DELETE',
-        });
+    const chunkSize = 5;
+    for (let i = 0; i < deleteItems.length; i += chunkSize) {
+      const chunk = deleteItems.slice(i, i + chunkSize);
+      const results = await Promise.allSettled(
+        chunk.map(async (item) => {
+          const res = await apiRequest(`/bundles/${item.resourceId}`, token, {
+            method: 'DELETE',
+          });
 
-        if (res.ok || res.status === 404) {
-          // Success or already deleted — remove from queue
-          await db.syncQueue.delete(item.id);
-          deleted++;
-          console.log(`[Toffee Sync] Deleted remote bundle ${item.resourceId}`);
-        } else {
-          // Increment retry count
-          const newRetries = item.retries + 1;
-          if (newRetries >= 5) {
-            // Give up after 5 retries
+          if (res.ok || res.status === 404) {
+            // Success or already deleted — remove from queue
             await db.syncQueue.delete(item.id);
-            errors.push(`Delete ${item.resourceId}: max retries exceeded`);
+            console.log(`[Toffee Sync] Deleted remote bundle ${item.resourceId}`);
+            return true;
           } else {
-            await db.syncQueue.update(item.id, { retries: newRetries });
-            errors.push(`Delete ${item.resourceId}: ${res.status} (retry ${newRetries})`);
+            // Increment retry count
+            const newRetries = item.retries + 1;
+            if (newRetries >= 5) {
+              // Give up after 5 retries
+              await db.syncQueue.delete(item.id);
+              throw new Error(`Delete ${item.resourceId}: max retries exceeded`);
+            } else {
+              await db.syncQueue.update(item.id, { retries: newRetries });
+              throw new Error(`Delete ${item.resourceId}: ${res.status} (retry ${newRetries})`);
+            }
           }
+        })
+      );
+
+      for (const res of results) {
+        if (res.status === 'fulfilled' && res.value) {
+          deleted++;
+        } else if (res.status === 'rejected') {
+          errors.push(res.reason.message);
         }
-      } catch (err: any) {
-        errors.push(`Delete ${item.resourceId}: ${err.message}`);
       }
     }
   } catch (err: any) {

@@ -1,0 +1,36 @@
+
+> @toffee/extension@1.0.0 build
+> tsc && vite build
+
+[36mvite v6.4.3 [32mbuilding for production...[36m[39m
+transforming...
+[32m✓[39m 2101 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mservice-worker-loader.js                 [39m[1m[2m  0.04 kB[22m[1m[22m
+[2mdist/[22m[32massets/grok.ts-loader-CLRBnzwU.js        [39m[1m[2m  0.34 kB[22m[1m[22m
+[2mdist/[22m[32massets/claude.ts-loader-BAkiuHqD.js      [39m[1m[2m  0.34 kB[22m[1m[22m
+[2mdist/[22m[32massets/gemini.ts-loader-CRgLQ-0r.js      [39m[1m[2m  0.34 kB[22m[1m[22m
+[2mdist/[22m[32massets/chatgpt.ts-loader-SO6Xq7ip.js     [39m[1m[2m  0.34 kB[22m[1m[22m
+[2mdist/[22m[32massets/copilot.ts-loader-B8fYB9A7.js     [39m[1m[2m  0.34 kB[22m[1m[22m
+[2mdist/[22m[32massets/perplexity.ts-loader-DFfcS8aV.js  [39m[1m[2m  0.35 kB[22m[1m[22m
+[2mdist/[22m[32micons/icon-16.png                        [39m[1m[2m  0.79 kB[22m[1m[22m
+[2mdist/[22m[32mpopup.html                               [39m[1m[2m  0.90 kB[22m[1m[22m[2m │ gzip:   0.47 kB[22m
+[2mdist/[22m[32micons/icon-32.png                        [39m[1m[2m  1.61 kB[22m[1m[22m
+[2mdist/[22m[32micons/icon-48.png                        [39m[1m[2m  2.35 kB[22m[1m[22m
+[2mdist/[22m[32mmanifest.json                            [39m[1m[2m  4.12 kB[22m[1m[22m[2m │ gzip:   1.02 kB[22m
+[2mdist/[22m[32micons/icon-128.png                       [39m[1m[2m  8.59 kB[22m[1m[22m
+[2mdist/[22m[35massets/popup-iHxPzPM8.css                [39m[1m[2m 35.94 kB[22m[1m[22m[2m │ gzip:   6.03 kB[22m
+[2mdist/[22m[36mchunks/index-CLy8BZkN.js                 [39m[1m[2m  0.98 kB[22m[1m[22m[2m │ gzip:   0.58 kB[22m
+[2mdist/[22m[36mchunks/types-DsSnMWCb.js                 [39m[1m[2m  2.37 kB[22m[1m[22m[2m │ gzip:   1.17 kB[22m
+[2mdist/[22m[36mchunks/gemini.ts-BtnYU9Ub.js             [39m[1m[2m  3.29 kB[22m[1m[22m[2m │ gzip:   1.46 kB[22m
+[2mdist/[22m[36mchunks/perplexity.ts-2Xm9rf_l.js         [39m[1m[2m  3.35 kB[22m[1m[22m[2m │ gzip:   1.47 kB[22m
+[2mdist/[22m[36mchunks/grok.ts-ThUQPNa-.js               [39m[1m[2m  3.36 kB[22m[1m[22m[2m │ gzip:   1.46 kB[22m
+[2mdist/[22m[36mchunks/claude.ts-B1NzOZGc.js             [39m[1m[2m  3.41 kB[22m[1m[22m[2m │ gzip:   1.47 kB[22m
+[2mdist/[22m[36mchunks/chatgpt.ts-Bd1b24RB.js            [39m[1m[2m  3.54 kB[22m[1m[22m[2m │ gzip:   1.54 kB[22m
+[2mdist/[22m[36mchunks/copilot.ts-CJxMMCnL.js            [39m[1m[2m  4.12 kB[22m[1m[22m[2m │ gzip:   1.68 kB[22m
+[2mdist/[22m[36mchunks/index.ts-DclZ9T9A.js              [39m[1m[2m 10.92 kB[22m[1m[22m[2m │ gzip:   3.80 kB[22m
+[2mdist/[22m[36mchunks/preload-helper-D2wPikTy.js        [39m[1m[2m 98.66 kB[22m[1m[22m[2m │ gzip:  32.05 kB[22m
+[2mdist/[22m[36mchunks/firebase-_rE213t2.js              [39m[1m[2m162.70 kB[22m[1m[22m[2m │ gzip:  33.55 kB[22m
+[2mdist/[22m[36mchunks/popup.html-BUKfP7Ml.js            [39m[1m[2m431.53 kB[22m[1m[22m[2m │ gzip: 129.28 kB[22m
+[32m✓ built in 21.31s[39m

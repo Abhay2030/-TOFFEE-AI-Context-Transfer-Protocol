@@ -1,0 +1,46 @@
+
+> @toffee/backend@1.0.0 lint
+> eslint src/
+
+
+D:\My Projects\Toffee Chat Transfer\packages\backend\src\modules\admin\index.ts
+  7:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\My Projects\Toffee Chat Transfer\packages\backend\src\modules\analytics\index.ts
+  5:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\My Projects\Toffee Chat Transfer\packages\backend\src\modules\auth\index.ts
+  11:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  45:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\My Projects\Toffee Chat Transfer\packages\backend\src\modules\bundles\index.ts
+  22:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\My Projects\Toffee Chat Transfer\packages\backend\src\modules\compression\index.ts
+  14:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  34:16  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  40:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\My Projects\Toffee Chat Transfer\packages\backend\src\modules\contact\index.ts
+  14:14  warning  'e' is defined but never used             @typescript-eslint/no-unused-vars
+  37:23  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  38:30  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\My Projects\Toffee Chat Transfer\packages\backend\src\modules\sharing\index.ts
+  19:64  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\My Projects\Toffee Chat Transfer\packages\backend\src\server.ts
+   38:26  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  114:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  115:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\My Projects\Toffee Chat Transfer\packages\backend\src\services\anthropic.service.ts
+  53:11  warning  'preview' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+D:\My Projects\Toffee Chat Transfer\packages\backend\src\services\sse.service.ts
+  47:51  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  59:65  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  64:14  warning  'err' is defined but never used           @typescript-eslint/no-unused-vars
+
+✖ 19 problems (0 errors, 19 warnings)
+

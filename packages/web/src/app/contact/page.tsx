@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { submitContactForm } from "@/lib/api";
 import { ArrowRight, Mail, Phone, MessageSquare, Building2, Globe, Shield, Sparkles, AlertTriangle, Bug, LifeBuoy, FileText, ChevronRight, Lock, CheckCircle2 } from "lucide-react";
+import { PageTransition } from "@/components/ui/PageTransition";
+import { GlassCard } from "@/components/ui/GlassCard";
 
 const CONTACT_DEPARTMENTS = [
   {
@@ -98,6 +100,7 @@ export default function ContactPage() {
   }
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-navy-950 pt-24 pb-16">
       
       {/* ── Hero & Contact Form Section ── */}
@@ -181,7 +184,7 @@ export default function ContactPage() {
           </div>
 
           {/* Right Column - Contact Form */}
-          <div className="glass-card p-8 md:p-10 border-toffee-500/20 relative">
+          <GlassCard className="p-8 md:p-10 border-toffee-500/20 relative">
             <h2 className="text-2xl font-bold text-white mb-8">Send a Message</h2>
             
             {submitStatus === "success" ? (
@@ -273,13 +276,13 @@ export default function ContactPage() {
                 </button>
               </form>
             )}
-          </div>
+          </GlassCard>
         </div>
       </section>
 
       {/* ── Guidelines ── */}
       <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pb-24">
-        <div className="glass-card p-8 border-navy-800 flex flex-col md:flex-row gap-8 items-center">
+        <GlassCard className="p-8 border-navy-800 flex flex-col md:flex-row gap-8 items-center">
           <div className="w-16 h-16 rounded-2xl bg-navy-900 flex items-center justify-center shrink-0 border border-navy-700">
             <span className="text-3xl">📬</span>
           </div>
@@ -288,7 +291,7 @@ export default function ContactPage() {
             <p className="mb-2"><strong className="text-white">Feature requests:</strong> A short description of the problem you're solving is most helpful.</p>
             <p><strong className="text-white">Collaboration/Business:</strong> Include a brief overview of the project or opportunity.</p>
           </div>
-        </div>
+        </GlassCard>
       </section>
 
       {/* ── About the Creator (Personalized for Toffee) ── */}
@@ -311,7 +314,7 @@ export default function ContactPage() {
               ))}
             </div>
             
-            <div className="glass-card p-6 border-accent-emerald/20">
+            <GlassCard className="p-6 border-accent-emerald/20">
               <h4 className="text-white font-bold mb-4 flex items-center gap-2">💻 Experience</h4>
               <div className="space-y-4 text-sm text-navy-300">
                 <div>
@@ -320,7 +323,7 @@ export default function ContactPage() {
                   <p className="mt-2 text-xs">Built the "AEK Tunes" music application, gaining hands-on experience with native Android development patterns.</p>
                 </div>
               </div>
-            </div>
+            </GlassCard>
           </div>
           
           <div className="lg:w-2/3 w-full prose prose-invert prose-lg text-navy-300 max-w-none">
@@ -365,5 +368,6 @@ export default function ContactPage() {
         <p className="text-xs font-medium text-toffee-500/50 tracking-widest uppercase">Designed & Developed by Abhay Sachin Donde</p>
       </div>
     </div>
+    </PageTransition>
   );
 }

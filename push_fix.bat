@@ -1,0 +1,9 @@
+@echo off
+echo Adding all files...
+git add .
+echo Committing...
+git commit -m "chore: push pending updates"
+echo Pushing to GitHub...
+git push origin main
+echo Done!
+pause

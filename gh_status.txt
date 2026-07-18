@@ -1,0 +1,8 @@
+FAILED:
+
+'gh' is not recognized as an internal or external command,
+operable program or batch file.
+
+Command failed: gh run list --limit 3
+'gh' is not recognized as an internal or external command,
+operable program or batch file.

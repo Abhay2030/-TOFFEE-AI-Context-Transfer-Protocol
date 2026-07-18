@@ -1,7 +1,10 @@
 import { Shield, FileText, CheckCircle2, Lock, Scale, AlertTriangle, Cloud, HardDrive, Smartphone, Building2 } from "lucide-react";
+import { PageTransition } from "@/components/ui/PageTransition";
+import { GlassCard } from "@/components/ui/GlassCard";
 
 export default function TermsPage() {
   return (
+    <PageTransition>
     <div className="min-h-screen bg-navy-950 pt-24 pb-16">
       
       {/* ── Hero Section ── */}
@@ -160,7 +163,7 @@ export default function TermsPage() {
         </div>
 
         {/* ── Final Statement ── */}
-        <div className="mt-24 p-10 glass-card border-toffee-500/30 text-center relative overflow-hidden">
+        <GlassCard className="mt-24 p-10 border-toffee-500/30 text-center relative overflow-hidden">
           <div className="absolute inset-0 bg-toffee-500/5" />
           <h3 className="text-2xl font-bold text-white mb-4 relative z-10">Our Mission</h3>
           <p className="text-lg text-navy-300 max-w-2xl mx-auto relative z-10">
@@ -169,9 +172,10 @@ export default function TermsPage() {
           <div className="mt-8 text-center relative z-10">
             <p className="text-xs font-medium text-navy-500 tracking-widest uppercase">Designed & Developed by Abhay Sachin Donde</p>
           </div>
-        </div>
+        </GlassCard>
 
       </section>
     </div>
+    </PageTransition>
   );
 }

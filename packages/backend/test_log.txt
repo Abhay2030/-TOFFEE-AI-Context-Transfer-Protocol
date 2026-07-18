@@ -1,0 +1,15 @@
+
+> @toffee/backend@1.0.0 test
+> vitest
+
+
+[1m[46m RUN [49m[22m [36mv3.2.6 [39m[90mD:/My Projects/Toffee Chat Transfer/packages/backend[39m
+
+ [32m✓[39m src/__tests__/hmac.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/__tests__/schemas.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m2 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[32m10 passed[39m[22m[90m (10)[39m
+[2m   Start at [22m 14:45:59
+[2m   Duration [22m 3.08s[2m (transform 473ms, setup 0ms, collect 924ms, tests 18ms, environment 1ms, prepare 2.52s)[22m
+
