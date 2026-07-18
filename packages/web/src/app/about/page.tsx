@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ArrowRight, Download, Brain, Globe, Shield, Sparkles, Workflow, Lock, Users, Zap } from "lucide-react";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { GlassCard } from "@/components/ui/GlassCard";

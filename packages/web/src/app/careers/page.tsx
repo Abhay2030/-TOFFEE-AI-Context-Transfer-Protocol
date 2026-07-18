@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ArrowRight, Users, Briefcase, ChevronRight, CheckCircle2, Shield, Sparkles, Terminal, Layers, Heart, Coffee, Globe, Cpu } from "lucide-react";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { GlassCard } from "@/components/ui/GlassCard";
