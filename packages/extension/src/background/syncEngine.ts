@@ -1,5 +1,6 @@
 // ============================================================
 // Toffee Cloud Sync Engine — Bidirectional Push/Pull/Delete
+/* global RequestInit */
 // ============================================================
 
 import { db, type StoredBundle, type SyncQueueItem } from '../db/database';

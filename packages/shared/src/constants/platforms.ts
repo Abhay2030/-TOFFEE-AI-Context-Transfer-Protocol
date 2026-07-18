@@ -105,6 +105,17 @@ export const PLATFORMS: Record<Platform, PlatformConfig> = {
     defaultModel: 'mistral-large',
     iconUrl: '/icons/mistral.svg',
   },
+  'toffee-stitched': {
+    id: 'toffee-stitched',
+    name: 'Toffee Stitched',
+    hostPatterns: [],
+    priority: 'P2',
+    captureSupported: false,
+    injectionSupported: true,
+    systemPromptSupport: false,
+    defaultModel: 'multi-model-stitch',
+    iconUrl: '/icons/generic.svg',
+  },
   other: {
     id: 'other',
     name: 'Other',
