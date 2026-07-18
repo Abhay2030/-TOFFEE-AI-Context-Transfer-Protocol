@@ -138,6 +138,13 @@ export async function updateBundleTags(id: string, tags: string[]): Promise<void
   });
 }
 
+export async function mergeBundles(bundleIds: string[], display_name?: string): Promise<{ id: string, s3Key: string }> {
+  return apiFetch<{ id: string, s3Key: string }>('/v1/bundles/merge', {
+    method: 'POST',
+    body: JSON.stringify({ bundleIds, display_name }),
+  });
+}
+
 export async function getMe(): Promise<{ user: UserProfile }> {
   return apiFetch<{ user: UserProfile }>('/v1/auth/me');
 }

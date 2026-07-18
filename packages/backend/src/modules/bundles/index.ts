@@ -6,6 +6,10 @@ import type { FastifyInstance } from 'fastify';
 import { v4 as uuid } from 'uuid';
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import zlib from 'zlib';
+import util from 'util';
+const gunzip = util.promisify(zlib.gunzip);
+const gzip = util.promisify(zlib.gzip);
 import { env } from '../../config/env.js';
 import {
   BundleListQuerySchema,
@@ -111,6 +115,125 @@ export default async function bundlesModule(fastify: FastifyInstance) {
       await client.query('ROLLBACK');
       fastify.log.error(error);
       return reply.status(500).send({ error: 'Failed to create bundle' });
+    } finally {
+      client.release();
+    }
+  });
+
+  // ── POST /merge — Merge multiple bundles ───────────────────
+  fastify.post('/merge', async (request, reply) => {
+    const { uid } = request.firebaseUser;
+
+    const { bundleIds, display_name } = request.body as { bundleIds: string[], display_name: string };
+    if (!Array.isArray(bundleIds) || bundleIds.length < 2) {
+      return reply.status(400).send({ error: 'Provide at least two bundleIds to merge' });
+    }
+
+    const client = await fastify.pg.connect();
+    try {
+      // 1. Fetch metadata and verify ownership
+      const result = await client.query(
+        'SELECT id, s3_key, token_count_original, token_count_bundle FROM toffee_bundles WHERE id = ANY($1) AND user_id = $2',
+        [bundleIds, uid]
+      );
+
+      if (result.rows.length !== bundleIds.length) {
+        throw new Error('One or more bundles not found or access denied');
+      }
+
+      // 2. Download from S3 and decompress
+      const bundlesData = [];
+      let totalOriginalTokens = 0;
+      let totalBundleTokens = 0;
+
+      for (const row of result.rows) {
+        totalOriginalTokens += row.token_count_original;
+        totalBundleTokens += row.token_count_bundle;
+        
+        const s3Response = await s3.send(new GetObjectCommand({
+          Bucket: env.AWS_S3_BUCKET,
+          Key: row.s3_key,
+        }));
+        
+        const base64Str = await s3Response.Body?.transformToString();
+        if (base64Str) {
+          const compressedBytes = Buffer.from(base64Str, 'base64');
+          const jsonBytes = await gunzip(compressedBytes);
+          bundlesData.push(JSON.parse(jsonBytes.toString('utf-8')));
+        }
+      }
+
+      // 3. Merge payloads
+      const newBundleId = uuid();
+      const mergedTopics = new Set<string>();
+      let mergedContext = '';
+      let mergedGoal = '';
+
+      bundlesData.forEach((b, index) => {
+        if (b.topics) b.topics.forEach((t: string) => mergedTopics.add(t));
+        mergedContext += `\n[Context from ${b.source_platform || 'Bundle ' + (index+1)}]\n${b.summary.critical_context}\n`;
+        mergedGoal += `${b.summary.conversation_goal}; `;
+      });
+
+      const mergedBundle = {
+        schema_version: '1.0.0',
+        bundle_id: newBundleId,
+        created_at: new Date().toISOString(),
+        source_platform: 'toffee-stitched',
+        source_model: 'multi-model-stitch',
+        capture_method: 'dom_scrape',
+        summary: {
+          conversation_goal: mergedGoal.trim(),
+          key_decisions: bundlesData.flatMap(b => b.summary.key_decisions || []),
+          ongoing_tasks: bundlesData.flatMap(b => b.summary.ongoing_tasks || []),
+          user_preferences_inferred: 'Mixed contexts',
+          critical_context: mergedContext.trim(),
+          suggested_continuation: 'Review merged context.',
+          knowledge_gaps: bundlesData.flatMap(b => b.summary.knowledge_gaps || []),
+        },
+        topics: Array.from(mergedTopics),
+        snippet_count: bundlesData.reduce((acc, b) => acc + (b.snippet_count || 1), 0),
+        token_count_original: totalOriginalTokens,
+        token_count_bundle: totalBundleTokens, // Approximate
+        compression_ratio: totalBundleTokens / totalOriginalTokens,
+        compression_profile: 'standard',
+        version: 1,
+        hmac_sha256: '0'.repeat(64), // We skip real HMAC for stitched bundles to save complexity
+      };
+
+      const finalJsonString = JSON.stringify(mergedBundle);
+      const finalCompressedBytes = await gzip(Buffer.from(finalJsonString, 'utf-8'));
+      const finalBundleDataB64 = finalCompressedBytes.toString('base64');
+      const newS3Key = `bundles/${uid}/${newBundleId}.toffee`;
+
+      await client.query('BEGIN');
+
+      // 4. Save to Postgres
+      await client.query(
+        `INSERT INTO toffee_bundles (id, user_id, display_name, source_platform, source_model, compression_profile, token_count_original, token_count_bundle, compression_ratio, s3_key, tags)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+        [newBundleId, uid, display_name || 'Stitched Context', 'toffee-stitched', 'multi-model-stitch', 'standard', totalOriginalTokens, totalBundleTokens, totalBundleTokens/totalOriginalTokens, newS3Key, Array.from(mergedTopics)]
+      );
+
+      // 5. Upload to S3
+      await s3.send(new PutObjectCommand({
+        Bucket: env.AWS_S3_BUCKET,
+        Key: newS3Key,
+        Body: Buffer.from(finalBundleDataB64, 'base64'),
+        ContentType: 'application/x-toffee',
+        ServerSideEncryption: 'aws:kms',
+      }));
+
+      await client.query('COMMIT');
+      
+      sseService.sendToUser(uid, 'new_bundle', { id: newBundleId, display_name: display_name || 'Stitched Context' });
+
+      return reply.status(201).send({ id: newBundleId, s3Key: newS3Key });
+
+    } catch (error: any) {
+      if (client) await client.query('ROLLBACK');
+      fastify.log.error(error);
+      return reply.status(500).send({ error: error.message || 'Failed to merge bundles' });
     } finally {
       client.release();
     }

@@ -78,6 +78,7 @@ export const PlatformEnum = z.enum([
   'perplexity',
   'meta_ai',
   'mistral',
+  'toffee-stitched',
   'other',
 ]);
 

@@ -13,9 +13,10 @@ import {
   AlertCircle,
   ChevronLeft,
   ChevronRight,
+  CheckSquare,
 } from "lucide-react";
 import Link from "next/link";
-import { getBundles, deleteBundle, getTags, updateBundleTags } from "@/lib/api";
+import { getBundles, deleteBundle, getTags, updateBundleTags, mergeBundles } from "@/lib/api";
 import type { BundleItem } from "@/lib/api";
 
 const PLATFORM_FILTERS = ["All", "chatgpt", "claude", "gemini", "copilot", "grok", "perplexity"];
@@ -37,6 +38,10 @@ export default function BundlesPage() {
   const [customTags, setCustomTags] = useState<string[]>([]);
   const [editingTagsFor, setEditingTagsFor] = useState<string | null>(null);
   const [newTagInput, setNewTagInput] = useState("");
+  const [selectedBundles, setSelectedBundles] = useState<Set<string>>(new Set());
+  const [isMerging, setIsMerging] = useState(false);
+  const [showStitchingModal, setShowStitchingModal] = useState(false);
+  const [mergeName, setMergeName] = useState("");
   const pageSize = 12;
 
   const loadBundles = useCallback(async () => {
@@ -125,6 +130,29 @@ export default function BundlesPage() {
     } catch (err) {
       console.error("Failed to update tags");
       loadBundles();
+    }
+  };
+
+  const toggleSelection = (id: string) => {
+    const next = new Set(selectedBundles);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setSelectedBundles(next);
+  };
+
+  const handleMerge = async () => {
+    if (selectedBundles.size < 2) return;
+    try {
+      setIsMerging(true);
+      await mergeBundles(Array.from(selectedBundles), mergeName || "Stitched Context");
+      setSelectedBundles(new Set());
+      setShowStitchingModal(false);
+      setMergeName("");
+      loadBundles();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to merge bundles");
+    } finally {
+      setIsMerging(false);
     }
   };
 
@@ -233,7 +261,23 @@ export default function BundlesPage() {
           {/* Bundle Cards */}
           <div className={`grid ${view === "grid" ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"} gap-3`}>
             {bundles.map((bundle) => (
-              <div key={bundle.id} className="glass-card p-4 text-left hover:border-toffee-500/20 transition-all">
+              <div 
+                key={bundle.id} 
+                className={`glass-card p-4 text-left transition-all cursor-pointer select-none relative ${
+                  selectedBundles.has(bundle.id) 
+                    ? "border-toffee-500/50 bg-toffee-500/5 shadow-[0_0_15px_rgba(245,158,11,0.1)]" 
+                    : "hover:border-toffee-500/20"
+                }`}
+                onClick={(e) => {
+                  if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('a')) return;
+                  toggleSelection(bundle.id);
+                }}
+              >
+                {selectedBundles.has(bundle.id) && (
+                  <div className="absolute top-4 right-4 z-10 w-5 h-5 rounded-full bg-toffee-500 flex items-center justify-center">
+                    <CheckSquare className="w-3 h-3 text-black" />
+                  </div>
+                )}
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div className="w-9 h-9 rounded-lg bg-toffee-500/10 flex items-center justify-center flex-shrink-0">
@@ -344,6 +388,84 @@ export default function BundlesPage() {
               </Link>
             </div>
           )}
+        </div>
+      )}
+      {/* Floating Action Bar for Merging */}
+      {selectedBundles.size > 1 && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 animate-in slide-in-from-bottom-10 fade-in duration-300">
+          <div className="flex items-center gap-4 px-6 py-4 bg-navy-900/90 backdrop-blur-xl border border-toffee-500/30 shadow-[0_10px_40px_rgba(245,158,11,0.2)] rounded-full">
+            <div className="flex items-center gap-2 border-r border-navy-700 pr-4">
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-toffee-500 text-black text-xs font-bold">
+                {selectedBundles.size}
+              </span>
+              <span className="text-sm font-medium text-white">Selected</span>
+            </div>
+            
+            <button
+              onClick={() => setShowStitchingModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-toffee-500 hover:bg-toffee-400 text-black rounded-full text-sm font-bold transition-all"
+            >
+              <CheckSquare className="w-4 h-4" />
+              Stitch Contexts
+            </button>
+
+            <button
+              onClick={() => setSelectedBundles(new Set())}
+              className="text-navy-400 hover:text-white transition-colors p-1 text-sm font-medium"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Stitching Modal */}
+      {showStitchingModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+          <div className="bg-navy-900 border border-navy-700/50 rounded-2xl w-full max-w-md p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+            <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+              <CheckSquare className="w-5 h-5 text-toffee-500" />
+              Stitch Contexts
+            </h2>
+            <p className="text-sm text-navy-400 mb-6">
+              You are about to merge {selectedBundles.size} conversations into a single Mega-Context payload.
+            </p>
+            
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-xs font-medium text-navy-300 mb-1">Stitched Bundle Name</label>
+                <input 
+                  type="text" 
+                  value={mergeName}
+                  onChange={e => setMergeName(e.target.value)}
+                  placeholder="e.g. Project Architecture + API Docs"
+                  className="w-full px-4 py-2 bg-navy-800/50 border border-navy-700 rounded-xl text-white focus:outline-none focus:border-toffee-500/50"
+                  autoFocus
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3">
+              <button 
+                onClick={() => setShowStitchingModal(false)}
+                className="px-4 py-2 text-sm font-medium text-navy-300 hover:text-white transition-colors"
+                disabled={isMerging}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleMerge}
+                disabled={isMerging}
+                className="flex items-center gap-2 px-5 py-2.5 bg-toffee-500 hover:bg-toffee-400 text-black text-sm font-bold rounded-xl transition-all disabled:opacity-50"
+              >
+                {isMerging ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Merging...</>
+                ) : (
+                  <>Merge Now</>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
