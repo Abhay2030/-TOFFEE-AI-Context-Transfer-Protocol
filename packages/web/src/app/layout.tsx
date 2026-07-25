@@ -44,6 +44,7 @@ import DynamicBackground from "@/components/ui/DynamicBackground";
 import { PageTransition } from "@/components/ui/PageTransition";
 import ServiceWorkerRegister from "@/components/pwa/ServiceWorkerRegister";
 import GoogleAdSense from "@/components/monetization/GoogleAdSense";
+import { Analytics } from "@vercel/analytics/react";
 
 export default function RootLayout({
   children,
@@ -62,6 +63,7 @@ export default function RootLayout({
               {children}
             </PageTransition>
           </SmoothScroll>
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>
