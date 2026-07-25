@@ -33,6 +33,9 @@ export const metadata: Metadata = {
       "Never re-explain yourself to an AI again. Transfer context seamlessly between AI platforms.",
     type: "website",
   },
+  other: {
+    "google-adsense-account": "ca-pub-2490258091963191",
+  },
 };
 
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
