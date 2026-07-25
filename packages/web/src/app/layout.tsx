@@ -39,6 +39,7 @@ import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import DynamicBackground from "@/components/ui/DynamicBackground";
 import { PageTransition } from "@/components/ui/PageTransition";
 import ServiceWorkerRegister from "@/components/pwa/ServiceWorkerRegister";
+import GoogleAdSense from "@/components/monetization/GoogleAdSense";
 
 export default function RootLayout({
   children,
@@ -49,6 +50,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans min-h-screen bg-navy-950 text-navy-100 antialiased relative overflow-x-hidden`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <GoogleAdSense publisherId="ca-pub-2490258091963191" />
           <ServiceWorkerRegister />
           <DynamicBackground />
           <SmoothScroll>

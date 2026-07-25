@@ -8,7 +8,8 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "clean": "rimraf dist",
-    "lint": "eslint src/"
+    "lint": "eslint src/",
+    "zip": "node scripts/zip.cjs"
   },
   "dependencies": {
     "@toffee/shared": "*",
@@ -29,6 +30,7 @@
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
     "@vitejs/plugin-react": "^4.5.0",
+    "archiver": "^8.0.0",
     "autoprefixer": "^10.4.0",
     "postcss": "^8.5.0",
     "rimraf": "^6.0.0",
