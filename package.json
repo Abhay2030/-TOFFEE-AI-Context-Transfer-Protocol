@@ -8,6 +8,7 @@
     "packages/*"
   ],
   "scripts": {
+    "dev": "npm run dev --workspace=packages/web",
     "dev:extension": "npm run dev --workspace=packages/extension",
     "dev:backend": "npm run dev --workspace=packages/backend",
     "dev:web": "npm run dev --workspace=packages/web",
