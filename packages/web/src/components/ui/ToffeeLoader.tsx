@@ -397,6 +397,12 @@ export default function ToffeeLoader({
     }, 1200);
   }, [dismissing, onComplete]);
 
+  // Auto-dismiss
+  useEffect(() => {
+    const t = setTimeout(handleDismiss, 9000);
+    return () => clearTimeout(t);
+  }, [handleDismiss]);
+
   return (
     <div
       id="toffee-loader"
