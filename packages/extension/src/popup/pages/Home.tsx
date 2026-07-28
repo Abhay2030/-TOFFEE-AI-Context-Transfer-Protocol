@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FolderOpen, Plus, Search, FileText, ArrowRightLeft, Trash2, Copy, Check, Loader2 } from 'lucide-react';
 import { useLibraryStore } from '../stores/libraryStore';
@@ -8,6 +8,7 @@ export default function Home() {
   const { bundles, setBundles, removeBundle, searchQuery, setSearchQuery } = useLibraryStore();
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch bundles on mount
   useEffect(() => {
@@ -45,6 +46,33 @@ export default function Home() {
     }
   };
 
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const text = event.target?.result as string;
+        const parsed = JSON.parse(text);
+        if (parsed.id && parsed.bundleData) {
+          // StoredBundle format
+          parsed.id = crypto.randomUUID();
+          await db.bundles.put(parsed);
+          // Refresh bundles
+          const storedBundles = await db.bundles.orderBy('createdAt').reverse().toArray();
+          setBundles(storedBundles as any);
+        } else {
+          alert('Unsupported file format. Please import a .toffee backup.');
+        }
+      } catch (err) {
+        console.error('Import failed', err);
+        alert('Failed to import bundle. File is corrupted or invalid.');
+      }
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+    reader.readAsText(file);
+  };
+
   // Filter bundles based on search query
   const filteredBundles = bundles.filter(b => 
     b.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -70,16 +98,33 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Hidden File Input */}
+      <input 
+        type="file" 
+        accept=".toffee,.json" 
+        className="hidden" 
+        ref={fileInputRef} 
+        onChange={handleImport} 
+      />
+
       {/* Quick Actions */}
       <div className="flex gap-3">
-        <button id="btn-new-capture" className="flex-1 relative group overflow-hidden rounded-2xl p-[1px]">
+        <button 
+          id="btn-new-capture" 
+          onClick={() => window.dispatchEvent(new CustomEvent('navigate', { detail: { tab: 'capture' } }))}
+          className="flex-1 relative group overflow-hidden rounded-2xl p-[1px]"
+        >
           <div className="absolute inset-0 toffee-gradient opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
           <div className="relative h-full flex items-center justify-center gap-2 px-4 py-3 bg-[#0A0A0A]/80 backdrop-blur-xl rounded-2xl group-hover:bg-[#0A0A0A]/60 transition-colors duration-300">
             <Plus className="w-4 h-4 text-[#F59E0B]" />
             <span className="text-sm font-semibold text-white">Capture</span>
           </div>
         </button>
-        <button id="btn-import-bundle" className="flex-1 glass-card flex items-center justify-center gap-2 px-4 py-3 hover:bg-white/10 transition-colors duration-300 group">
+        <button 
+          id="btn-import-bundle" 
+          onClick={() => fileInputRef.current?.click()}
+          className="flex-1 glass-card flex items-center justify-center gap-2 px-4 py-3 hover:bg-white/10 transition-colors duration-300 group"
+        >
           <FolderOpen className="w-4 h-4 text-white/60 group-hover:text-white transition-colors" />
           <span className="text-sm font-medium text-white/80 group-hover:text-white transition-colors">Import</span>
         </button>
@@ -157,6 +202,10 @@ export default function Home() {
                           <Trash2 className="w-4 h-4 text-white/60 hover:text-red-400" />
                         </button>
                         <button 
+                          onClick={() => {
+                            localStorage.setItem('toffee_inject_preselect', bundle.id);
+                            window.dispatchEvent(new CustomEvent('navigate', { detail: { tab: 'inject' } }));
+                          }}
                           className="p-1.5 rounded-md hover:bg-[#F59E0B]/20 transition-colors"
                           title="Inject Context"
                         >

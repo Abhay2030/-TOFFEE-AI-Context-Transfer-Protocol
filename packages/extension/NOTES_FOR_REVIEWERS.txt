@@ -1,0 +1,28 @@
+To the Microsoft Edge Add-ons Review Team:
+
+Thank you for reviewing the Toffee — AI Context Transfer extension!
+
+Toffee allows users to seamlessly transfer conversational context between different AI platforms (ChatGPT, Claude, Gemini, Copilot, Grok, and Perplexity) so they never have to re-explain themselves.
+
+### How to Test (No Account Required)
+To comply with the requirement that functionality must be testable without mandatory account creation (Policy 1.1.3), we have built a fully offline "Guest Mode" populated with demo data.
+
+Please follow these steps to test the core functionality:
+
+1. Click on the Toffee extension icon in your toolbar to open the popup.
+2. At the bottom of the Login screen, click the **"Explore as Guest"** button.
+3. You will immediately enter the main application, bypassing Firebase authentication entirely.
+4. The extension will automatically seed your local database with 3 sample "Memory Crystals" (simulated context bundles) so you have data to interact with.
+5. **Testing Injection:** 
+   - Navigate to any supported AI platform (e.g., https://chatgpt.com or https://claude.ai).
+   - Open the Toffee extension and navigate to the **"Inject"** tab (the lightning bolt icon).
+   - Select one of the sample bundles, adjust the token budget slider if desired, and click **"Inject Context"**.
+   - The extension will automatically insert the context into the AI's chat input area.
+6. **Testing Extraction:**
+   - While on a supported AI platform (e.g., https://chatgpt.com), click the **"Capture"** tab in the extension.
+   - Click **"Extract Context"**. The extension will parse the DOM and save the conversation offline as a new memory crystal.
+
+If you have any questions or experience any issues during testing, please reach out to us. 
+
+Thank you!
+The Toffee Team

@@ -15,7 +15,13 @@ export default function Inject() {
   useEffect(() => {
     db.bundles.orderBy('createdAt').reverse().toArray().then((results) => {
       setBundles(results);
-      if (results.length > 0) setSelectedBundleId(results[0].id);
+      const preselect = localStorage.getItem('toffee_inject_preselect');
+      if (preselect && results.some(b => b.id === preselect)) {
+        setSelectedBundleId(preselect);
+        localStorage.removeItem('toffee_inject_preselect');
+      } else if (results.length > 0) {
+        setSelectedBundleId(results[0].id);
+      }
     });
   }, []);
   return (

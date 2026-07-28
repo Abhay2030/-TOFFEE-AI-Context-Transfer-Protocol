@@ -106,12 +106,6 @@ export default function Capture() {
           </button>
         )}
 
-        {status === 'idle' && (
-          <button id="btn-selective-capture" className="w-full glass-card py-3 text-sm font-medium text-white/60 hover:text-white hover:bg-white/10 transition-colors duration-300">
-            Selective Extraction
-          </button>
-        )}
-
         {status === 'complete' && (
           <div className="space-y-3">
             <button 
@@ -128,6 +122,7 @@ export default function Capture() {
                   await db.bundles.put(storedBundle);
                   await db.conversations.update(conversation.id, { processed: true });
                   setStatus('idle');
+                  window.dispatchEvent(new CustomEvent('navigate', { detail: { tab: 'home' } }));
                 } catch (e: any) {
                   console.error(e);
                   setError(e.message);
@@ -139,9 +134,6 @@ export default function Capture() {
                 <CheckCircle2 className="w-5 h-5 text-white" />
                 <span className="text-base font-semibold text-white tracking-wide">Save to Memory</span>
               </div>
-            </button>
-            <button className="w-full glass-card py-3 text-sm font-medium text-white/60 hover:text-white hover:bg-white/10 transition-colors duration-300">
-              Preview Extracted Data
             </button>
           </div>
         )}

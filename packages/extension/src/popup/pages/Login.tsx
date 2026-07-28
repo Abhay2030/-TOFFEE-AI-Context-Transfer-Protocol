@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Mail, Lock, LogIn, Chrome } from 'lucide-react';
+import { Sparkles, Mail, Lock, LogIn, Chrome, Eye } from 'lucide-react';
 import { auth, signInWithGoogle } from '../../lib/firebase';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { useGuestStore } from '../stores/guestStore';
+import { seedDemoBundles } from '../../db/demoData';
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
@@ -10,6 +12,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { enterGuestMode } = useGuestStore();
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,6 +39,19 @@ export default function Login() {
       await signInWithGoogle();
     } catch (err: any) {
       setError(err.message || 'Google authentication failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGuestMode = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      await seedDemoBundles();
+      await enterGuestMode();
+    } catch (err: any) {
+      setError(err.message || 'Failed to enter guest mode');
     } finally {
       setLoading(false);
     }
@@ -127,13 +143,41 @@ export default function Login() {
           </button>
         </form>
 
-        <div className="mt-8 text-center">
+        <div className="mt-6 text-center">
           <button
             onClick={() => { setIsLogin(!isLogin); setError(''); }}
             className="text-xs font-medium text-white/40 hover:text-white transition-colors"
           >
             {isLogin ? "No access key? Register" : "Have an access key? Connect"}
           </button>
+        </div>
+
+        {/* Guest Mode Divider */}
+        <div className="flex items-center gap-4 mt-6 opacity-40">
+          <div className="h-px bg-white/20 flex-1" />
+          <span className="text-[10px] font-bold text-white uppercase tracking-widest">or</span>
+          <div className="h-px bg-white/20 flex-1" />
+        </div>
+
+        {/* Guest Mode Button */}
+        <button
+          id="btn-guest-mode"
+          onClick={handleGuestMode}
+          disabled={loading}
+          className="w-full mt-4 flex items-center justify-center gap-3 py-3 px-4 bg-white/[0.04] hover:bg-white/10 border border-white/[0.08] hover:border-white/20 text-white/70 hover:text-white rounded-xl font-medium text-sm transition-all duration-300 disabled:opacity-50 group"
+        >
+          <Eye className="w-4 h-4 text-[#F59E0B]/70 group-hover:text-[#F59E0B] transition-colors" />
+          <span>Explore as Guest</span>
+        </button>
+        <p className="text-[10px] text-white/30 text-center mt-2">
+          Preview with sample data • No account required
+        </p>
+
+        {/* Footer / Legal */}
+        <div className="mt-8 flex items-center justify-center gap-4 text-[10px] text-white/40">
+          <a href="https://toffee.ai/privacy" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Privacy Policy</a>
+          <span>•</span>
+          <a href="https://toffee.ai/terms" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Terms of Service</a>
         </div>
       </motion.div>
     </div>

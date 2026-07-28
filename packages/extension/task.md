@@ -10,5 +10,8 @@
   - `[x]` Redesign `Home.tsx` (Memory Crystals & animated empty states).
   - `[x]` Redesign `Capture.tsx` (Pulsing Radar/Scanning UI).
   - `[x]` Redesign `Login.tsx` (Cinematic entry with glowing orb).
-- `[ ]` **4. Final Polish**
-  - `[ ]` Verify fluid interactions and responsive layout constraints for the extension popup.
+  - `[x]` Update `Login.tsx` — Add Privacy & ToS links to footer
+  - `[x]` Update `Settings.tsx` — Add Privacy & ToS links to footer
+- `[x]` **4. Final Polish**
+  - `[x]` Create `NOTES_FOR_REVIEWERS.txt` — Draft certification notes
+  - `[x]` Build & Verify fluid interactions and responsive layout constraints for the extension popup.

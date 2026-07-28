@@ -9,6 +9,7 @@ import SettingsPage from './pages/Settings';
 import Login from './pages/Login';
 import { auth } from '../lib/firebase';
 import { User } from 'firebase/auth';
+import { useGuestStore } from './stores/guestStore';
 
 type Tab = 'home' | 'capture' | 'inject' | 'analytics' | 'settings';
 
@@ -24,13 +25,29 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>('home');
   const [user, setUser] = useState<User | null>(null);
   const [loadingAuth, setLoadingAuth] = useState(true);
+  const { isGuest, isLoading: loadingGuest, loadGuestState } = useGuestStore();
 
   useEffect(() => {
+    // Load guest state from storage
+    loadGuestState();
+
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       setUser(currentUser);
       setLoadingAuth(false);
     });
-    return () => unsubscribe();
+
+    const handleNavigate = (e: Event) => {
+      const customEvent = e as CustomEvent<{ tab: Tab }>;
+      if (customEvent.detail && customEvent.detail.tab) {
+        setActiveTab(customEvent.detail.tab);
+      }
+    };
+    window.addEventListener('navigate', handleNavigate);
+
+    return () => {
+      unsubscribe();
+      window.removeEventListener('navigate', handleNavigate);
+    };
   }, []);
 
   const renderPage = () => {
@@ -43,7 +60,8 @@ export default function App() {
     }
   };
 
-  if (loadingAuth) {
+  // Wait for both auth and guest state to resolve
+  if (loadingAuth || loadingGuest) {
     return (
       <div className="flex items-center justify-center h-[600px] bg-navy-950">
         <div className="w-8 h-8 rounded-full border-2 border-toffee-500 border-t-transparent animate-spin" />
@@ -51,7 +69,8 @@ export default function App() {
     );
   }
 
-  if (!user) {
+  // Show login only if not authenticated AND not in guest mode
+  if (!user && !isGuest) {
     return (
       <div className="h-[600px]">
         <Login />
@@ -73,9 +92,16 @@ export default function App() {
           </div>
           <h1 className="text-lg font-bold text-white tracking-tight">Toffee</h1>
         </div>
-        <div className="glass-pill px-3 py-1 flex items-center gap-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-          <span className="text-xs font-medium text-white/80">v1.0.0</span>
+        <div className="flex items-center gap-2">
+          {isGuest && (
+            <div className="px-2.5 py-1 rounded-full bg-[#F59E0B]/10 border border-[#F59E0B]/20">
+              <span className="text-[10px] font-bold text-[#F59E0B] tracking-widest uppercase">Guest</span>
+            </div>
+          )}
+          <div className="glass-pill px-3 py-1 flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+            <span className="text-xs font-medium text-white/80">v1.0.0</span>
+          </div>
         </div>
       </header>
 
@@ -141,3 +167,4 @@ export default function App() {
     </div>
   );
 }
+

@@ -1,8 +1,10 @@
 import { type ReactNode, useEffect } from 'react';
-import { User, Cloud, Shield, Moon, Globe, LogOut, ChevronRight, RefreshCw, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { User, Cloud, Shield, Moon, Globe, LogOut, ChevronRight, RefreshCw, CheckCircle, AlertCircle, Loader2, LogIn, Eye } from 'lucide-react';
 import { useSettingsStore } from '../stores/settingsStore';
+import { useGuestStore } from '../stores/guestStore';
 import { auth } from '../../lib/firebase';
 import { signOut } from 'firebase/auth';
+import { clearDemoBundles } from '../../db/demoData';
 
 export default function SettingsPage() {
   const {
@@ -10,6 +12,7 @@ export default function SettingsPage() {
     toggleCloudSync, toggleDarkMode, setLanguage,
     loadFromStorage, triggerManualSync,
   } = useSettingsStore();
+  const { isGuest, exitGuestMode } = useGuestStore();
   const user = auth.currentUser;
 
   useEffect(() => {
@@ -24,6 +27,15 @@ export default function SettingsPage() {
     }
   };
 
+  const handleExitGuestMode = async () => {
+    try {
+      await clearDemoBundles();
+      await exitGuestMode();
+    } catch (error) {
+      console.error('Error exiting guest mode:', error);
+    }
+  };
+
   return (
     <div className="pt-2 pb-28 space-y-8 relative">
       {/* Ambient Glow Effects */}
@@ -35,39 +47,79 @@ export default function SettingsPage() {
         <h2 className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] px-2">
           Account
         </h2>
-        <div className="group relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent rounded-2xl blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          <div className="relative bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-glass rounded-2xl p-4 flex items-center justify-between overflow-hidden">
-            {/* Subtle inner highlight */}
-            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-50" />
-            
-            <div className="flex items-center gap-4">
-              <div className="relative w-12 h-12 rounded-full flex items-center justify-center p-[2px] bg-gradient-to-tr from-[#F59E0B] to-[#EC4899]">
-                <div className="w-full h-full rounded-full overflow-hidden bg-[#0A0A0A] flex items-center justify-center">
-                  {user?.photoURL ? (
-                    <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover" />
-                  ) : (
-                    <User className="w-5 h-5 text-white/50" />
-                  )}
+
+        {isGuest ? (
+          /* ── Guest Mode Account Card ─────────────────── */
+          <div className="group relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-[#F59E0B]/5 to-transparent rounded-2xl blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="relative bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-glass rounded-2xl p-5 overflow-hidden">
+              {/* Subtle inner highlight */}
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#F59E0B]/30 to-transparent opacity-50" />
+              
+              <div className="flex items-center gap-4 mb-4">
+                <div className="relative w-12 h-12 rounded-full flex items-center justify-center bg-[#F59E0B]/10 border border-[#F59E0B]/20">
+                  <Eye className="w-5 h-5 text-[#F59E0B]" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white/90 font-display">Guest Mode</p>
+                  <p className="text-[11px] text-white/50 font-light tracking-wide">Exploring with sample data</p>
                 </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-white/90 font-display">
-                  {user?.displayName || 'Toffee User'}
+
+              <div className="space-y-2">
+                <button
+                  id="btn-sign-in-from-guest"
+                  onClick={handleExitGuestMode}
+                  className="w-full relative group/btn overflow-hidden rounded-xl p-[1px]"
+                >
+                  <div className="absolute inset-0 toffee-gradient opacity-80 group-hover/btn:opacity-100 transition-opacity duration-300" />
+                  <div className="relative flex items-center justify-center gap-2 px-4 py-2.5 bg-[#0A0A0A]/80 backdrop-blur-xl rounded-xl group-hover/btn:bg-transparent transition-colors duration-300">
+                    <LogIn className="w-4 h-4 text-white" />
+                    <span className="text-sm font-semibold text-white">Sign In for Full Access</span>
+                  </div>
+                </button>
+                <p className="text-[10px] text-white/30 text-center">
+                  Unlock cloud sync, real captures & cross-device transfer
                 </p>
-                <p className="text-[11px] text-white/50 font-light tracking-wide">{user?.email}</p>
               </div>
             </div>
-            <button 
-              id="btn-sign-out" 
-              onClick={handleSignOut}
-              className="p-2.5 text-white/40 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all duration-300"
-              title="Sign Out"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
           </div>
-        </div>
+        ) : (
+          /* ── Authenticated Account Card ──────────────── */
+          <div className="group relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent rounded-2xl blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="relative bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-glass rounded-2xl p-4 flex items-center justify-between overflow-hidden">
+              {/* Subtle inner highlight */}
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-50" />
+              
+              <div className="flex items-center gap-4">
+                <div className="relative w-12 h-12 rounded-full flex items-center justify-center p-[2px] bg-gradient-to-tr from-[#F59E0B] to-[#EC4899]">
+                  <div className="w-full h-full rounded-full overflow-hidden bg-[#0A0A0A] flex items-center justify-center">
+                    {user?.photoURL ? (
+                      <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                      <User className="w-5 h-5 text-white/50" />
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white/90 font-display">
+                    {user?.displayName || 'Toffee User'}
+                  </p>
+                  <p className="text-[11px] text-white/50 font-light tracking-wide">{user?.email}</p>
+                </div>
+              </div>
+              <button 
+                id="btn-sign-out" 
+                onClick={handleSignOut}
+                className="p-2.5 text-white/40 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all duration-300"
+                title="Sign Out"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* Preferences */}
@@ -80,17 +132,19 @@ export default function SettingsPage() {
             icon={<Cloud className="w-4 h-4 text-[#38BDF8]" />}
             iconBg="bg-[#38BDF8]/10"
             label="Cloud Sync"
-            description={cloudSync
-              ? syncStatus === 'syncing'
-                ? 'Syncing...'
-                : lastSyncAt
-                  ? `Last synced ${new Date(lastSyncAt).toLocaleTimeString()}`
-                  : 'Enabled — waiting for first sync'
-              : 'Sync bundles across devices'
+            description={isGuest
+              ? 'Sign in to enable cloud sync'
+              : cloudSync
+                ? syncStatus === 'syncing'
+                  ? 'Syncing...'
+                  : lastSyncAt
+                    ? `Last synced ${new Date(lastSyncAt).toLocaleTimeString()}`
+                    : 'Enabled — waiting for first sync'
+                : 'Sync bundles across devices'
             }
           >
             <div className="flex items-center gap-2">
-              {cloudSync && (
+              {cloudSync && !isGuest && (
                 <button
                   id="btn-sync-now"
                   onClick={() => triggerManualSync()}
@@ -109,7 +163,12 @@ export default function SettingsPage() {
                   )}
                 </button>
               )}
-              <Toggle id="toggle-cloud-sync" enabled={cloudSync} onChange={toggleCloudSync} />
+              <Toggle
+                id="toggle-cloud-sync"
+                enabled={cloudSync}
+                onChange={toggleCloudSync}
+                disabled={isGuest}
+              />
             </div>
           </SettingRow>
           
@@ -168,11 +227,16 @@ export default function SettingsPage() {
       </section>
 
       {/* Footer */}
-      <div className="text-center pt-6 pb-2 relative z-10 space-y-1">
+      <div className="text-center pt-6 pb-2 relative z-10 space-y-2">
         <p className="text-[10px] text-white/40 font-medium tracking-wider">
           Toffee • The Universal AI Context Transfer Platform
         </p>
-        <p className="text-[9px] text-white/30 tracking-wider">
+        <div className="flex items-center justify-center gap-3 text-[9px] text-white/30 font-medium">
+          <a href="https://toffee.ai/privacy" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Privacy Policy</a>
+          <span>•</span>
+          <a href="https://toffee.ai/terms" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Terms of Service</a>
+        </div>
+        <p className="text-[9px] text-white/20 tracking-wider pt-1">
           Created & Built by Abhay Sachin Donde
         </p>
       </div>
@@ -203,16 +267,18 @@ function SettingRow({ icon, iconBg, label, description, children }: {
   );
 }
 
-function Toggle({ id, enabled, onChange }: { id: string; enabled: boolean; onChange: () => void }) {
+function Toggle({ id, enabled, onChange, disabled }: { id: string; enabled: boolean; onChange: () => void; disabled?: boolean }) {
   return (
     <button
       id={id}
       role="switch"
       aria-checked={enabled}
       onClick={onChange}
+      disabled={disabled}
       className={`
         relative w-11 h-6 rounded-full transition-all duration-300 outline-none
         border border-white/5 shadow-inner
+        ${disabled ? 'opacity-40 cursor-not-allowed' : ''}
         ${enabled ? 'bg-gradient-to-r from-[#F59E0B] to-[#EC4899] shadow-[0_0_12px_rgba(245,158,11,0.4)]' : 'bg-white/10 hover:bg-white/15'}
       `}
     >
@@ -226,3 +292,4 @@ function Toggle({ id, enabled, onChange }: { id: string; enabled: boolean; onCha
     </button>
   );
 }
+
