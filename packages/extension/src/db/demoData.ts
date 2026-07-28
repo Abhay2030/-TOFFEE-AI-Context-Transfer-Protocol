@@ -5,12 +5,13 @@
 
 import { db, type StoredBundle } from './database';
 import { v4 as uuid } from 'uuid';
+import { gzipString, uint8ArrayToBase64 } from '../core/compression';
 
 // ── Demo Bundle IDs (fixed so we can clean them up) ──────────
 
 const DEMO_PREFIX = 'demo-';
 
-const DEMO_BUNDLES: Omit<StoredBundle, 'id'>[] = [
+const DEMO_BUNDLES_RAW = [
   {
     displayName: 'React Architecture Deep Dive',
     sourcePlatform: 'chatgpt',
@@ -20,7 +21,7 @@ const DEMO_BUNDLES: Omit<StoredBundle, 'id'>[] = [
     tokenCountBundle: 4210,
     compressionRatio: 0.228,
     tags: ['react', 'architecture', 'frontend'],
-    bundleData: btoa(JSON.stringify({
+    bundleDataJson: {
       version: 1,
       source: { platform: 'chatgpt', model: 'gpt-4o' },
       summary: {
@@ -39,7 +40,7 @@ const DEMO_BUNDLES: Omit<StoredBundle, 'id'>[] = [
         { role: 'user', summary: 'Follow-up on state management with RSC' },
         { role: 'assistant', summary: 'Recommended Zustand for client state, server actions for mutations' },
       ],
-    })),
+    },
     hmacSignature: 'demo-signature-001',
     version: 1,
     createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
@@ -54,7 +55,7 @@ const DEMO_BUNDLES: Omit<StoredBundle, 'id'>[] = [
     tokenCountBundle: 5180,
     compressionRatio: 0.21,
     tags: ['python', 'machine-learning', 'data-pipeline'],
-    bundleData: btoa(JSON.stringify({
+    bundleDataJson: {
       version: 1,
       source: { platform: 'claude', model: 'claude-3.5-sonnet' },
       summary: {
@@ -75,7 +76,7 @@ const DEMO_BUNDLES: Omit<StoredBundle, 'id'>[] = [
         { role: 'user', summary: 'Discussed model deployment options' },
         { role: 'assistant', summary: 'Suggested ONNX Runtime with FastAPI for low-latency serving' },
       ],
-    })),
+    },
     hmacSignature: 'demo-signature-002',
     version: 1,
     createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
@@ -90,7 +91,7 @@ const DEMO_BUNDLES: Omit<StoredBundle, 'id'>[] = [
     tokenCountBundle: 6840,
     compressionRatio: 0.219,
     tags: ['kubernetes', 'devops', 'infrastructure'],
-    bundleData: btoa(JSON.stringify({
+    bundleDataJson: {
       version: 1,
       source: { platform: 'gemini', model: 'gemini-1.5-pro' },
       summary: {
@@ -113,7 +114,7 @@ const DEMO_BUNDLES: Omit<StoredBundle, 'id'>[] = [
         { role: 'user', summary: 'Asked about cost optimization with spot instances' },
         { role: 'assistant', summary: 'Provided spot instance strategy with fallback to on-demand' },
       ],
-    })),
+    },
     hmacSignature: 'demo-signature-003',
     version: 1,
     createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
@@ -138,10 +139,21 @@ export async function seedDemoBundles(): Promise<number> {
     }
 
     // Insert demo bundles
-    const entries: StoredBundle[] = DEMO_BUNDLES.map((bundle, i) => ({
-      ...bundle,
-      id: `${DEMO_PREFIX}${uuid().slice(0, 8)}-${i}`,
-    }));
+    const entries: StoredBundle[] = await Promise.all(
+      DEMO_BUNDLES_RAW.map(async (bundle, i) => {
+        const rawString = JSON.stringify(bundle.bundleDataJson);
+        const compressed = await gzipString(rawString);
+        const base64 = uint8ArrayToBase64(compressed);
+
+        const { bundleDataJson, ...rest } = bundle;
+
+        return {
+          ...rest,
+          bundleData: base64,
+          id: `${DEMO_PREFIX}${uuid().slice(0, 8)}-${i}`,
+        } as StoredBundle;
+      })
+    );
 
     await db.bundles.bulkPut(entries);
     console.log(`[Toffee] Seeded ${entries.length} demo bundles`);
