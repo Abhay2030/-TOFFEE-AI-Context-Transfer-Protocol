@@ -78,6 +78,7 @@ export default function ToffeeLoader({
   // Reduced motion
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setReduced(mq.matches);
     const h = (e: MediaQueryListEvent) => setReduced(e.matches);
     mq.addEventListener("change", h);
@@ -86,7 +87,11 @@ export default function ToffeeLoader({
 
   // Phase progression — drives text reveals
   useEffect(() => {
-    if (reduced) { setPhase(5); return; }
+    if (reduced) { 
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setPhase(5); 
+      return; 
+    }
     const ts = [
       setTimeout(() => setPhase(1), 600),
       setTimeout(() => setPhase(2), 2200),
@@ -341,7 +346,11 @@ export default function ToffeeLoader({
         const hexR = coreR * Math.cos(Math.PI / sides);
         const r = lerp(hexR, coreR, morphT);
         const px = Math.cos(a) * r, py = Math.sin(a) * r;
-        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+        if (i === 0) {
+          ctx.moveTo(px, py);
+        } else {
+          ctx.lineTo(px, py);
+        }
       }
       ctx.closePath();
       ctx.fill();

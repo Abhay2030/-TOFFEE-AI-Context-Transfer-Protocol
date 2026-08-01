@@ -74,6 +74,7 @@ export default function BundlesPage() {
   }, [page, debouncedSearch, platformFilter]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadBundles();
   }, [loadBundles]);
 
@@ -88,6 +89,7 @@ export default function BundlesPage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadTags();
   }, [loadTags]);
 

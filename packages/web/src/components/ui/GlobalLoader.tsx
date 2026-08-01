@@ -10,6 +10,7 @@ export function GlobalLoader() {
     // Only show the loader on the first visit per session
     const hasLoaded = sessionStorage.getItem("toffee_has_loaded");
     if (!hasLoaded) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowLoader(true);
       sessionStorage.setItem("toffee_has_loaded", "true");
     }

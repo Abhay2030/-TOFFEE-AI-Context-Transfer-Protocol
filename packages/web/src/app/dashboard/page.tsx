@@ -45,6 +45,7 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData();
 
     let eventSource: EventSource | null = null;

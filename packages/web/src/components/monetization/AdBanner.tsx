@@ -18,6 +18,7 @@ export default function AdBanner({
   useEffect(() => {
     try {
       if (typeof window !== "undefined") {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const adsbygoogle = (window as any).adsbygoogle || [];
         const adContainer = document.querySelector(`ins[data-ad-slot="${dataAdSlot}"]`);
         if (adContainer && adContainer.innerHTML === "") {
