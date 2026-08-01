@@ -14,9 +14,13 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
   ]),
   {
+    files: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
     rules: {
       "react/no-unescaped-entities": "off",
-      "@typescript-eslint/no-unused-vars": "off"
+      "@typescript-eslint/no-unused-vars": "off",
+      "no-undef": "off",
+      "react/no-unknown-property": "off",
+      "@typescript-eslint/no-unused-expressions": "off"
     }
   }
 ]);

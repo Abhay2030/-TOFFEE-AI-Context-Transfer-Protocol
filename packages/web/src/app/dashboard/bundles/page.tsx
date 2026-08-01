@@ -61,9 +61,6 @@ export default function BundlesPage() {
       const data = await getBundles({
         page,
         pageSize,
-      const data = await getBundles({
-        page,
-        pageSize,
         search: debouncedSearch || undefined,
         tag: platformFilter !== "All" ? platformFilter : undefined,
       });
