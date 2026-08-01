@@ -28,10 +28,20 @@ const PLATFORM_LABELS: Record<string, string> = {
 export default function BundlesPage() {
   const [view, setView] = useState<"grid" | "list">("grid");
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [platformFilter, setPlatformFilter] = useState("All");
   const [bundles, setBundles] = useState<BundleItem[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+
+  // Debounce search input and reset page when it changes
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [search]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [deleting, setDeleting] = useState<string | null>(null);
@@ -51,7 +61,10 @@ export default function BundlesPage() {
       const data = await getBundles({
         page,
         pageSize,
-        search: search || undefined,
+      const data = await getBundles({
+        page,
+        pageSize,
+        search: debouncedSearch || undefined,
         tag: platformFilter !== "All" ? platformFilter : undefined,
       });
       setBundles(data.bundles);
@@ -61,10 +74,10 @@ export default function BundlesPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, platformFilter]);
+  }, [page, debouncedSearch, platformFilter]);
 
   useEffect(() => {
-    setTimeout(() => loadBundles(), 0);
+    loadBundles();
   }, [loadBundles]);
 
   const loadTags = useCallback(async () => {
@@ -81,10 +94,7 @@ export default function BundlesPage() {
     loadTags();
   }, [loadTags]);
 
-  // Reset page when filters change
-  useEffect(() => {
-    setTimeout(() => setPage(1), 0);
-  }, [search, platformFilter]);
+  // Page resets are now handled inline and by the search debouncer.
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this bundle permanently?")) return;
@@ -217,7 +227,10 @@ export default function BundlesPage() {
           {PLATFORM_FILTERS.map((platform) => (
             <button
               key={platform}
-              onClick={() => setPlatformFilter(platform)}
+              onClick={() => {
+                setPlatformFilter(platform);
+                setPage(1);
+              }}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 platformFilter === platform
                   ? "bg-toffee-500/10 text-toffee-400 border border-toffee-500/20"
@@ -236,7 +249,10 @@ export default function BundlesPage() {
             {customTags.map((tag) => (
               <button
                 key={tag}
-                onClick={() => setPlatformFilter(tag)}
+                onClick={() => {
+                  setPlatformFilter(tag);
+                  setPage(1);
+                }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                   platformFilter === tag
                     ? "bg-accent-violet/10 text-accent-violet border border-accent-violet/20"

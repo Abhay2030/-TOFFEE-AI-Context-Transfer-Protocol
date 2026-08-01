@@ -178,14 +178,23 @@ async function pullRemoteBundles(token: string, errors: string[]): Promise<numbe
 
   try {
     // Get all remote bundles (metadata)
-    const res = await apiRequest('/bundles?pageSize=500', token);
-    if (!res.ok) {
-      errors.push(`Pull list: ${res.status}`);
-      return 0;
+    const remoteBundles: { id: string; [key: string]: unknown }[] = [];
+    let page = 1;
+    let hasMore = true;
+    
+    while (hasMore) {
+      const res = await apiRequest(`/bundles?page=${page}&pageSize=500`, token);
+      if (!res.ok) {
+        errors.push(`Pull list (page ${page}): ${res.status}`);
+        return 0;
+      }
+      const data = await res.json();
+      const bundles = data.bundles || [];
+      remoteBundles.push(...bundles);
+      
+      if (bundles.length < 500) hasMore = false;
+      page++;
     }
-
-    const data = await res.json();
-    const remoteBundles: any[] = data.bundles || [];
 
     // Get all local bundle IDs
     const localIds = new Set((await db.bundles.toArray()).map((b) => b.id));
@@ -331,11 +340,21 @@ async function processDeleteQueue(token: string, errors: string[]): Promise<numb
 
 async function fetchRemoteBundleIds(token: string): Promise<Set<string> | null> {
   try {
-    const res = await apiRequest('/bundles?pageSize=500', token);
-    if (!res.ok) return null;
+    const ids = new Set<string>();
+    let page = 1;
+    let hasMore = true;
+    
+    while (hasMore) {
+      const res = await apiRequest(`/bundles?page=${page}&pageSize=500`, token);
+      if (!res.ok) return null;
 
-    const data = await res.json();
-    const ids = new Set<string>((data.bundles || []).map((b: any) => b.id));
+      const data = await res.json();
+      const bundles = data.bundles || [];
+      bundles.forEach((b: { id: string }) => ids.add(b.id));
+      
+      if (bundles.length < 500) hasMore = false;
+      page++;
+    }
     return ids;
   } catch {
     return null;

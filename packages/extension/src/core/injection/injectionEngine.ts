@@ -22,7 +22,7 @@ export async function processInjection(context: InjectionContext): Promise<{
   const { optimizedBundle, tokensProjected } = optimizeBundleForInjection(context.bundle, constraints);
 
   // Token Safety Check
-  const MAX_SAFE_TOKENS = (constraints as any).maxTokens || 128000; // Default fallback
+  const MAX_SAFE_TOKENS = constraints.maxAbsoluteTokens || 128000; // Default fallback
   if (tokensProjected > MAX_SAFE_TOKENS) {
     throw new Error(`Token limit exceeded: The optimized bundle requires ${tokensProjected} tokens, but the target model only supports ${MAX_SAFE_TOKENS}. Please truncate the conversation manually before injecting.`);
   }
@@ -46,16 +46,16 @@ Please ingest this context before answering my next question.
 ${bundle.summary.conversation_goal}
 
 # Key Decisions
-${bundle.summary.key_decisions.map(d => `- ${d}`).join('\n')}
+${bundle.summary.key_decisions?.map(d => `- ${d}`).join('\n') || 'None recorded.'}
 
 # Ongoing Tasks
-${bundle.summary.ongoing_tasks.map(t => `- ${t}`).join('\n')}
+${bundle.summary.ongoing_tasks?.map(t => `- ${t}`).join('\n') || 'None recorded.'}
 
 # User Preferences
-${bundle.summary.user_preferences_inferred}
+${bundle.summary.user_preferences_inferred || 'None recorded.'}
 
 # Critical Context
-${bundle.summary.critical_context}
+${bundle.summary.critical_context || 'None recorded.'}
 
-Please acknowledge receipt of this context with a brief "Context loaded. Ready to proceed."`;
+CRITICAL INSTRUCTION: You must acknowledge receipt by outputting EXACTLY the phrase "Context loaded. Ready to proceed." and absolutely nothing else. Do not summarize the context.`;
 }

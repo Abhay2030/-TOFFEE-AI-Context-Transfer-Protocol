@@ -45,7 +45,7 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    setTimeout(() => loadData(), 0);
+    loadData();
 
     let eventSource: EventSource | null = null;
     let mounted = true;
@@ -54,11 +54,14 @@ export default function DashboardPage() {
     setupSSESync((newBundleData) => {
       if (mounted) {
         console.log("Real-time sync: Received new bundle", newBundleData);
-        // Refresh data when a new bundle is received
         loadData();
       }
     }).then(es => {
       eventSource = es;
+      if (!mounted && eventSource) {
+        // If the component unmounted while we were waiting for the Promise, close it immediately
+        eventSource.close();
+      }
     });
 
     return () => {

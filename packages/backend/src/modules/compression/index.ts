@@ -8,10 +8,11 @@ import { v4 as uuid } from 'uuid';
 import { compressConversationLLM } from '../../services/anthropic.service.js';
 import { signBundle } from '../../services/hmac.service.js';
 import { CompressBodySchema } from '../../schemas/validation.js';
+import stringify from 'fast-json-stable-stringify';
 
 export default async function compressionModule(fastify: FastifyInstance) {
   fastify.addHook('preHandler', async (request, reply) => {
-    await (fastify as any).verifyFirebaseToken(request, reply);
+    await fastify.verifyFirebaseToken(request, reply);
   });
 
   // ── POST /compress ─────────────────────────────────────────
@@ -31,7 +32,7 @@ export default async function compressionModule(fastify: FastifyInstance) {
 
     // ── Preprocessing & Real LLM Call ─────────────────────────────
     const transcriptText = conversation.turns
-      .map((t: any) => `${t.role.toUpperCase()}: ${t.content.trim().replace(/\n{3,}/g, '\n\n')}`)
+      .map((t: { role: string; content: string }) => `${t.role.toUpperCase()}: ${t.content.trim().replace(/\n{3,}/g, '\n\n')}`)
       .join('\n');
 
     let summaryData;
@@ -76,7 +77,7 @@ export default async function compressionModule(fastify: FastifyInstance) {
     };
 
     // Sign with server-side per-user derived key
-    const hmac = signBundle(JSON.stringify(bundlePayload), uid);
+    const hmac = signBundle(stringify(bundlePayload), uid);
     const bundle = { ...bundlePayload, hmac_sha256: hmac };
 
     const processingTimeMs = Date.now() - startTime;

@@ -2,6 +2,13 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import SmoothScroll from "@/components/layout/SmoothScroll";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import DynamicBackground from "@/components/ui/DynamicBackground";
+import { PageTransition } from "@/components/ui/PageTransition";
+import ServiceWorkerRegister from "@/components/pwa/ServiceWorkerRegister";
+import GoogleAdSense from "@/components/monetization/GoogleAdSense";
+import { Analytics } from "@vercel/analytics/react";
+import { GlobalLoader } from "@/components/ui/GlobalLoader";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains-mono" });
@@ -39,13 +46,7 @@ export const metadata: Metadata = {
   },
 };
 
-import { ThemeProvider } from "@/components/providers/ThemeProvider";
-import DynamicBackground from "@/components/ui/DynamicBackground";
-import { PageTransition } from "@/components/ui/PageTransition";
-import ServiceWorkerRegister from "@/components/pwa/ServiceWorkerRegister";
-import GoogleAdSense from "@/components/monetization/GoogleAdSense";
-import { Analytics } from "@vercel/analytics/react";
-import { GlobalLoader } from "@/components/ui/GlobalLoader";
+// Metadata and fonts are defined above
 
 export default function RootLayout({
   children,

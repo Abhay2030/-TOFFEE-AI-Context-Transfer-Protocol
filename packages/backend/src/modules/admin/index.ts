@@ -7,7 +7,8 @@ export default async function adminModule(fastify: FastifyInstance) {
     await (fastify as any).verifyFirebaseToken(request, reply);
     
     // 2. Verify the authenticated user is the designated admin
-    if (request.firebaseUser.email !== 'abhaydonde2007@gmail.com') {
+    const adminEmails = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim());
+    if (!request.firebaseUser.email || !adminEmails.includes(request.firebaseUser.email)) {
       return reply.status(403).send({ error: 'Forbidden: Admin access only' });
     }
   });

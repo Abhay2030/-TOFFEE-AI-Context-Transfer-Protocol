@@ -18,13 +18,16 @@ export default function AdBanner({
   useEffect(() => {
     try {
       if (typeof window !== "undefined") {
-        // @ts-ignore
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
+        const adsbygoogle = (window as any).adsbygoogle || [];
+        const adContainer = document.querySelector(`ins[data-ad-slot="${dataAdSlot}"]`);
+        if (adContainer && adContainer.innerHTML === "") {
+          adsbygoogle.push({});
+        }
       }
     } catch (error) {
       console.error("AdSense error:", error);
     }
-  }, []);
+  }, [dataAdSlot]);
 
   if (!pId) return null;
 

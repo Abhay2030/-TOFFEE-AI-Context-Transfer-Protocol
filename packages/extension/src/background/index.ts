@@ -37,6 +37,9 @@ chrome.runtime.onInstalled.addListener(async (details) => {
 // ── Message Router ───────────────────────────────────────────
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  const fireAndForget = ['PLATFORM_DETECTED', 'CAPTURE_RESULT', 'CAPTURE_ERROR'];
+  const isAsync = !fireAndForget.includes(message.type);
+
   handleMessage(message, sender)
     .then(sendResponse)
     .catch((error) => {
@@ -44,7 +47,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       sendResponse({ error: error.message });
     });
 
-  return true; // Keep message channel open for async response
+  return isAsync; // Only hold the port open if necessary
 });
 
 async function handleMessage(
@@ -218,10 +221,18 @@ async function injectContentScript(tabId: number, tabUrl: string): Promise<boole
       });
     }
 
-    // Give the content script time to initialize and register listeners
-    await new Promise((r) => setTimeout(r, 800));
-    console.log(`[Toffee] Programmatically injected ${sorted.length} chunks into tab ${tabId}`);
-    return true;
+    // Poll the content script until it's alive, max 2000ms
+    let alive = false;
+    for (let i = 0; i < 40; i++) {
+      if (await isContentScriptAlive(tabId)) {
+        alive = true;
+        break;
+      }
+      await new Promise(r => setTimeout(r, 50));
+    }
+    
+    console.log(`[Toffee] Programmatically injected ${sorted.length} chunks into tab ${tabId}. Alive: ${alive}`);
+    return alive;
   } catch (err) {
     console.error('[Toffee] Programmatic injection failed:', err);
     return false;
@@ -245,13 +256,8 @@ async function ensureContentScript(tabId: number, tabUrl: string): Promise<boole
   const injected = await injectContentScript(tabId, tabUrl);
   if (!injected) return false;
 
-  // Step 3: Verify injection worked
-  const nowAlive = await isContentScriptAlive(tabId);
-  if (nowAlive) return true;
-
-  // Step 4: Last resort — try one more time with a longer delay
-  await new Promise((r) => setTimeout(r, 1000));
-  return isContentScriptAlive(tabId);
+  // Step 3: Verify injection worked (polling is handled in injectContentScript)
+  return injected;
 }
 
 // ── Message Handlers ─────────────────────────────────────────

@@ -28,21 +28,21 @@
         "https://chat.openai.com/*",
         "https://chatgpt.com/*"
       ],
-      "js": ["src/content/adapters/chatgpt.ts"],
+      "js": ["src/content/adapters/chatgpt.iife.ts"],
       "run_at": "document_idle"
     },
     {
       "matches": [
         "https://claude.ai/*"
       ],
-      "js": ["src/content/adapters/claude.ts"],
+      "js": ["src/content/adapters/claude.iife.ts"],
       "run_at": "document_idle"
     },
     {
       "matches": [
         "https://gemini.google.com/*"
       ],
-      "js": ["src/content/adapters/gemini.ts"],
+      "js": ["src/content/adapters/gemini.iife.ts"],
       "run_at": "document_idle"
     },
     {
@@ -50,7 +50,7 @@
         "https://copilot.microsoft.com/*",
         "https://www.bing.com/chat*"
       ],
-      "js": ["src/content/adapters/copilot.ts"],
+      "js": ["src/content/adapters/copilot.iife.ts"],
       "run_at": "document_idle"
     },
     {
@@ -58,14 +58,14 @@
         "https://grok.com/*",
         "https://x.com/i/grok*"
       ],
-      "js": ["src/content/adapters/grok.ts"],
+      "js": ["src/content/adapters/grok.iife.ts"],
       "run_at": "document_idle"
     },
     {
       "matches": [
         "https://www.perplexity.ai/*"
       ],
-      "js": ["src/content/adapters/perplexity.ts"],
+      "js": ["src/content/adapters/perplexity.iife.ts"],
       "run_at": "document_idle"
     }
   ],

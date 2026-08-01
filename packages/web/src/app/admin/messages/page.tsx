@@ -37,7 +37,8 @@ export default function AdminMessagesPage() {
     // Wait for Firebase auth to initialize
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        if (user.email === 'abhaydonde2007@gmail.com') {
+        const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || '').split(',').map(e => e.trim());
+        if (user.email && adminEmails.includes(user.email)) {
           setIsAuthorized(true);
           fetchMessages();
         } else {
