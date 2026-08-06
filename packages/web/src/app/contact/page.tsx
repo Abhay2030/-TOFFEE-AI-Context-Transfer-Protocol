@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import { Metadata } from 'next';
 import { useState } from "react";
 import Link from "next/link";
 import { submitContactForm } from "@/lib/api";
@@ -152,9 +153,21 @@ export default function ContactPage() {
                   <Globe className="w-6 h-6 text-accent-emerald" />
                 </div>
                 <div>
-                  <h3 className="text-white font-bold text-lg mb-1">Location</h3>
-                  <p className="text-navy-300 font-medium">Nashik, Maharashtra, India</p>
-                  <p className="text-sm text-navy-400">Open to remote collaboration worldwide</p>
+                  <h3 className="text-white font-bold text-lg mb-1">Corporate HQ</h3>
+                  <p className="text-navy-300 font-medium">Toffee AI Inc.</p>
+                  <p className="text-navy-300">Nashik IT Park, Ambad</p>
+                  <p className="text-navy-300">Nashik, Maharashtra 422010, India</p>
+                </div>
+              </div>
+
+              <div className="flex gap-4 items-start">
+                <div className="w-12 h-12 rounded-xl bg-toffee-500/10 flex items-center justify-center shrink-0">
+                  <Phone className="w-6 h-6 text-toffee-500" />
+                </div>
+                <div>
+                  <h3 className="text-white font-bold text-lg mb-1">Phone Support</h3>
+                  <p className="text-navy-300 font-medium">+91 (800) 555-0199</p>
+                  <p className="text-sm text-navy-400">Mon-Fri, 9am - 6pm IST</p>
                 </div>
               </div>
 

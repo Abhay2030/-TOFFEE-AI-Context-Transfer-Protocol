@@ -1,7 +1,13 @@
+import { Metadata } from 'next';
 import { Zap, Shield, Sparkles, Workflow, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { GlassCard } from "@/components/ui/GlassCard";
+
+export const metadata: Metadata = {
+  title: 'Features | Toffee AI Context Transfer Protocol',
+  description: 'Explore the technical capabilities of Toffee AI: Semantic compression, cross-platform context transfer, local-first storage, and enterprise-grade security.',
+};
 
 export default function FeaturesPage() {
   return (

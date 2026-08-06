@@ -1,6 +1,12 @@
+import { Metadata } from 'next';
 import { Shield, Eye, Settings, CheckCircle2, Globe, FileText, Settings2, Smartphone, Key, Lock } from "lucide-react";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { GlassCard } from "@/components/ui/GlassCard";
+
+export const metadata: Metadata = {
+  title: 'Cookie Policy | Toffee AI',
+  description: 'Toffee AI uses minimal, essential cookies. We respect your privacy and do not use third-party tracking cookies.',
+};
 
 export default function CookiePolicyPage() {
   return (

@@ -11,9 +11,9 @@ import { auth } from "@/utils/firebase/firebase";
 import { ThemeToggle } from "../ui/ThemeToggle";
 
 const NAV_LINKS = [
-  { label: "Features", href: "#features" },
-  { label: "How It Works", href: "#how-it-works" },
-  { label: "Pricing", href: "#pricing" },
+  { label: "Features", href: "/features" },
+  { label: "Blog", href: "/blog" },
+  { label: "Pricing", href: "/pricing" },
 ];
 
 export default function Navbar() {

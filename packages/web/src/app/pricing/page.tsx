@@ -1,7 +1,13 @@
+import { Metadata } from 'next';
 import { Check, X } from "lucide-react";
 import Link from "next/link";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { GlassCard } from "@/components/ui/GlassCard";
+
+export const metadata: Metadata = {
+  title: 'Pricing | Toffee AI Context Transfer',
+  description: 'Simple, transparent pricing for Toffee AI. Start for free, upgrade when you need cloud sync and advanced AI compression models.',
+};
 
 const TIERS = [
   {

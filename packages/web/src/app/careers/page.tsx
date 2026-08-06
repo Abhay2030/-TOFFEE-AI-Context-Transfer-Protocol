@@ -1,30 +1,13 @@
+import { Metadata } from 'next';
 import Link from "next/link";
-import { ArrowRight, Users, Briefcase, ChevronRight, CheckCircle2, Shield, Sparkles, Terminal, Layers, Heart, Coffee, Globe, Cpu } from "lucide-react";
+import { ArrowRight, Users, Briefcase, ChevronRight, CheckCircle2, Shield, Sparkles, Terminal, Layers, Heart, Coffee, Globe, Cpu, Mail } from "lucide-react";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { GlassCard } from "@/components/ui/GlassCard";
 
-const POSITIONS = [
-  {
-    department: "Engineering",
-    roles: [
-      "Senior Frontend Engineer", "Backend Engineer", "Full Stack Engineer", 
-      "Browser Extension Engineer", "AI Engineer", "Machine Learning Engineer", 
-      "DevOps Engineer", "Security Engineer", "Site Reliability Engineer", "QA Automation Engineer"
-    ]
-  },
-  {
-    department: "Product",
-    roles: ["Product Manager", "Technical Program Manager", "Product Designer", "UX Researcher"]
-  },
-  {
-    department: "Design",
-    roles: ["Senior Product Designer", "Visual Designer", "Motion Designer", "Brand Designer", "3D Designer"]
-  },
-  {
-    department: "Growth & Marketing",
-    roles: ["Developer Relations Engineer", "Technical Writer", "Content Strategist", "Product Marketing Manager", "Community Manager"]
-  }
-];
+export const metadata: Metadata = {
+  title: 'Careers | Toffee AI',
+  description: 'Join Toffee AI and help build the future of AI memory and context transfer infrastructure. We are currently accepting expressions of interest for early engineers and designers.',
+};
 
 const BENEFITS = [
   {
@@ -60,7 +43,7 @@ export default function CareersPage() {
         
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent-emerald/10 border border-accent-emerald/20 text-accent-emerald text-xs font-medium mb-6">
           <Briefcase className="w-4 h-4" />
-          <span>We are hiring worldwide</span>
+          <span>We are growing our core team</span>
         </div>
 
         <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.1] mb-8 text-white max-w-4xl mx-auto">
@@ -181,71 +164,33 @@ export default function CareersPage() {
         </div>
       </section>
 
-      {/* ── Hiring Process ── */}
-      <section className="px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto py-20">
-        <h2 className="text-3xl font-bold text-white text-center mb-12">Our Hiring Process</h2>
-        <p className="text-center text-navy-400 mb-12 max-w-2xl mx-auto">We value transparency and respect your time. Candidates receive timely feedback throughout the process.</p>
-        
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          {["Application Review", "Intro Call", "Technical Assessment", "System Design", "Team Interview", "Leadership", "Offer"].map((step, i) => (
-            <div key={i} className="flex flex-col items-center flex-1 w-full relative">
-              <div className="w-10 h-10 rounded-full bg-navy-800 border-2 border-toffee-500/50 flex items-center justify-center text-toffee-400 font-bold text-sm mb-3 relative z-10">
-                {i + 1}
-              </div>
-              <span className="text-xs text-center font-medium text-navy-300">{step}</span>
-              {i < 6 && <div className="hidden md:block absolute top-5 left-[50%] w-full h-0.5 bg-navy-800" />}
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* ── Open Roles ── */}
-      <section id="roles" className="px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto py-20 border-t border-navy-800/50">
-        <div className="flex items-center justify-between mb-12">
-          <h2 className="text-3xl font-bold text-white">Open Positions</h2>
-          <span className="text-sm font-medium text-toffee-400">Remote-First • Global</span>
+      <section id="roles" className="px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto py-20 border-t border-navy-800/50 text-center">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-white mb-4">Join the Core Team</h2>
+          <p className="text-navy-300 text-lg">We are an early-stage startup building the future of AI infrastructure. While we don't have predefined roles open right now, we are always looking for exceptional builders to join us on this journey.</p>
         </div>
 
-        <div className="space-y-12">
-          {POSITIONS.map((dept, i) => (
-            <div key={i}>
-              <h3 className="text-xl font-bold text-white mb-6 pb-2 border-b border-navy-800/50">{dept.department}</h3>
-              <div className="grid gap-4">
-                {dept.roles.map((role, j) => (
-                  <Link href="#" key={j} className="glass-card p-6 flex flex-col sm:flex-row sm:items-center justify-between group hover:border-toffee-500/30 transition-all cursor-pointer">
-                    <div>
-                      <h4 className="text-lg font-bold text-white group-hover:text-toffee-400 transition-colors mb-1">{role}</h4>
-                      <p className="text-sm text-navy-400">Remote • Full-time</p>
-                    </div>
-                    <div className="mt-4 sm:mt-0 flex items-center gap-2 text-toffee-400 font-medium text-sm">
-                      Apply Now <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Internship Program ── */}
-      <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-20">
-        <GlassCard className="p-12 border-accent-violet/20 bg-gradient-to-br from-navy-900 to-navy-950 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-accent-violet/10 rounded-full blur-3xl" />
-          <h2 className="text-3xl font-bold text-white mb-4">Build the Future of AI: Internship Program</h2>
-          <p className="text-navy-300 max-w-2xl mb-8">
-            Our internship program is designed for ambitious students and recent graduates who want to work on real products, not practice projects. Interns contribute directly to production systems with guidance from experienced mentors.
+        <GlassCard className="p-10 border-toffee-500/20 text-left">
+          <h3 className="text-2xl font-bold text-white mb-6">Expression of Interest</h3>
+          <p className="text-navy-300 mb-8 leading-relaxed">
+            If you are a world-class engineer, designer, or researcher passionate about AI interoperability, we want to hear from you. We are particularly interested in individuals with experience in:
           </p>
-          <div className="flex flex-wrap gap-2 mb-8">
-            {["Frontend", "Backend", "AI & ML", "Product Design", "DevOps & Cloud", "Cybersecurity"].map(track => (
-              <span key={track} className="px-3 py-1 bg-navy-800 rounded-full text-xs text-navy-200 border border-navy-700">
-                {track}
-              </span>
-            ))}
-          </div>
-          <Link href="#" className="btn-primary py-3 px-6 inline-flex items-center gap-2">
-            View Internship Tracks <ArrowRight className="w-4 h-4" />
-          </Link>
+          <ul className="space-y-3 mb-8">
+            <li className="flex items-center gap-3 text-navy-200">
+              <CheckCircle2 className="w-5 h-5 text-toffee-400" /> Deep TypeScript & React Ecosystem Knowledge
+            </li>
+            <li className="flex items-center gap-3 text-navy-200">
+              <CheckCircle2 className="w-5 h-5 text-toffee-400" /> Browser Extension Architecture (Manifest V3)
+            </li>
+            <li className="flex items-center gap-3 text-navy-200">
+              <CheckCircle2 className="w-5 h-5 text-toffee-400" /> LLM Orchestration & Prompt Engineering
+            </li>
+          </ul>
+          
+          <a href="mailto:abhaydonde2007@gmail.com?subject=Expression%20of%20Interest:%20Toffee%20AI%20Core%20Team" className="btn-primary py-4 px-8 flex items-center justify-center gap-3 w-full sm:w-auto">
+            <Mail className="w-5 h-5" /> Get In Touch
+          </a>
         </GlassCard>
       </section>
 
@@ -255,14 +200,6 @@ export default function CareersPage() {
         <p className="text-lg text-navy-300 mb-10 max-w-2xl mx-auto">
           Every conversation. Every line of code. Every design decision helps shape how the next generation of artificial intelligence remembers, collaborates, and evolves.
         </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <a href="#roles" className="btn-primary py-4 px-8 text-lg">
-            View Open Positions
-          </a>
-          <a href="#" className="btn-secondary py-4 px-8 text-lg">
-            Join the Talent Community
-          </a>
-        </div>
         
         {/* Footer Trust Indicators */}
         <div className="mt-16 flex flex-wrap justify-center gap-x-6 gap-y-4 text-xs font-medium text-navy-500 uppercase tracking-widest">

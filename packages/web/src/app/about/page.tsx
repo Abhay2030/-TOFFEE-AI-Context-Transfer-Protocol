@@ -1,8 +1,13 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Metadata } from 'next';
 import Link from "next/link";
 import { ArrowRight, Download, Brain, Globe, Shield, Sparkles, Workflow, Lock, Users, Zap } from "lucide-react";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { GlassCard } from "@/components/ui/GlassCard";
+
+export const metadata: Metadata = {
+  title: 'About Us | Toffee AI - The Universal Memory Layer',
+  description: 'Learn about the vision, technology, and privacy principles behind Toffee AI. We are building the infrastructure for portable, persistent AI memory.',
+};
 
 export default function AboutPage() {
   return (

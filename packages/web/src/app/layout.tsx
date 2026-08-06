@@ -48,14 +48,21 @@ export const metadata: Metadata = {
 
 // Metadata and fonts are defined above
 
+import { JsonLd, organizationJsonLd, websiteJsonLd, softwareAppJsonLd } from "@/components/seo/JsonLd";
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const SITE_URL = 'https://toffee-ai-context-transfer-protocol-red.vercel.app';
+  
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans min-h-screen bg-navy-950 text-navy-100 antialiased relative overflow-x-hidden`}>
+        <JsonLd data={organizationJsonLd(SITE_URL)} />
+        <JsonLd data={websiteJsonLd(SITE_URL)} />
+        <JsonLd data={softwareAppJsonLd(SITE_URL)} />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <GlobalLoader />
           <GoogleAdSense publisherId="ca-pub-2490258091963191" />

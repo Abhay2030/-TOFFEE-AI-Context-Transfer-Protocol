@@ -1,6 +1,12 @@
+import { Metadata } from 'next';
 import { Shield, Lock, Eye, Database, Globe, AlertTriangle, FileSignature, CheckCircle2, Cloud, HardDrive, Smartphone, Users } from "lucide-react";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { GlassCard } from "@/components/ui/GlassCard";
+
+export const metadata: Metadata = {
+  title: 'Privacy Policy | Toffee AI',
+  description: 'How Toffee AI protects your privacy. We use local-first architecture and end-to-end encryption to ensure your AI conversations remain private.',
+};
 
 export default function PrivacyPage() {
   return (

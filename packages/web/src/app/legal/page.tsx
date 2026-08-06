@@ -193,12 +193,17 @@ export default function LegalPage() {
           <GlassCard className="p-10 border-navy-800" disableTilt={false}>
             <h3 className="text-2xl font-bold text-white mb-6">Legal Resource Center</h3>
             <ul className="space-y-3">
-              {["Privacy Policy", "Terms of Service", "Data Processing Agreement", "Security Whitepaper", "Brand Guidelines", "API Terms"].map(doc => (
-                <li key={doc}>
-                  <a href="#" className="flex items-center justify-between p-3 rounded-lg bg-navy-900/50 hover:bg-navy-800 transition-colors group text-sm text-navy-300 hover:text-white">
-                    <span className="flex items-center gap-2"><FileSignature className="w-4 h-4 text-toffee-500" /> {doc}</span>
+              {[
+                { title: "Privacy Policy", href: "/privacy" }, 
+                { title: "Terms of Service", href: "/terms" }, 
+                { title: "Cookie Policy", href: "/cookies" }, 
+                { title: "API Docs", href: "/api-docs" }
+              ].map(doc => (
+                <li key={doc.title}>
+                  <Link href={doc.href} className="flex items-center justify-between p-3 rounded-lg bg-navy-900/50 hover:bg-navy-800 transition-colors group text-sm text-navy-300 hover:text-white">
+                    <span className="flex items-center gap-2"><FileSignature className="w-4 h-4 text-toffee-500" /> {doc.title}</span>
                     <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>

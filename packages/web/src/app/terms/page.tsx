@@ -1,6 +1,12 @@
+import { Metadata } from 'next';
 import { Shield, FileText, CheckCircle2, Lock, Scale, AlertTriangle, Cloud, HardDrive, Smartphone, Building2 } from "lucide-react";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { GlassCard } from "@/components/ui/GlassCard";
+
+export const metadata: Metadata = {
+  title: 'Terms of Service | Toffee AI',
+  description: 'Terms of Service for using the Toffee AI Context Transfer Protocol and associated tools.',
+};
 
 export default function TermsPage() {
   return (

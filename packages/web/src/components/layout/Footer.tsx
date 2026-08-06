@@ -6,7 +6,7 @@ const FOOTER_LINKS = {
   Product: [
     { label: "Features", href: "/features" },
     { label: "Pricing", href: "/pricing" },
-    { label: "Extension", href: "/extension" },
+    { label: "FAQ", href: "/faq" },
     { label: "API Docs", href: "/api-docs" },
   ],
   Company: [
@@ -16,7 +16,6 @@ const FOOTER_LINKS = {
     { label: "Contact", href: "/contact" },
   ],
   Legal: [
-    { label: "Legal Overview", href: "/legal" },
     { label: "Privacy Policy", href: "/privacy" },
     { label: "Terms of Service", href: "/terms" },
     { label: "Cookie Policy", href: "/cookies" },
@@ -41,13 +40,15 @@ export default function Footer() {
             </p>
             <div className="flex gap-3">
               <a
-                href="#"
+                href="https://github.com"
+                target="_blank" rel="noopener noreferrer"
                 className="w-9 h-9 rounded-lg bg-navy-800/50 flex items-center justify-center text-navy-400 hover:text-white hover:bg-navy-700/50 transition-all"
               >
                 <Github className="w-4 h-4" />
               </a>
               <a
-                href="#"
+                href="https://twitter.com"
+                target="_blank" rel="noopener noreferrer"
                 className="w-9 h-9 rounded-lg bg-navy-800/50 flex items-center justify-center text-navy-400 hover:text-white hover:bg-navy-700/50 transition-all"
               >
                 <Twitter className="w-4 h-4" />
