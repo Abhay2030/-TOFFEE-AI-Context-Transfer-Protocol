@@ -5,6 +5,7 @@ import { howBrowserExtensionsCaptureContext } from './articles/how-browser-exten
 import { manifestV3ArchitectureDeepDive } from './articles/manifest-v3-architecture-deep-dive';
 import { tokenOptimizationTechniques } from './articles/token-optimization-techniques';
 import { buildingCrossAiMemorySystems } from './articles/building-cross-ai-memory-systems';
+import { fragmentedAiMemoryProblem } from './articles/fragmented-ai-memory-problem';
 
 /** All published articles, ordered by publish date (newest first) */
 const ALL_ARTICLES: Article[] = [
@@ -14,6 +15,7 @@ const ALL_ARTICLES: Article[] = [
   manifestV3ArchitectureDeepDive,
   tokenOptimizationTechniques,
   buildingCrossAiMemorySystems,
+  fragmentedAiMemoryProblem,
 ].sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
 
 /** Get all articles (metadata only, no body content) */
